@@ -1,0 +1,5 @@
+<application>
+  <component name="NotificationConfiguration">
+    <notification groupId="Localization and Internationalization" displayType="NONE" shouldLog="false" />
+  </component>
+</application>
