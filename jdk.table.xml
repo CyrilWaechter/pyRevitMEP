@@ -1,0 +1,35 @@
+<application>
+  <component name="ProjectJdkTable">
+    <jdk version="2">
+      <name value="Python 2.7.10 (C:\Anaconda\python.exe)" />
+      <type value="Python SDK" />
+      <version value="Python 2.7.10" />
+      <homePath value="C:\Anaconda\python.exe" />
+      <roots>
+        <classPath>
+          <root type="composite">
+            <root type="simple" url="file://C:/Anaconda/DLLs" />
+            <root type="simple" url="file://C:/Anaconda/Lib" />
+            <root type="simple" url="file://C:/Anaconda/Lib/lib-tk" />
+            <root type="simple" url="file://C:/Anaconda" />
+            <root type="simple" url="file://C:/Anaconda/Library/bin" />
+            <root type="simple" url="file://C:/Anaconda/Lib/site-packages" />
+            <root type="simple" url="file://C:/Anaconda/Lib/site-packages/CoolProp-5.1.1-py2.7-win-amd64.egg" />
+            <root type="simple" url="file://C:/Anaconda/Lib/site-packages/Sphinx-1.3.1-py2.7.egg" />
+            <root type="simple" url="file://C:/Anaconda/Lib/site-packages/cryptography-0.9.1-py2.7-win-amd64.egg" />
+            <root type="simple" url="file://C:/Anaconda/Lib/site-packages/win32" />
+            <root type="simple" url="file://C:/Anaconda/Lib/site-packages/win32/lib" />
+            <root type="simple" url="file://C:/Anaconda/Lib/site-packages/pythonwin" />
+            <root type="simple" url="jar://C:/Anaconda/Lib/site-packages/setuptools-18.5-py2.7.egg!/" />
+            <root type="simple" url="file://$USER_HOME$/.PyCharmCE2016.3/system/python_stubs/-946255732" />
+            <root type="simple" url="file://$APPLICATION_HOME_DIR$/helpers/python-skeletons" />
+          </root>
+        </classPath>
+        <sourcePath>
+          <root type="composite" />
+        </sourcePath>
+      </roots>
+      <additional />
+    </jdk>
+  </component>
+</application>
