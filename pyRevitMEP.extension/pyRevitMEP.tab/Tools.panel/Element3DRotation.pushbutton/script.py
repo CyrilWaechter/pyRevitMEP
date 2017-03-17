@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Copyright (c) 2017 Cyril Waechter
 Python scripts for Autodesk Revit
@@ -17,24 +18,26 @@ See this link for a copy of the GNU General Public License protecting this packa
 https://github.com/Nahouhak/pyRevitMEP/blob/master/LICENSE
 """
 
-__doc__ = "Change selected elements level without moving it"
-__title__ = "Change Level"
+from Autodesk.Revit.DB import Transaction, ElementTransformUtils, Line, XYZ, Location
+from revitutils import doc, uidoc, selection
+from math import pi
+
+__doc__ = "Rotate object in any direction"
+__title__ = "3D Rotate"
 __author__ = "Cyril Waechter"
 
-from Autodesk.Revit.UI import TaskDialog
+getselection = uidoc.Selection.GetElementIds
 
-TaskDialog.Show("This is the title","Welcome to your first dialog!")
-
-from Autodesk.Revit.DB import Transaction
-
-doc = __revit__.ActiveUIDocument.Document
-uidoc = __revit__.ActiveUIDocument
-
-t = Transaction(doc, 'convert text')
-t.Start()
-
-for elId in uidoc.Selection.GetElementIds():
-    el = doc.GetElement(elId)
-    el.Text = el.Text.lower()
-
-t.Commit()
+try:
+    t = Transaction(doc, "Rotation axe x")
+    t.Start()
+    # Cherche l'origine de la famille sélectionnée et effectué une rotation autour de l'axe x de l'objet passant par
+    # l'origine.
+    for elid in selection.element_ids:
+        o = doc.GetElement(elid).Location.Point
+        z = XYZ(o.X + 1, o.Y, o.Z)
+        axis = Line.CreateBound(o, z)
+        ElementTransformUtils.RotateElement(doc, elid, axis, pi / 2)
+    t.Commit()
+except:
+    raise
