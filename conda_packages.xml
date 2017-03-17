@@ -508,7 +508,7 @@
         <entry key="mccabe" value="0.6.1" />
         <entry key="mdp" value="3.5" />
         <entry key="meld3" value="1.0.2" />
-        <entry key="memory_profiler" value="0.41" />
+        <entry key="memory_profiler" value="0.43" />
         <entry key="menuinst" value="1.4.4" />
         <entry key="mercurial" value="4.1.1" />
         <entry key="meta" value="0.4.2.dev" />
@@ -616,7 +616,7 @@
         <entry key="pyasn1" value="0.2.3" />
         <entry key="pyasn1-modules" value="0.0.8" />
         <entry key="pycodestyle" value="2.3.1" />
-        <entry key="pycosat" value="0.6.1" />
+        <entry key="pycosat" value="0.6.2" />
         <entry key="pycparser" value="2.17" />
         <entry key="pycrypto" value="2.6.1" />
         <entry key="pycurl" value="7.43.0" />
@@ -651,7 +651,7 @@
         <entry key="pyside" value="1.2.1" />
         <entry key="pysocks" value="1.6.6" />
         <entry key="pytables" value="3.3.0" />
-        <entry key="pytest" value="3.0.6" />
+        <entry key="pytest" value="3.0.7" />
         <entry key="pytest-cache" value="1.0" />
         <entry key="pytest-cov" value="2.3.1" />
         <entry key="pytest-pep8" value="1.0.6" />
@@ -972,7 +972,7 @@
         <entry key="scikits-image" value="0.7.1" />
         <entry key="scipy" value="0.19.0" />
         <entry key="scons" value="2.3.0" />
-        <entry key="scrapy" value="1.1.1" />
+        <entry key="scrapy" value="1.3.3" />
         <entry key="seaborn" value="0.7.1" />
         <entry key="semantic_version" value="2.6.0" />
         <entry key="serf" value="1.3.8" />
@@ -1046,7 +1046,7 @@
         <entry key="vs2013_runtime" value="12.0.21005" />
         <entry key="vs2015_runtime" value="14.0.25123" />
         <entry key="vtk" value="6.3.0" />
-        <entry key="w3lib" value="1.16.0" />
+        <entry key="w3lib" value="1.17.0" />
         <entry key="waitress" value="0.9.0" />
         <entry key="wcwidth" value="0.1.7" />
         <entry key="webob" value="1.6.1" />
@@ -1068,7 +1068,7 @@
         <entry key="xlrd" value="1.0.0" />
         <entry key="xlsxwriter" value="0.9.6" />
         <entry key="xlutils" value="2.0.0" />
-        <entry key="xlwings" value="0.10.2" />
+        <entry key="xlwings" value="0.10.4" />
         <entry key="xlwt" value="1.2.0" />
         <entry key="xray" value="0.7.0" />
         <entry key="yaml" value="0.1.6" />
@@ -5897,6 +5897,7 @@
             <list>
               <option value="0.41" />
               <option value="0.40" />
+              <option value="0.43" />
             </list>
           </value>
         </entry>
@@ -7115,6 +7116,7 @@
             <list>
               <option value="0.6.0" />
               <option value="0.6.1" />
+              <option value="0.6.2" />
             </list>
           </value>
         </entry>
@@ -7471,6 +7473,7 @@
               <option value="3.0.3" />
               <option value="2.3.5" />
               <option value="2.5.1" />
+              <option value="3.0.7" />
             </list>
           </value>
         </entry>
@@ -10190,6 +10193,7 @@
               <option value="0.24.4" />
               <option value="0.16.4" />
               <option value="1.0.1" />
+              <option value="1.3.3" />
             </list>
           </value>
         </entry>
@@ -10986,6 +10990,7 @@
               <option value="1.15.0" />
               <option value="1.2" />
               <option value="1.5" />
+              <option value="1.17.0" />
             </list>
           </value>
         </entry>
@@ -11236,6 +11241,7 @@
               <option value="0.1.0" />
               <option value="0.10.0" />
               <option value="0.7.0" />
+              <option value="0.10.4" />
             </list>
           </value>
         </entry>
@@ -11354,6 +11360,6 @@
     <option name="CONDA_CHANNELS">
       <set />
     </option>
-    <option name="LAST_TIME_CHECKED" value="1489603705689" />
+    <option name="LAST_TIME_CHECKED" value="1489705378002" />
   </component>
 </application>
