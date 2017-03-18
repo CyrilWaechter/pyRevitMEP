@@ -10858,6 +10858,7 @@
             <list>
               <option value="0.4.17" />
               <option value="0.04.19" />
+              <option value="0.04.20" />
             </list>
           </value>
         </entry>
@@ -11360,6 +11361,6 @@
     <option name="CONDA_CHANNELS">
       <set />
     </option>
-    <option name="LAST_TIME_CHECKED" value="1489705378002" />
+    <option name="LAST_TIME_CHECKED" value="1489829294039" />
   </component>
 </application>
