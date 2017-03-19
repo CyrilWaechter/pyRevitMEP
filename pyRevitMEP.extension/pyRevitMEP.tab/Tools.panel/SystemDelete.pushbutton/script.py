@@ -1,38 +1,48 @@
-#Code par Cyril Waechter le 14.10.2014
-from Autodesk.Revit.DB import *
-from Autodesk.Revit.DB.Architecture import *
-from Autodesk.Revit.DB.Analysis import *
+"""
+Copyright (c) 2017 Cyril Waechter
+Python scripts for Autodesk Revit
 
-uidoc = __revit__.ActiveUIDocument
-doc = __revit__.ActiveUIDocument.Document
-getselection = uidoc.Selection.GetElementIds
+This file is part of pyRevitMEP repository at https://github.com/Nahouhak/pyRevitMEP
 
-from Autodesk.Revit.UI import TaskDialog
-from Autodesk.Revit.UI import UIApplication
-def alert(msg):
-   TaskDialog.Show('RevitPythonShell', msg)
+pyRevitMEP is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
+you can redistribute it and/or modify it under the terms of the GNU General Public License
+version 3, as published by the Free Software Foundation.
 
-def quit():
-   __window__.Close()
-exit = quit
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-t = Transaction(doc, "supprimer_système")
-t.Start()
-#Trouve l'Id des systèmes des objets sélectionnés et supprime ces systèmes
+See this link for a copy of the GNU General Public License protecting this package.
+https://github.com/Nahouhak/pyRevitMEP/blob/master/LICENSE
+"""
+
+from revitutils import doc, selection
+
+# noinspection PyUnresolvedReferences
+from Autodesk.Revit.DB import Element, Transaction, MEPModel, ConnectorManager, MEPSystem
+
+__doc__ = "Delete MEP system of selected objects"
+__title__ = "System delete"
+__author__ = "Cyril Waechter"
+
+# Find systems id and delete it
 s = []
-for e in getselection():	
-	try:
-		s.append(doc.GetElement(e).MEPSystem.Id)
-	except:
-		c = doc.GetElement(e).MEPModel.ConnectorManager.Connectors
-		for i in c:
-			if i.MEPSystem != None:
-				id = Element.Id.GetValue(i.MEPSystem)
-				print id
-				s.append(id)				
-for id in s:
-	print id
-	doc.Delete(id)
+for el in selection.elements:
+    try:
+        s.append(el.MEPSystem.Id)
+    except AttributeError:
+        try:
+            connectors = el.MEPModel.ConnectorManager.Connectors
+            for connector in connectors:
+                if connector.MEPSystem is not None:
+                    elid = Element.Id.GetValue(connector.MEPSystem)
+                    s.append(elid)
+        except AttributeError:
+            pass
+
+t = Transaction(doc, "delete selected objects system")
+t.Start()
+for elid in s:
+    doc.Delete(elid)
 t.Commit()
-exit()
-	
