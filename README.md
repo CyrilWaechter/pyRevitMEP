@@ -13,7 +13,7 @@ PyRevitMEP - MEP Extensions for PyRevit
 * Report [bugs](https://github.com/Nahouhak/pyRevitMEP/issues)
 
 ## Documentation
-* 
+* [pyRevitMEP on pythoncvc.net](http://pythoncvc.net/?page_id=123)
 
 ## Credits
 * [Ehsan Iran-Nejad](https://github.com/eirannejad) for developing pyRevit
