@@ -1,0 +1,11 @@
+# Project specific files and folders to ignore
+_windows/*
+.idea/*
+inspection/*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# pycharm xml files
+*.xml
