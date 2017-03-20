@@ -90,7 +90,7 @@
         <entry key="conda" value="4.3.14" />
         <entry key="conda-api" value="1.1.0" />
         <entry key="conda-build" value="2.1.7" />
-        <entry key="conda-build-all" value="1.0.1" />
+        <entry key="conda-build-all" value="1.0.2" />
         <entry key="conda-env" value="2.6.0" />
         <entry key="conda-manager" value="0.4.0" />
         <entry key="conda-server" value="0.14.0" />
@@ -192,7 +192,7 @@
         <entry key="grin" value="1.2.1" />
         <entry key="h2o" value="3.10.0.9" />
         <entry key="h2o-py" value="3.10.0.9" />
-        <entry key="h5py" value="2.6.0" />
+        <entry key="h5py" value="2.7.0" />
         <entry key="handlebars_static" value="4.0.5" />
         <entry key="hdf4" value="4.2.12" />
         <entry key="hdf5" value="1.8.17" />
@@ -558,7 +558,7 @@
         <entry key="numbapro" value="0.23.1" />
         <entry key="numbapro_cudalib" value="0.2" />
         <entry key="numexpr" value="2.6.2" />
-        <entry key="numpy" value="1.12.0" />
+        <entry key="numpy" value="1.12.1" />
         <entry key="numpydoc" value="0.6.0" />
         <entry key="odo" value="0.5.0" />
         <entry key="olefile" value="0.44" />
@@ -2315,6 +2315,7 @@
           <value>
             <list>
               <option value="1.0.1" />
+              <option value="1.0.2" />
             </list>
           </value>
         </entry>
@@ -3391,6 +3392,7 @@
               <option value="2.4.0" />
               <option value="2.1.1" />
               <option value="2.1.0" />
+              <option value="2.7.0" />
             </list>
           </value>
         </entry>
@@ -6494,6 +6496,7 @@
               <option value="1.9.2" />
               <option value="1.10.4" />
               <option value="1.10.0" />
+              <option value="1.12.1" />
             </list>
           </value>
         </entry>
@@ -11362,6 +11365,6 @@
     <option name="CONDA_CHANNELS">
       <set />
     </option>
-    <option name="LAST_TIME_CHECKED" value="1489915839907" />
+    <option name="LAST_TIME_CHECKED" value="1490040567796" />
   </component>
 </application>
