@@ -2,7 +2,7 @@
 Copyright (c) 2017 Cyril Waechter
 Python scripts for Autodesk Revit
 
-This file is part of pyRevitMEP repository at https://github.com/Nahouhak/pyRevitMEP
+This file is part of pyRevitMEP repository at https://github.com/CyrilWaechter/pyRevitMEP
 
 pyRevitMEP is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
 you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 See this link for a copy of the GNU General Public License protecting this package.
-https://github.com/Nahouhak/pyRevitMEP/blob/master/LICENSE
+https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 """
 
 from revitutils import doc, selection
