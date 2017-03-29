@@ -41,19 +41,19 @@ def delete_elements():
 
 
 class SimpleEventHandler(IExternalEventHandler):
-    def __init__(self,):
-        pass
+    def __init__(self, do_this):
+        self.do_this = do_this
 
     def Execute(self, uiapp):
         try:
-            delete_elements()
+            self.do_this()
         except InvalidOperationException:
             print "InvalidOperationException catched"
 
     def GetName(self):
         return "simple form event"
 
-simple_event_handler = SimpleEventHandler()
+simple_event_handler = SimpleEventHandler(delete_elements)
 ex_event = ExternalEvent.Create(simple_event_handler)
 
 
