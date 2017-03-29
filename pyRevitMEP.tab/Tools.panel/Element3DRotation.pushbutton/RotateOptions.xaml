@@ -3,6 +3,8 @@
         Title="Set rotation angle:" Height="500" Width="500" ShowInTaskbar="False"
         WindowStartupLocation="CenterScreen" ScrollViewer.VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center">
         <StackPanel Margin="20" HorizontalAlignment="Stretch">
+            <Button Content="Select or Re-select" Height="30" Margin="10,10" Click="reselect_click"/>
+            <TextBlock x:Name="selection_overview" Text="" Grid.Column="0" HorizontalAlignment="Center" FontWeight="Bold"/>
             <DockPanel>
                 <GroupBox Header="Rotate on itself:" Margin="0,0,10,0">
                     <StackPanel Margin="10">
@@ -26,7 +28,11 @@
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Header="Rotate around selected axis:">
-                    <StackPanel Margin="20">
+                    <StackPanel Margin="10">
+                        <Button Content="Select axis" Height="30" Margin="10,10" Click="axis_selection_click"/>
+                        <TextBlock Text="Rotation angle" Grid.Column="0" HorizontalAlignment="Center" FontWeight="Bold" />
+                        <TextBox x:Name="rotation_angle" Text="0" Width="30" Height="30" Grid.Column="0" Margin="0,20,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                        <Button Content="Go" Height="30" Margin="10,10" Click="around_axis_click"/>
                     </StackPanel>
                 </GroupBox>
             </DockPanel>
