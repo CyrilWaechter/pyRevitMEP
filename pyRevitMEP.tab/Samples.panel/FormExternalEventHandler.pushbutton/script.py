@@ -16,23 +16,29 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 """
-from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
+# noinspection PyUnresolvedReferences
+from Autodesk.Revit.UI import IExternalEventHandler, ExternalEvent
+# noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction
+# noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException
-from revitutils import selection, uidoc, doc
+from revitutils import selection, doc
 from scriptutils.userinput import WPFWindow
 
-__doc__ = "A simple modeless form"
+__doc__ = "A simple modeless form sample"
 __title__ = "Modeless Form"
 __author__ = "Cyril Waechter"
+
+uidoc = __revit__.ActiveUIDocument
 
 def delete_elements():
     t = Transaction(doc, "ModelessDeletion")
     t.Start()
-    for elid in selection.element_ids:
+    for elid in uidoc.Selection.GetElementIds():
         print elid
         doc.Delete(elid)
     t.Commit()
+
 
 class SimpleEventHandler(IExternalEventHandler):
     def __init__(self,):
@@ -40,17 +46,15 @@ class SimpleEventHandler(IExternalEventHandler):
 
     def Execute(self, uiapp):
         try:
-            t = Transaction(doc, "ModelessDeletion")
-            t.Start()
-            for elid in selection.element_ids:
-                print elid
-                doc.Delete(elid)
-            t.Commit()
+            delete_elements()
         except InvalidOperationException:
-            raise
+            print "InvalidOperationException catched"
 
     def GetName(self):
         return "simple form event"
+
+simple_event_handler = SimpleEventHandler()
+ex_event = ExternalEvent.Create(simple_event_handler)
 
 
 class ModelessForm(WPFWindow):
@@ -64,11 +68,10 @@ class ModelessForm(WPFWindow):
         self.Show()
 
     def delete_click(self, sender, e):
-        SimpleEventHandler.Execute(simple_event_handler, uidoc)
-
-simple_event_handler = SimpleEventHandler()
-exEvent = ExternalEvent.Create(simple_event_handler)
-
-# exEvent.Raise()
+        for el in selection.elements:
+            print el
+        ex_event.Raise()
 
 modeless_form = ModelessForm("ModelessForm.xaml")
+
+
