@@ -31,7 +31,7 @@ t = Transaction(doc, "Change reference level")
 try:
     # Retrieve needed information from reference object
     ref_object = selection.utils.pick_element("Select reference object")
-    ref_level = ref_object.ReferenceLevel
+    ref_level = ref_object[0].ReferenceLevel
 
     t.Start()
 
@@ -44,7 +44,7 @@ try:
             el.ReferenceLevel = ref_level
 
         # Change reference level of objects like ducts, pipes and cable trays
-        elif el is FamilyInstance and el.Host is None:
+        elif isinstance(el, FamilyInstance) and el.Host is None:
             el_level = doc.GetElement(el.LevelId)
             el_level_param = el.get_Parameter(BuiltInParameter.FAMILY_LEVEL_PARAM)
             el_param_offset = el.get_Parameter(BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM)
@@ -53,7 +53,8 @@ try:
             el_level_param.Set(ref_level.Id)
         # Ignore other objects
         else:
-            continue
+            print "Warning. Following element was ignored. It is probably an hosted element."
+            print el
 
     t.Commit()
 

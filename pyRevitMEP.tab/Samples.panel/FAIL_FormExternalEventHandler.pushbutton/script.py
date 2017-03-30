@@ -16,7 +16,7 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 """
-# noinspection PyUnresolvedReferences
+    # noinspection PyUnresolvedReferences
 from Autodesk.Revit.UI import IExternalEventHandler, ExternalEvent
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction
@@ -40,23 +40,6 @@ def delete_elements():
     t.Commit()
 
 
-class SimpleEventHandler(IExternalEventHandler):
-    def __init__(self, do_this):
-        self.do_this = do_this
-
-    def Execute(self, uiapp):
-        try:
-            self.do_this()
-        except InvalidOperationException:
-            print "InvalidOperationException catched"
-
-    def GetName(self):
-        return "simple form event"
-
-simple_event_handler = SimpleEventHandler(delete_elements)
-ex_event = ExternalEvent.Create(simple_event_handler)
-
-
 class ModelessForm(WPFWindow):
     """
     Simple modeless form sample
@@ -68,8 +51,11 @@ class ModelessForm(WPFWindow):
         self.Show()
 
     def delete_click(self, sender, e):
-        for el in selection.elements:
-            print el
-        ex_event.Raise()
+        try:
+            delete_elements()
+        except InvalidOperationException:
+            print "InvalidOperationException catched"
 
 modeless_form = ModelessForm("ModelessForm.xaml")
+
+
