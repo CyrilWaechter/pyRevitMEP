@@ -112,13 +112,15 @@ class RotateElement(object):
         except:
             import traceback
             traceback.print_exc()
+        finally:
+            uidoc.Selection.SetElementIds(rotate_elements.selection)
 
 rotate_elements = RotateElement()
 
 
 # Create a subclass of IExternalEventHandler
 class RotateElementHandler(IExternalEventHandler):
-    """Input : function or method. Execute input in a IExternalEventHandler"""
+    """Input : function or method. Execute input in a IExternalEventHandler"""
 
     # __init__ is used to make function from outside of the class to be executed by the handler. \
     # Instructions could be simply written under Execute method only
@@ -179,6 +181,5 @@ class RotateOptions(WPFWindow):
             self.warning.Text = "Incorrect angles, input format required '0.0'"
         else:
             around_axis_event.Raise()
-
 
 RotateOptions('RotateOptions.xaml').Show()
