@@ -91,8 +91,11 @@ class ReferenceLevelSelection(WPFWindow):
 
     def button_levelfromlist_click(self, sender, e):
         self.Close()
-        level = self.levels_dict[self.combobox_levels.SelectedItem]
-        change_level(level)
+        if self.combobox_levels.SelectedItem in self.levels_dict:
+            level = self.levels_dict[self.combobox_levels.SelectedItem]
+            change_level(level)
+        else:
+            print("Incorrect level name")
 
     def button_levelfromrefobject_click(self, sender, e):
         self.Close()
