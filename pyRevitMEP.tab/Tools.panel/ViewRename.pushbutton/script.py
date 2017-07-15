@@ -74,8 +74,6 @@ def get_viewparameters(viewclass):
             print(param.GUID)
         print param.AsValueString()
 
-
-
 class ViewRename(WPFWindow):
     """
     GUI used to select a reference level from a list or an object

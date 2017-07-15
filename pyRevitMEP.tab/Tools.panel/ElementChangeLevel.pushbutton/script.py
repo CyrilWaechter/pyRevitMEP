@@ -84,14 +84,18 @@ class ReferenceLevelSelection(WPFWindow):
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
 
-        levels_dict = {}
-        self.levels_list = FilteredElementCollector(doc).OfClass(Level)
-        self.combobox_levels.ItemsSource = self.levels_list
+        self.levels_dict = {}
+        for level in FilteredElementCollector(doc).OfClass(Level):
+            self.levels_dict[level.Name] = level
+        self.combobox_levels.ItemsSource = self.levels_dict.keys()
 
     def button_levelfromlist_click(self, sender, e):
         self.Close()
-        level = self.combobox_levels.SelectedItem
-        change_level(level)
+        if self.combobox_levels.SelectedItem in self.levels_dict:
+            level = self.levels_dict[self.combobox_levels.SelectedItem]
+            change_level(level)
+        else:
+            print("Incorrect level name")
 
     def button_levelfromrefobject_click(self, sender, e):
         self.Close()
