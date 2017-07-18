@@ -28,19 +28,21 @@ __author__ = "Cyril Waechter"
 __context__ = "Selection"
 
 # Find systems id and delete it
-s = []
+s = set()
 for el in selection.elements:
     try:
-        s.append(el.MEPSystem.Id)
+        s.add(el.MEPSystem.Id)
     except AttributeError:
         try:
             connectors = el.MEPModel.ConnectorManager.Connectors
             for connector in connectors:
                 if connector.MEPSystem is not None:
                     elid = Element.Id.GetValue(connector.MEPSystem)
-                    s.append(elid)
+                    s.add(elid)
         except AttributeError:
             pass
+
+print s
 
 t = Transaction(doc, "delete selected objects system")
 t.Start()
