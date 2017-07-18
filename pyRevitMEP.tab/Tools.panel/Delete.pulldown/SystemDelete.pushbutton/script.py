@@ -25,6 +25,7 @@ from Autodesk.Revit.DB import Element, Transaction, MEPModel, ConnectorManager, 
 __doc__ = "Delete MEP system of selected objects"
 __title__ = "System delete"
 __author__ = "Cyril Waechter"
+__context__ = "Selection"
 
 # Find systems id and delete it
 s = []

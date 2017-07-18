@@ -3,26 +3,36 @@
         Title="Choose a renaming pattern" Height="500" Width="500" ShowInTaskbar="False" Topmost="True"
         WindowStartupLocation="CenterScreen" Left="0" Top="180" ScrollViewer.VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center">
         <StackPanel Margin="10" HorizontalAlignment="Stretch">
-            <TextBlock FontWeight="Bold">Rename</TextBlock>
-            <RadioButton IsChecked="True">selected views</RadioButton>
-            <RadioButton>all project views</RadioButton>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock FontWeight="Bold">Rename</TextBlock>
+                    <RadioButton IsChecked="True">selected views</RadioButton>
+                    <RadioButton>all views in current project</RadioButton>
+                </StackPanel>
+                <Button Click="btn_ok_click" Grid.Column="1" Width="40" Height="30">OK</Button>
+            </Grid>
             <GroupBox Header="Preview" Margin="0,0,10,0">
                 <StackPanel Margin="10">
-                    <TextBlock x:Name="preview" Text="{Binding}" Grid.Column="2" HorizontalAlignment="Center" FontWeight="Bold" Foreground="#00f"/>
+                    <TextBlock x:Name="preview" Grid.Column="2" HorizontalAlignment="Center" FontWeight="Bold" Foreground="#00f"/>
                 </StackPanel>
             </GroupBox>
-            <GroupBox Header="From levels list" Margin="0,0,10,0">
+            <GroupBox Header="ViewPlan pattern" Margin="0,0,10,0">
                 <StackPanel Margin="10">
-                    <TextBox x:Name="pattern" Text="COO_GEN_E0" SelectionChanged="pattern_SelectionChanged" Width="Auto" Height="30" Grid.Column="0" Margin="0,20,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <Button x:Name="button_addparamater" Content="Add this parameter at cursor position" Click="button_addparameter_click" HorizontalAlignment="Center" Padding="5"/>
-                    <ComboBox x:Name="combobox_parameters" SelectedIndex="0" IsEditable="True" Padding="5">
+                    <TextBlock x:Name="pattern_paramname_preview" Text="{Binding}" Grid.Column="2" HorizontalAlignment="Center" FontWeight="Bold" Foreground="#00f"/>
+                    <TextBox x:Name="pattern" SelectionChanged="pattern_selection_changed" Width="Auto" Height="30" Grid.Column="0" Margin="0,20,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                    <Button x:Name="btn_addparameter" Content="Add this parameter at cursor position" Click="btn_addparameter_click" HorizontalAlignment="Center" Padding="5"/>
+                    <ComboBox x:Name="cb_viewplan_parameters" SelectedIndex="0" IsEditable="True" Padding="5">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="300" />
+                                        <ColumnDefinition Width="300" />
                                         <ColumnDefinition Width="200" />
-                                        <ColumnDefinition Width="50" />
-                                        <ColumnDefinition Width="50" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding Definition.Name}" Grid.Column="0"/>
                                     <TextBlock Text="{Binding Definition.BuiltInParameter}" Grid.Column="1"/>
@@ -35,11 +45,11 @@
             </GroupBox>
             <GroupBox Header="Plan class to rename" Margin="0,0,10,0">
                 <StackPanel Margin="10">
-                    <CheckBox Name="cb_all" IsThreeState="True" Checked="cb_all_CheckedChanged" Unchecked="cb_all_CheckedChanged">All</CheckBox>
+                    <CheckBox Name="cb_all" IsThreeState="True" Checked="cb_all_checked_changed" Unchecked="cb_all_checked_changed">All</CheckBox>
                     <StackPanel Margin="20,5">
-                        <CheckBox Name="cb_viewplan" IsChecked="True" Checked="cb_CheckedChanged" Unchecked="cb_CheckedChanged">ViewPlan</CheckBox>
-                        <CheckBox Name="cb_view3D" Checked="cb_CheckedChanged" Unchecked="cb_CheckedChanged">View3D</CheckBox>
-                        <CheckBox Name="cb_viewsection" Checked="cb_CheckedChanged" Unchecked="cb_CheckedChanged">ViewSection</CheckBox>
+                        <CheckBox Name="cb_viewplan" IsChecked="True" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewPlan</CheckBox>
+                        <CheckBox Name="cb_view3D" Checked="cb_checked_changed" Unchecked="cb_checked_changed">View3D</CheckBox>
+                        <CheckBox Name="cb_viewsection" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewSection</CheckBox>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>

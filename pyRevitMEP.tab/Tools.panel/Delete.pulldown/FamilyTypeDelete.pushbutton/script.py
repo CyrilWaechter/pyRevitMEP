@@ -25,6 +25,7 @@ from Autodesk.Revit.DB import Transaction, FamilySymbol
 __doc__ = "Delete selected families from project"
 __title__ = "Familytype delete"
 __author__ = "Cyril Waechter"
+__context__ = "Selection"
 
 t = Transaction(doc, "Delete families from project")
 t.Start()
