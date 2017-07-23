@@ -38,53 +38,6 @@ __doc__ = "Rename selected views according to a pattern"
 __title__ = "Rename views"
 __author__ = "Cyril Waechter"
 
-# try:
-#     t = Transaction(doc, "Rename views")
-#     t.Start()
-#     for view in selection.elements:  # Loop trough selected views
-#         view_typeid = doc.GetElement(view.GetTypeId())  # Get ViewFamilyType Id
-#         view_typename = Element.Name.GetValue(view_typeid)  # Get ViewFamilyType Name
-#
-#         # Get Scope Box name if it exist
-#         try:
-#             view_scopebox = view.get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP)
-#             view_scopebox_name = "" if view_scopebox.Value() is None else "_" + view_scopebox.AsValueString()
-#         except AttributeError:
-#             view_scopebox_name = ""
-#
-#         # Get view reference level if it exist
-#         view_genlevel = "" if view.GenLevel is None else view.GenLevel.Name
-#
-#         # Future view name
-#         view_name = "{c}_{a}{b}".format(a=view_genlevel, b=view_scopebox_name, c=view_typename, )
-#
-#         # Rename view
-#         i = 0
-#         while True:
-#             try:
-#                 view.Name = view_name if i == 0 else view_name + str(i)
-#             except ArgumentException:
-#                 i += 1
-#             except:
-#                 raise
-#             else:
-#                 break
-#     t.Commit()
-# except:  # print a stack trace and error messages for debugging
-#     import traceback
-#
-#     traceback.print_exc()
-#     t.RollBack()
-
-
-# def get_viewparameters(view):
-#     for view in FilteredElementCollector(doc).OfClass(viewclass):
-#         if view.IsTemplate:
-#             continue
-#         else:
-#             viewparams = view.Parameters
-#     return viewparams
-
 # Create a regular expression to retrieve Guid (including constructor) in a string
 parameterGuidRegex = re.compile(r'''
 Guid\(              # Guid constructor. Example : Guid("F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4")
@@ -110,6 +63,7 @@ def get_sampleviewfromclass(viewclass):
             continue
         else:
             return view
+
 
 # Retrieve a sample view for each view class
 sampleviewplan = get_sampleviewfromclass(ViewPlan)
@@ -236,42 +190,9 @@ def apply_pattern(view, pattern, func):
         return "Something goes wrong in apply_pattern"
 
 
-class ElementParametersDicts(object):
-    """
-    Create an object which contain dictionnaries for parameters
-    Each dictionnary reference element parameters by their GUID, BuiltInParameter and Name
-    """
-    def __init__(self, view, attribute):
-        self.test = 1
-        guid_dict = {}
-        bip_dict = {}
-        name_dict = {}
-        for param in view.Parameters:
-            bip = str(param.Definition.BuiltInParameter)
-            if param.StorageType.ToString() == "None":
-                continue
-            elif param.IsShared:
-                guid_dict[str(param.GUID)] = getattr(rpw.db.Parameter(param), attribute)
-            elif bip != "INVALID":
-                bip_dict[bip] = getattr(rpw.db.Parameter(param), attribute)
-            name_dict[param.Definition.Name] = getattr(rpw.db.Parameter(param), attribute)
-        self.guid_dict = guid_dict
-        self.bip_dict = bip_dict
-        self.name_dict = name_dict
-
-# Make a static dictionnaries for each view class to use it in preview fields
-viewplan_namedicts = ElementParametersDicts(get_sampleviewfromclass(ViewPlan), "name")
-viewplan_valuedicts = ElementParametersDicts(get_sampleviewfromclass(ViewPlan), "value")
-view3D_namedicts = ElementParametersDicts(get_sampleviewfromclass(View3D), "name")
-view3D_valuedicts = ElementParametersDicts(get_sampleviewfromclass(View3D), "value")
-viewsection_namedicts = ElementParametersDicts(get_sampleviewfromclass(ViewSection), "name")
-viewsection_valuedicts = ElementParametersDicts(get_sampleviewfromclass(ViewSection), "value")
-
-list_dict = [view3D_namedicts, view3D_namedicts, viewsection_namedicts]
-
-
 class RenameViews(object):
     """Simple class intended to be used in ExternalEvent"""
+
     def __init__(self):
         self.viewsandnames = []
 
@@ -282,6 +203,7 @@ class RenameViews(object):
         for view, newname in self.viewsandnames:
             view.Name = newname
         t.Commit()
+
 
 rename_view = RenameViews()
 
@@ -327,59 +249,61 @@ class ViewRename(WPFWindow):
         viewplan_paramlist.sort(key=operator.attrgetter("Definition.Name"))
         self.cb_viewplan_parameters.ItemsSource = viewplan_paramlist
         self.viewplan_pattern.Text = "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_PE_bip(PLAN_VIEW_LEVEL)_" \
-                            "bip(VIEWER_VOLUME_OF_INTEREST_CROP)"
+                                     "bip(VIEWER_VOLUME_OF_INTEREST_CROP)"
         self.viewplan_preview.Text = apply_pattern(sampleviewplan,
-                                          self.viewplan_pattern.Text,
-                                          param_display_value)
+                                                   self.viewplan_pattern.Text,
+                                                   param_display_value)
         self.viewplan_toname_preview.Text = apply_pattern(sampleviewplan,
-                                                            self.viewplan_pattern.Text,
-                                                            param_name)
+                                                          self.viewplan_pattern.Text,
+                                                          param_name)
         # Initialize View3D pattern and parameter list
         view3D_paramlist = list(sampleview3D.Parameters)
         view3D_paramlist.sort(key=operator.attrgetter("Definition.Name"))
         self.cb_view3D_parameters.ItemsSource = view3D_paramlist
         self.view3D_pattern.Text = "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_3D"
         self.view3D_preview.Text = apply_pattern(sampleview3D,
-                                                   self.view3D_pattern.Text,
-                                                   param_display_value)
+                                                 self.view3D_pattern.Text,
+                                                 param_display_value)
         self.view3D_toname_preview.Text = apply_pattern(sampleview3D,
-                                                         self.view3D_pattern.Text,
-                                                         param_name)
+                                                        self.view3D_pattern.Text,
+                                                        param_name)
         # Initialize ViewSection pattern and parameter list
         viewsection_paramlist = list(sampleviewsection.Parameters)
         viewsection_paramlist.sort(key=operator.attrgetter("Definition.Name"))
         self.cb_viewsection_parameters.ItemsSource = viewsection_paramlist
         self.viewsection_pattern.Text = "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_CP"
         self.viewsection_preview.Text = apply_pattern(sampleviewsection,
-                                                 self.viewsection_pattern.Text,
-                                                 param_display_value)
+                                                      self.viewsection_pattern.Text,
+                                                      param_display_value)
         self.viewsection_toname_preview.Text = apply_pattern(sampleviewsection,
-                                                        self.viewsection_pattern.Text,
-                                                        param_name)
+                                                             self.viewsection_pattern.Text,
+                                                             param_name)
 
         self.cursorposition = 0
         self.cb_all.IsChecked = None
         # Create a dict with key=View class, value=pattern location
-        self.pattern_dict = {ViewPlan:self.viewplan_pattern, View3D:self.view3D_pattern, ViewSection:self.viewsection_pattern}
+        self.pattern_dict = {ViewPlan: self.viewplan_pattern, View3D: self.view3D_pattern,
+                             ViewSection: self.viewsection_pattern}
 
     def btn_viewplan_addparameter_click(self, sender, e):
         param_reference = add_parameter_in_pattern(self.cb_viewplan_parameters.SelectedItem)
         index = self.cursorposition
-        self.viewplan_pattern.Text = self.viewplan_pattern.Text[:index] + param_reference + self.viewplan_pattern.Text[index:]
+        self.viewplan_pattern.Text = self.viewplan_pattern.Text[:index] + param_reference + self.viewplan_pattern.Text[
+                                                                                            index:]
 
     def btn_view3D_addparameter_click(self, sender, e):
         param_reference = add_parameter_in_pattern(self.cb_view3D_parameters.SelectedItem)
         index = self.cursorposition
-        self.view3D_pattern.Text = self.view3D_pattern.Text[:index]\
-                                   + param_reference\
-                                   + self.view3D_pattern.Text[index:]
+        self.view3D_pattern.Text = self.view3D_pattern.Text[:index] + \
+                                   param_reference + \
+                                   self.view3D_pattern.Text[index:]
 
     def btn_viewsection_addparameter_click(self, sender, e):
         param_reference = add_parameter_in_pattern(self.cb_viewsection_parameters.SelectedItem)
         index = self.cursorposition
-        self.viewsection_pattern.Text = self.viewsection_pattern.Text[:index]\
-                                        + param_reference\
-                                        + self.viewsection_pattern.Text[index:]
+        self.viewsection_pattern.Text = self.viewsection_pattern.Text[:index] + \
+                                        param_reference + \
+                                        self.viewsection_pattern.Text[index:]
 
     def viewplan_pattern_changed(self, sender, e):
         self.cursorposition = sender.SelectionStart
@@ -387,36 +311,36 @@ class ViewRename(WPFWindow):
                                                    self.viewplan_pattern.Text,
                                                    param_display_value)
         self.viewplan_toname_preview.Text = apply_pattern(sampleviewplan,
-                                                            self.viewplan_pattern.Text,
-                                                            param_name)
+                                                          self.viewplan_pattern.Text,
+                                                          param_name)
 
     def view3D_pattern_changed(self, sender, e):
         self.cursorposition = sender.SelectionStart
         self.view3D_preview.Text = apply_pattern(sampleview3D,
-                                                   self.view3D_pattern.Text,
-                                                   param_display_value)
+                                                 self.view3D_pattern.Text,
+                                                 param_display_value)
         self.view3D_toname_preview.Text = apply_pattern(sampleview3D,
-                                                         self.view3D_pattern.Text,
-                                                         param_name)
+                                                        self.view3D_pattern.Text,
+                                                        param_name)
 
     def viewsection_pattern_changed(self, sender, e):
         self.cursorposition = sender.SelectionStart
         self.viewsection_preview.Text = apply_pattern(sampleviewsection,
-                                                   self.viewsection_pattern.Text,
-                                                   param_display_value)
+                                                      self.viewsection_pattern.Text,
+                                                      param_display_value)
         self.viewsection_toname_preview.Text = apply_pattern(sampleviewsection,
-                                                         self.viewsection_pattern.Text,
-                                                         param_name)
+                                                             self.viewsection_pattern.Text,
+                                                             param_name)
 
     def cb_checked_changed(self, sender, e):
         self.cb_all.IsChecked = None
-        if self.cb_viewplan.IsChecked == True\
-                and self.cb_view3D.IsChecked == True\
-                and self.cb_viewsection.IsChecked == True:
+        if self.cb_viewplan.IsChecked \
+                and self.cb_view3D.IsChecked \
+                and self.cb_viewsection.IsChecked:
             self.cb_all.IsChecked = True
-        if self.cb_viewplan.IsChecked == False\
-                and self.cb_view3D.IsChecked == False\
-                and self.cb_viewsection.IsChecked == False:
+        if not self.cb_viewplan.IsChecked \
+                and not self.cb_view3D.IsChecked \
+                and not self.cb_viewsection.IsChecked:
             self.cb_all.IsChecked = False
 
     def cb_all_checked_changed(self, sender, e):
