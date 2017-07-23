@@ -42,8 +42,6 @@ for el in selection.elements:
         except AttributeError:
             pass
 
-print s
-
 t = Transaction(doc, "delete selected objects system")
 t.Start()
 for elid in s:
