@@ -17,8 +17,10 @@ See this link for a copy of the GNU General Public License protecting this packa
 https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 """
 # noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import FilteredElementCollector, ViewFamilyType, CopyPasteOptions, ElementTransformUtils
+from Autodesk.Revit.DB import FilteredElementCollector, ViewFamilyType, CopyPasteOptions, ElementTransformUtils,\
+    ElementId, Transform, Transaction
 # noinspection PyUnresolvedReferences
+from System.Collections.Generic import List
 
 import rpw
 from revitutils import doc
@@ -43,14 +45,18 @@ form.ShowDialog()
 source_doc = form.values["source"]
 target_doc = form.values["target"]
 
-
-def get_all_viewfamilytype(document):
-    viewfamilytypes = FilteredElementCollector(document).OfClass(ViewFamilyType)
-    return viewfamilytypes
+def get_all_viewfamilytype_ids(document):
+    id_list = List[ElementId]()
+    for vft in FilteredElementCollector(document).OfClass(ViewFamilyType):
+        id_list.Add(vft.Id)
+    return id_list
 
 copypasteoptions = CopyPasteOptions()
 
-ElementTransformUtils.CopyElements(source_doc,,target_doc,Transform)
+id_list = get_all_viewfamilytype_ids(source_doc)
 
-print(list(get_all_viewfamilytype(source_doc)))
-print(list(get_all_viewfamilytype(target_doc)))
+t = Transaction(target_doc, "Copy view types")
+
+t.Start()
+ElementTransformUtils.CopyElements(source_doc,id_list,target_doc,Transform.Identity,copypasteoptions)
+t.Commit()
