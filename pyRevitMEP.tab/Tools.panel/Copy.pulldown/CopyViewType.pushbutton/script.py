@@ -23,21 +23,23 @@ from Autodesk.Revit.DB import FilteredElementCollector, ViewFamilyType, CopyPast
 from System.Collections.Generic import List
 
 import rpw
-from revitutils import doc
+
+__doc__ = "Copy view types from a selected opened project to another"
+__title__ = "Copy view type"
+__author__ = "Cyril Waechter"
 
 ComboBox = rpw.ui.forms.flexform.ComboBox
-TextBox = rpw.ui.forms.flexform.TextBox
+Label = rpw.ui.forms.flexform.Label
 Button = rpw.ui.forms.flexform.Button
 
-openDocs = {}
+opened_docs = {}
 for d in __revit__.Application.Documents:
-    if not d.IsLinked:
-        openDocs[d.Title] = d
+    opened_docs[d.Title] = d
 
-components = [TextBox("txtbox1", "Pick source document"),
-              ComboBox("source",openDocs),
-              TextBox("txtbox1", "Pick target document"),
-              ComboBox("target",openDocs),
+components = [Label("Pick source document"),
+              ComboBox("source", opened_docs),
+              Label("Pick target document"),
+              ComboBox("target", opened_docs),
               Button("Select")]
 
 form = rpw.ui.forms.FlexForm("Pick documents", components)
