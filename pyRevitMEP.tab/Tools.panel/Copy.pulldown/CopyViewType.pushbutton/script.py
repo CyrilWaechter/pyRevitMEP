@@ -24,8 +24,8 @@ from System.Collections.Generic import List
 
 import rpw
 
-__doc__ = "Copy view types from a selected opened project to another"
-__title__ = "Copy view type"
+__doc__ = "Copy all view types from a selected opened project to another"
+__title__ = "Copy view types"
 __author__ = "Cyril Waechter"
 
 ComboBox = rpw.ui.forms.flexform.ComboBox

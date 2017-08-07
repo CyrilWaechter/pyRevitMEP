@@ -32,9 +32,6 @@ __doc__ = "Copy pipe types from a selected opened document to active document"
 __title__ = "Copy pipe type"
 __author__ = "Cyril Waechter"
 
-ComboBox = rpw.ui.forms.flexform.ComboBox
-Label = rpw.ui.forms.flexform.Label
-Button = rpw.ui.forms.flexform.Button
 
 opened_docs = {}
 for d in __revit__.Application.Documents:
@@ -72,7 +69,7 @@ def copy(source_doc, elem):
     t.Commit()
 
 
-class ReferenceLevelSelection(WPFWindow):
+class PipeTypeSelectionForm(WPFWindow):
     '''
     GUI used to select pipe type to copy
     '''
@@ -95,5 +92,5 @@ class ReferenceLevelSelection(WPFWindow):
         copy(self.source_doc, elem)
 
 
-ReferenceLevelSelection('PipeTypeSelection.xaml').ShowDialog()
+PipeTypeSelectionForm('PipeTypeSelection.xaml').ShowDialog()
 
