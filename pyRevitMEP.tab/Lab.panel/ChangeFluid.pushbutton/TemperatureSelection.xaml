@@ -1,0 +1,33 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Set fluid:" Height="415" Width="600" ShowInTaskbar="False" Topmost="True"
+        WindowStartupLocation="CenterScreen" ScrollViewer.VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center">
+        <StackPanel Margin="20" HorizontalAlignment="Stretch">
+            <StackPanel Margin="10" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                <GroupBox Header="Select source fluid and temperature" Margin="0,0,10,0">
+                    <StackPanel Margin="10">
+                        <TextBlock>Revit FluidType name</TextBlock>
+                        <ComboBox x:Name="cb_source_fluid_type" SelectedIndex="0" SelectionChanged="source_fluid_type_changed">
+                        </ComboBox>
+
+                        <TextBlock>Revit FluidTemperature</TextBlock>
+                        <ComboBox x:Name="cb_source_fluid_temperature" SelectedIndex="0">
+                        </ComboBox>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Select target fluid and temperature" Margin="0,0,10,0">
+                    <StackPanel Margin="10">
+                        <TextBlock>Revit FluidType name</TextBlock>
+                        <ComboBox x:Name="cb_target_fluid_type" SelectedIndex="0" SelectionChanged="target_fluid_type_changed">
+                        </ComboBox>
+
+                        <TextBlock>Revit FluidTemperature</TextBlock>
+                        <ComboBox x:Name="cb_target_fluid_temperature" SelectedIndex="0">
+                        </ComboBox>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+            <Button Content="Go" Height="30" Margin="10,10" Click="change_temp_click"/>
+            <TextBlock x:Name="warning" Text="" Width="Auto" HorizontalAlignment="Left" Foreground="#f00" TextWrapping="WrapWithOverflow" />
+        </StackPanel>
+</Window>

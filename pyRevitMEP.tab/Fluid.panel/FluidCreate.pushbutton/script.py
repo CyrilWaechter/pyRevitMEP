@@ -125,7 +125,7 @@ def add_temperatures(t_start, t_end, fluid_type, coolprop_fluid, pressure, t_ini
 
 class FluidSelection(WPFWindow):
     """
-    Modeless WPF form used for rotation angle input
+    Form used to get fluids inputs
     """
 
     def __init__(self, xaml_file_name):
