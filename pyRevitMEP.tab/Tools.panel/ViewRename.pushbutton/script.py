@@ -32,6 +32,8 @@ import re
 import collections
 from revitutils import doc, uidoc
 from scriptutils.userinput import WPFWindow
+from scriptutils import logger
+import sys
 
 __doc__ = "Rename selected views according to a pattern"
 __title__ = "Rename views"
@@ -197,10 +199,30 @@ class RenameViews(object):
 
     def rename(self):
         """Rename all views with their associated new name"""
+        logger.debug('Start rename function')
         t = Transaction(doc, "Rename views")
         t.Start()
+        logger.debug('Start batch renaming: {}'.format(self.viewsandnames))
         for view, newname in self.viewsandnames:
-            view.Name = newname
+            logger.debug('{}{}'.format(view,newname))
+            try:
+                view.Name = newname
+            except ArgumentException:
+                i = 1
+                while True:
+                    logger.debug('ArgumentException catched with newname: {}'.format(newname))
+                    try:
+                        alt_name = newname + ' ' + str(i)
+                        view.Name = alt_name
+                    except ArgumentException:
+                        logger.debug('ArgumentException catched with newname: {}'.format(alt_name))
+                        i += 1
+                    else:
+                        break
+            except:
+                print "Unexpected error:", sys.exc_info()[0]
+            else:
+                logger.debug('Successfully renamed views')
         t.Commit()
 
 
@@ -243,18 +265,27 @@ class ViewRename(WPFWindow):
 
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
+        self.cursorposition = 0
+        self.cb_all.IsChecked = None
+
         # Initialize ViewPlan pattern and parameter list
-        viewplan_paramlist = list(sampleviewplan.Parameters)
-        viewplan_paramlist.sort(key=operator.attrgetter("Definition.Name"))
-        self.cb_viewplan_parameters.ItemsSource = viewplan_paramlist
-        self.viewplan_pattern.Text = "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_PE_bip(PLAN_VIEW_LEVEL)_" \
-                                     "bip(VIEWER_VOLUME_OF_INTEREST_CROP)"
-        self.viewplan_preview.Text = apply_pattern(sampleviewplan,
-                                                   self.viewplan_pattern.Text,
-                                                   param_display_value)
-        self.viewplan_toname_preview.Text = apply_pattern(sampleviewplan,
-                                                          self.viewplan_pattern.Text,
-                                                          param_name)
+        try:
+            viewplan_paramlist = list(sampleviewplan.Parameters)
+            viewplan_paramlist.sort(key=operator.attrgetter("Definition.Name"))
+            self.cb_viewplan_parameters.ItemsSource = viewplan_paramlist
+            self.viewplan_pattern.Text = "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_PE_bip(PLAN_VIEW_LEVEL)_" \
+                                         "bip(VIEWER_VOLUME_OF_INTEREST_CROP)"
+            self.viewplan_preview.Text = apply_pattern(sampleviewplan,
+                                                       self.viewplan_pattern.Text,
+                                                       param_display_value)
+            self.viewplan_toname_preview.Text = apply_pattern(sampleviewplan,
+                                                              self.viewplan_pattern.Text,
+                                                              param_name)
+        except AttributeError:
+            self.cb_all.IsEnabled = False
+            self.cb_viewplan.IsChecked = False
+            self.cb_viewplan.IsEnabled = False
+
         # Initialize View3D pattern and parameter list
         try:
             view3D_paramlist = list(sampleview3D.Parameters)
@@ -268,7 +299,9 @@ class ViewRename(WPFWindow):
                                                             self.view3D_pattern.Text,
                                                             param_name)
         except AttributeError:
-            self.warning.Text = "There is no 3D view in the project. Do not try to rename all views"
+            self.cb_all.IsEnabled = False
+            self.cb_view3D.IsEnabled = False
+
         # Initialize ViewSection pattern and parameter list
         try:
             viewsection_paramlist = list(sampleviewsection.Parameters)
@@ -282,10 +315,9 @@ class ViewRename(WPFWindow):
                                                                  self.viewsection_pattern.Text,
                                                                  param_name)
         except AttributeError:
-            self.warning.Text = "There is no view section in the project. Do not try to rename all views"
+            self.cb_all.IsEnabled = False
+            self.cb_viewsection.IsEnabled = False
 
-        self.cursorposition = 0
-        self.cb_all.IsChecked = None
         # Create a dict with key=View class, value=pattern location
         self.pattern_dict = {ViewPlan: self.viewplan_pattern, View3D: self.view3D_pattern,
                              ViewSection: self.viewsection_pattern}
@@ -361,23 +393,27 @@ class ViewRename(WPFWindow):
                 views.append(doc.GetElement(elemid))
         else:
             checked_viewclass_list = []
-            if self.cb_viewplan.IsCheked:
+            if self.cb_viewplan.IsChecked:
                 checked_viewclass_list.append(ViewPlan)
             if self.cb_view3D.IsChecked:
                 checked_viewclass_list.append(View3D)
             if self.cb_viewsection.IsChecked:
                 checked_viewclass_list.append(ViewSection)
+
             for viewclass in checked_viewclass_list:
                 for view in FilteredElementCollector(doc).OfClass(viewclass):
                     if not view.IsTemplate:
                         views.append(view)
+        logger.debug(views)
         viewplusname = []
+
         for view in views:
             pattern = self.pattern_dict[type(view)].Text
             newname = apply_pattern(view, pattern, param_display_value)
             viewplusname.append((view, newname))
-            rename_view.viewsandnames = viewplusname
-            rename_view_event.Raise()
+        logger.debug(viewplusname)
+        rename_view.viewsandnames = viewplusname
+        rename_view_event.Raise()
 
 
 wpf_viewrename = ViewRename('ViewRename.xaml')
