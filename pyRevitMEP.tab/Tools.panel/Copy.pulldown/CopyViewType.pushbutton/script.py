@@ -23,6 +23,7 @@ from Autodesk.Revit.DB import FilteredElementCollector, ViewFamilyType, CopyPast
 from System.Collections.Generic import List
 
 import rpw
+from scriptutils import logger
 
 __doc__ = "Copy all view types from a selected opened project to another"
 __title__ = "Copy view types"
@@ -31,6 +32,13 @@ __author__ = "Cyril Waechter"
 ComboBox = rpw.ui.forms.flexform.ComboBox
 Label = rpw.ui.forms.flexform.Label
 Button = rpw.ui.forms.flexform.Button
+
+def get_all_viewfamilytype_ids(document):
+    id_list = List[ElementId]()
+    for vft in FilteredElementCollector(document).OfClass(ViewFamilyType):
+        id_list.Add(vft.Id)
+    return id_list
+
 
 opened_docs = {}
 for d in __revit__.Application.Documents:
@@ -44,21 +52,19 @@ components = [Label("Pick source document"),
 
 form = rpw.ui.forms.FlexForm("Pick documents", components)
 form.ShowDialog()
-source_doc = form.values["source"]
-target_doc = form.values["target"]
+try:
+    source_doc = form.values["source"]
+    target_doc = form.values["target"]
+    copypasteoptions = CopyPasteOptions()
 
-def get_all_viewfamilytype_ids(document):
-    id_list = List[ElementId]()
-    for vft in FilteredElementCollector(document).OfClass(ViewFamilyType):
-        id_list.Add(vft.Id)
-    return id_list
+    id_list = get_all_viewfamilytype_ids(source_doc)
 
-copypasteoptions = CopyPasteOptions()
+    t = Transaction(target_doc, "Copy view types")
 
-id_list = get_all_viewfamilytype_ids(source_doc)
+    t.Start()
+    ElementTransformUtils.CopyElements(source_doc,id_list,target_doc,Transform.Identity,copypasteoptions)
+    t.Commit()
+except KeyError:
+    logger.debug('No input or incorrect inputs')
 
-t = Transaction(target_doc, "Copy view types")
 
-t.Start()
-ElementTransformUtils.CopyElements(source_doc,id_list,target_doc,Transform.Identity,copypasteoptions)
-t.Commit()
