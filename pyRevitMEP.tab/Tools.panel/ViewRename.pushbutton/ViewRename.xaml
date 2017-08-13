@@ -6,14 +6,27 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="2*" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <TextBlock FontWeight="Bold">Rename</TextBlock>
                     <RadioButton x:Name="radiobtn_selectedviews" IsChecked="True">selected views</RadioButton>
                     <RadioButton>all views in current project</RadioButton>
                 </StackPanel>
-                <Button Click="btn_ok_click" Grid.Column="1" Width="40" Height="30">OK</Button>
+                <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                    <TextBlock>Plan class to rename (only when rename all views is selected)</TextBlock>
+                    <CheckBox Name="cb_all" IsThreeState="True" Checked="cb_all_checked_changed" Unchecked="cb_all_checked_changed">All</CheckBox>
+                    <StackPanel Margin="20,5">
+                        <CheckBox Name="cb_viewplan" IsChecked="True" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewPlan</CheckBox>
+                        <CheckBox Name="cb_view3D" Checked="cb_checked_changed" Unchecked="cb_checked_changed">View3D</CheckBox>
+                        <CheckBox Name="cb_viewsection" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewSection</CheckBox>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel  Grid.Column="2">
+                    <Button Click="btn_ok_click" Width="40" Height="30">OK</Button>
+                    <TextBlock x:Name="warning" Foreground="#f00"/>
+                </StackPanel>
             </Grid>
             <GroupBox Header="ViewPlan pattern" Margin="0,0,10,0">
                 <StackPanel Margin="10">
@@ -137,16 +150,6 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                </StackPanel>
-            </GroupBox>
-            <GroupBox Header="Plan class to rename" Margin="0,0,10,0">
-                <StackPanel Margin="10">
-                    <CheckBox Name="cb_all" IsThreeState="True" Checked="cb_all_checked_changed" Unchecked="cb_all_checked_changed">All</CheckBox>
-                    <StackPanel Margin="20,5">
-                        <CheckBox Name="cb_viewplan" IsChecked="True" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewPlan</CheckBox>
-                        <CheckBox Name="cb_view3D" Checked="cb_checked_changed" Unchecked="cb_checked_changed">View3D</CheckBox>
-                        <CheckBox Name="cb_viewsection" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewSection</CheckBox>
-                    </StackPanel>
                 </StackPanel>
             </GroupBox>
         </StackPanel>

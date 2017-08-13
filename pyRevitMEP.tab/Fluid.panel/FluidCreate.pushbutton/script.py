@@ -139,6 +139,18 @@ class FluidSelection(WPFWindow):
     def fluid_category_changed(self, sender, e):
         self.cb_fluid_name.ItemsSource = fluid_list[self.cb_fluid_category.SelectedItem]
 
+    def fluid_name_changed(self, sender, e):
+        pressure = float(self.txt_pressure.Text)
+        fluid_concentration = float(self.txt_concentration.Text)
+        coolprop_fluid = sender.SelectedItem
+        if coolprop_fluid is not None:
+            if 'incompressible' in coolprop_fluid.lower():
+                coolprop_fluid = 'INCOMP::{0}[{1}]'.format(coolprop_fluid, fluid_concentration)
+            try:
+                self.freeze_temp_text.Text = str(freeze_temp(coolprop_fluid, pressure))
+            except:
+                self.freeze_temp_text.Text = str(0)
+
     # noinspection PyUnusedLocal
     def add_temperature_click(self, sender, e):
         # Get form inputs

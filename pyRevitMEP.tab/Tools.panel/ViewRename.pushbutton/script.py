@@ -29,7 +29,6 @@ from System import Guid
 
 import operator
 import re
-import rpw
 import collections
 from revitutils import doc, uidoc
 from scriptutils.userinput import WPFWindow
@@ -257,27 +256,33 @@ class ViewRename(WPFWindow):
                                                           self.viewplan_pattern.Text,
                                                           param_name)
         # Initialize View3D pattern and parameter list
-        view3D_paramlist = list(sampleview3D.Parameters)
-        view3D_paramlist.sort(key=operator.attrgetter("Definition.Name"))
-        self.cb_view3D_parameters.ItemsSource = view3D_paramlist
-        self.view3D_pattern.Text = "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_3D"
-        self.view3D_preview.Text = apply_pattern(sampleview3D,
-                                                 self.view3D_pattern.Text,
-                                                 param_display_value)
-        self.view3D_toname_preview.Text = apply_pattern(sampleview3D,
-                                                        self.view3D_pattern.Text,
-                                                        param_name)
+        try:
+            view3D_paramlist = list(sampleview3D.Parameters)
+            view3D_paramlist.sort(key=operator.attrgetter("Definition.Name"))
+            self.cb_view3D_parameters.ItemsSource = view3D_paramlist
+            self.view3D_pattern.Text = "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_3D"
+            self.view3D_preview.Text = apply_pattern(sampleview3D,
+                                                     self.view3D_pattern.Text,
+                                                     param_display_value)
+            self.view3D_toname_preview.Text = apply_pattern(sampleview3D,
+                                                            self.view3D_pattern.Text,
+                                                            param_name)
+        except AttributeError:
+            self.warning.Text = "There is no 3D view in the project. Do not try to rename all views"
         # Initialize ViewSection pattern and parameter list
-        viewsection_paramlist = list(sampleviewsection.Parameters)
-        viewsection_paramlist.sort(key=operator.attrgetter("Definition.Name"))
-        self.cb_viewsection_parameters.ItemsSource = viewsection_paramlist
-        self.viewsection_pattern.Text = "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_CP"
-        self.viewsection_preview.Text = apply_pattern(sampleviewsection,
-                                                      self.viewsection_pattern.Text,
-                                                      param_display_value)
-        self.viewsection_toname_preview.Text = apply_pattern(sampleviewsection,
-                                                             self.viewsection_pattern.Text,
-                                                             param_name)
+        try:
+            viewsection_paramlist = list(sampleviewsection.Parameters)
+            viewsection_paramlist.sort(key=operator.attrgetter("Definition.Name"))
+            self.cb_viewsection_parameters.ItemsSource = viewsection_paramlist
+            self.viewsection_pattern.Text = "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_CP"
+            self.viewsection_preview.Text = apply_pattern(sampleviewsection,
+                                                          self.viewsection_pattern.Text,
+                                                          param_display_value)
+            self.viewsection_toname_preview.Text = apply_pattern(sampleviewsection,
+                                                                 self.viewsection_pattern.Text,
+                                                                 param_name)
+        except AttributeError:
+            self.warning.Text = "There is no view section in the project. Do not try to rename all views"
 
         self.cursorposition = 0
         self.cb_all.IsChecked = None

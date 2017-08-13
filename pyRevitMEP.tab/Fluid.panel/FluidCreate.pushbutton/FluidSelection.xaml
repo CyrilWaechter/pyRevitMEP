@@ -25,14 +25,14 @@
                                    FontWeight="Bold"/>
                         <Image x:Name="freeze_img" Grid.Column="0" Grid.Row="1"
                                Width="32" Margin="0,10"/>
-                        <TextBlock x:Name="freeze_temp_text" Text="0°C" Grid.Column="1" Grid.Row="1"
+                        <TextBlock x:Name="freeze_temp_text" Text="Not Working yet" Grid.Column="1" Grid.Row="1"
                                    VerticalAlignment="Center" FontWeight="Bold"/>
 
                         <TextBlock Text="Evaporating temperature" Grid.ColumnSpan="3" Grid.Row="2"
                                    FontWeight="Bold"/>
                         <Image x:Name="evaporate_img" Grid.Column="0" Grid.Row="3"
                                Width="32" Margin="0,10"/>
-                        <TextBlock x:Name="evaporate_temp_text" Text="100°C" Grid.Column="1" Grid.Row="3"
+                        <TextBlock x:Name="evaporate_temp_text" Text="Not working yet" Grid.Column="1" Grid.Row="3"
                                    VerticalAlignment="Center" FontWeight="Bold"/>
 
                         <TextBlock Text="Temperature range" Grid.ColumnSpan="3" Grid.Row="4"
@@ -62,11 +62,11 @@
                         <TextBox x:Name="revit_fluid_name">Eau</TextBox>
 
                         <TextBlock>Fluid category</TextBlock>
-                        <ComboBox x:Name="cb_fluid_category" SelectedIndex="0" SelectionChanged="fluid_category_changed">
+                        <ComboBox x:Name="cb_fluid_category" SelectedItem="Pure" SelectionChanged="fluid_category_changed">
                         </ComboBox>
 
                         <TextBlock>Fluid</TextBlock>
-                        <ComboBox x:Name="cb_fluid_name" SelectedIndex="0">
+                        <ComboBox x:Name="cb_fluid_name" SelectedItem="Water" SelectionChanged="fluid_name_changed">
                         </ComboBox>
 
                         <TextBlock>Concentration (format=0.25)</TextBlock>
