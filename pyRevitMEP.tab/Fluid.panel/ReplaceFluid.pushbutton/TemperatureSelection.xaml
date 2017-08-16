@@ -1,6 +1,6 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Set fluid:" Height="415" Width="600" ShowInTaskbar="False" Topmost="True"
+        Title="Set fluid:" Height="260" Width="500" ShowInTaskbar="False" Topmost="True"
         WindowStartupLocation="CenterScreen" ScrollViewer.VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center">
         <StackPanel Margin="20" HorizontalAlignment="Stretch">
             <StackPanel Margin="10" Orientation="Horizontal" HorizontalAlignment="Stretch">
