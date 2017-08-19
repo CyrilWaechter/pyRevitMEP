@@ -66,14 +66,14 @@
                         </ComboBox>
 
                         <TextBlock>Fluid</TextBlock>
-                        <ComboBox x:Name="cb_fluid_name" SelectedItem="Water" SelectionChanged="fluid_name_changed">
+                        <ComboBox x:Name="cb_fluid_name" SelectedItem="Water" SelectionChanged="fluid_property_changed">
                         </ComboBox>
 
                         <TextBlock>Concentration (format=0.25)</TextBlock>
-                        <TextBox x:Name="txt_concentration">0</TextBox>
+                        <TextBox x:Name="txt_concentration" Text="0.2" SelectionChanged="fluid_property_changed"/>
 
                         <TextBlock>Pressure</TextBlock>
-                        <TextBox x:Name="txt_pressure">101325</TextBox>
+                        <TextBox x:Name="txt_pressure" Text="101325" SelectionChanged="fluid_property_changed"/>
                     </StackPanel>
                 </GroupBox>
             </StackPanel>
