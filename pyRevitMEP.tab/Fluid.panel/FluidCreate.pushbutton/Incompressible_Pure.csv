@@ -1,0 +1,60 @@
+Name,Description,Tmin (°C),Tmax (°C),Tbase (K)
+AS10,"Aspen Temper -10, Potassium acetate/formate",-10,30,273.15
+AS20,"Aspen Temper -20, Potassium acetate/formate",-20,30,273.15
+AS30,"Aspen Temper -30, Potassium acetate/formate",-30,30,273.15
+AS40,"Aspen Temper -40, Potassium acetate/formate",-40,30,273.15
+AS55,"Aspen Temper -55, Potassium acetate/formate",-55,30,273.15
+DEB,Diethylbenzene mixture - Dowtherm J,-80,100,0
+DowJ,DowthermJ,-80,345,405.65
+DowJ2,"Dowtherm J, Diethylbenzene mixture",-73,315,394.15
+DowQ,DowthermQ,-35,360,435.65
+DowQ2,"Dowtherm Q, Diphenylethane/alkylated aromatics",-35,330,420.65
+HC10,Dynalene HC10,-10,218,377.15
+HC20,Dynalene HC20,-20,210,368.15
+HC30,Dynalene HC30,-30,210,363.15
+HC40,Dynalene HC40,-40,200,353.15
+HC50,Dynalene HC50,-50,210,353.15
+HCB,Hydrocarbon blend - Dynalene MV,-80,100,0
+HCM,Hydrocarbon mixture - Gilotherm D12,-80,100,0
+HFE,Hydrofluoroether - HFE-7100 3M Novec,-80,100,0
+HFE2,"HFE-7100, Hydrofluoroether",-80.33,64.27,265.12
+HY20,"HYCOOL 20, Potassium formate",-20,50,273.15
+HY30,"HyCool 30, Potassium formate",-30,50,273.15
+HY40,"HyCool 40, Potassium formate",-40,20,273.15
+HY45,"HyCool 45, Potassium formate",-45,20,273.15
+HY50,"HyCool 50, Potassium formate",-50,20,273.15
+NBS,"NBS, Water",1,100,323.65
+NaK,"Nitrate salt, 0.6 NaNO3 and 0.4 KNO3",300,600,273.15
+PBB,Pirobloc HTF-BASIC,50,300,448.15
+PCL,"Paracryol, Aliphatic Hydrocarbon",-40,180,343.15
+PCR,Paratherm CR,-100,220,333.15
+PGLT,Paratherm GLT,-15,315,423.15
+PHE,Paratherm HE,0,330,438.15
+PHR,Paratherm HR,-15,370,450.65
+PLR,Paratherm LR,-85,230,345.65
+PMR,Paratherm MR,-40,315,410.65
+PMS1,Polydimethylsiloxan 1 - Baysilone KT3,-80,100,0
+PMS2,Polydimethylsiloxan 2 - Syltherm XLT,-80,100,0
+PNF,Paratherm NF,-10,315,425.65
+PNF2,"Paratherm NF, Hydrotreated mineral oil",-10,320,428.15
+S800,Syltherm 800,-40,398,452.15
+SAB,Synthetic alkyl benzene - Marlotherm X,-80,100,0
+T66,Therminol66,0,380,463.15
+T72,Therminol72,-10,380,458.15
+TCO,Citrus oil terpene - d-Limonene,-80,100,0
+TD12,TherminolD12,-85,230,345.65
+TVP1,TherminolVP1,12,397,477.65
+TVP1869,Thermogen VP 1869,-80,20,273.15
+TX22,Texatherm22,0,350,448.15
+TY10,"Tyfoxit 1.10, Potassium Acetate",-10,40,288.15
+TY15,"Tyfoxit 1.15, Potassium Acetate",-20,40,283.15
+TY20,"Tyfoxit 1.20, Potassium Acetate",-40,40,273.15
+TY24,"Tyfoxit 1.24, Potassium Acetate",-55,40,265.65
+Water,Fit of EOS from 1 bar to 100 bar,0,200,373.15
+XLT,SylthermXLT,-100,260,353.15
+XLT2,"Syltherm XLT, Polydimethylsiloxan",-100,260,353.15
+ZS10,"Zitrec S10, Potassium formate/Sodium propionate",-8,90,314.15
+ZS25,"Zitrec S25, Potassium formate/Sodium propionate",-23,90,306.65
+ZS40,"Zitrec S40, Potassium formate/Sodium propionate",-38,90,299.15
+ZS45,"Zitrec S45, Potassium formate/Sodium propionate",-43,90,296.65
+ZS55,"Zitrec S55, Potassium formate/Sodium propionate",-55,90,290.65

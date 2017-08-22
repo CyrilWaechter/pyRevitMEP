@@ -1,0 +1,14 @@
+Name,Description,Tmin (°C),Tmax (°C),Tbase (K),xmin,xmax
+AEG,"ASHRAE, Ethylene Glycol",-35,100,305.65,0.1,0.6
+AKF,"Antifrogen KF, Potassium Formate",-40,50,278.15,0.4,1
+AL,"Antifrogen L, Propylene Glycol",-40,80,293.15,0.1,0.6
+AN,"Antifrogen N, Ethylene Glycol",-40,80,293.15,0.1,0.6
+APG,"ASHRAE, Propylene Glycol",-35,100,305.65,0.1,0.6
+GKN,"Glykosol N, Ethylene Glycol",-53,100,296.65,0.1,0.6
+PK2,"Pekasol 2000, K acetate/formate",-62,100,292.15,0.3,1
+PKL,"Pekasol L, Propylene Glycol",-49,100,298.65,0.1,0.6
+ZAC,"Zitrec AC, Corrosion Inhibitor",0,100,323.15,0.06,0.5
+ZFC,"Zitrec FC, Propylene Glycol",-40,100,303.15,0.3,0.6
+ZLC,"Zitrec LC, Propylene Glycol",-50,100,298.15,0.3,0.7
+ZM,"Zitrec M, Ethylene Glycol",-50,120,308.15,0,1
+ZMC,"Zitrec MC, Ethylene Glycol",-50,110,303.15,0.3,0.7

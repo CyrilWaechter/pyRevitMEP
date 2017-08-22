@@ -1,0 +1,36 @@
+Name,Description,Reference,Tmin (°C),Tmax (°C),Tbase (K),xmin,xmax
+FRE,"Freezium, Potassium Formate",[22][4],-40.15,39.85,273.15,0.19,0.5
+IceEA,Ice slurry with Ethanol,[23][4],-33.15,-8.15,252.5,0.05,0.35
+IceNA,Ice slurry with NaCl,[23][4],-18.15,-3.15,262.5,0.05,0.35
+IcePG,Ice slurry with Propylene Glycol,[23][4],-43.15,-8.15,247.5,0.05,0.35
+LiBr,Lithium-bromide solution - aq,[21],-0.15,226.85,386.5,0,0.75
+MAM,Ammonia (NH3) - aq,[3],-100,30,268.5,0,0.3
+MAM2,"Melinder, Ammonia",[3][4],-49,20,258.65,0.08,0.24
+MCA,Calcium Chloride (CaCl2) - aq,[3],-100,40,280.68,0,0.3
+MCA2,"Melinder, Calcium Chloride",[3][4],-44,30,266.15,0.09,0.29
+MEA,Ethyl Alcohol (Ethanol) - aq,[3],-100,40,281.31,0,0.6
+MEA2,"Melinder, Ethanol",[3][4],-44,20,261.15,0.11,0.6
+MEG,Ethylene Glycol - aq,[3],-100,100,304.88,0,0.6
+MEG2,"Melinder, Ethylene Glycol",[3][4],-44,40,271.15,0,0.56
+MGL,Glycerol - aq,[3],-100,40,282.06,0,0.6
+MGL2,"Melinder, Glycerol",[3][4],-40,40,273.15,0.2,0.63
+MITSW,MIT Seawater,[24],0,120,333.15,0,0.12
+MKA,Potassium Acetate (CH3CO2K) - aq,[3],-100,40,279.93,0,0.45
+MKA2,"Melinder, Potassium Acetate",[3][4],-44,30,266.15,0.11,0.41
+MKC,Potassium Carbonate (K2CO3) - aq,[3],-100,40,284.39,0,0.4
+MKC2,"Melinder, Potassium Carbonate",[3][4],-35,30,270.65,0,0.39
+MKF,Potassium Formate (CHKO2) - aq,[3],-100,40,279.04,0,0.48
+MLI,Lithium Chloride (LiCl) - aq,[3],-100,40,274.64,0,0.24
+MMA,Methyl Alcohol (Methanol) - aq,[3],-100,40,276.69,0,0.6
+MMA2,"Melinder, Methanol",[3][4],-50,20,258.15,0.08,0.47
+MMG,MgCl2 - aq,[3],-100,40,282.47,0,0.3
+MMG2,"Melinder, Magnesium Chloride",[3][4],-30,30,273.15,0,0.2
+MNA,Sodium Chloride (NaCl) - aq,[3],-100,40,285.77,0,0.23
+MNA2,"Melinder, Sodium Chloride",[3][4],-20,30,278.15,0,0.23
+MPG,Propylene Glycol - aq,[3],-100,100,305.86,0,0.6
+MPG2,"Melinder, Propylene Glycol",[3][4],-45,40,270.65,0.15,0.57
+VCA,"VDI, Calcium Cloride",[25][4],-55,20,255.65,0.15,0.3
+VKC,"VDI, Potassium Carbonate",[25][4],-35,20,265.65,0.13,0.39
+VMA,"VDI, Methanol",[25][4],-80,0,233.15,0.1,0.9
+VMG,"VDI, Magnesium Chloride",[25][4],-33,20,266.65,0.07,0.21
+VNA,"VDI, Sodium Chloride",[25][4],-21,20,272.65,0.07,0.23

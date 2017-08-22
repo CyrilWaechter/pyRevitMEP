@@ -40,9 +40,7 @@ def get_all_viewfamilytype_ids(document):
     return id_list
 
 
-opened_docs = {}
-for d in __revit__.Application.Documents:
-    opened_docs[d.Title] = d
+opened_docs_dict = {document.Title: document for document in rpw.revit.docs}
 
 components = [Label("Pick source document"),
               ComboBox("source", opened_docs),

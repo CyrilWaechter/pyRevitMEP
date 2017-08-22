@@ -62,11 +62,11 @@
                         <TextBox x:Name="revit_fluid_name">Eau</TextBox>
 
                         <TextBlock>Fluid category</TextBlock>
-                        <ComboBox x:Name="cb_fluid_category" SelectedItem="Pure" SelectionChanged="fluid_category_changed">
+                        <ComboBox x:Name="cb_fluid_category" SelectedItem="Incompressible_Pure" SelectionChanged="fluid_category_changed">
                         </ComboBox>
 
                         <TextBlock>Fluid</TextBlock>
-                        <ComboBox x:Name="cb_fluid_name" SelectedItem="Water" SelectionChanged="fluid_property_changed">
+                        <ComboBox x:Name="cb_fluid_name" SelectedIndex="52" SelectionChanged="fluid_property_changed">
                         </ComboBox>
 
                         <TextBlock>Concentration (format=0.25)</TextBlock>
