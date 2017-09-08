@@ -220,7 +220,7 @@ class RenameViews(object):
                     else:
                         break
             except:
-                print "Unexpected error:", sys.exc_info()[0]
+                print("Unexpected error:", sys.exc_info()[0])
             else:
                 logger.debug('Successfully renamed views')
         t.Commit()
@@ -245,7 +245,7 @@ class ViewRenameHandler(IExternalEventHandler):
             self.do_this()
         except InvalidOperationException:
             # If you don't catch this exeption Revit may crash.
-            print "InvalidOperationException catched"
+            print("InvalidOperationException catched")
 
     # noinspection PyMethodMayBeStatic, PyPep8Naming
     def GetName(self):
@@ -385,6 +385,12 @@ class ViewRename(WPFWindow):
         self.cb_viewplan.IsChecked = checked
         self.cb_view3D.IsChecked = checked
         self.cb_viewsection.IsChecked = checked
+
+    def save_to_parameter_click(self, sender,e):
+        pass
+
+    def save_to_file_click(self, sender, e):
+        pass
 
     def btn_ok_click(self, sender, e):
         views = []
