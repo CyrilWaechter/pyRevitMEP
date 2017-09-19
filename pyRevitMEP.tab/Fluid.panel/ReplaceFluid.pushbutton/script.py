@@ -21,7 +21,7 @@ https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 from Autodesk.Revit.DB import FilteredElementCollector, Element, Transaction
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB.Plumbing import PipingSystemType, FluidType, FluidTemperature
-from revitutils import doc, logger
+from revitutils import logger
 from scriptutils.forms import WPFWindow
 import rpw
 
@@ -29,6 +29,7 @@ __doc__ = "Replace a selected fluid and temperature find in all systems by an ot
 __title__ = "Replace fluid"
 __author__ = "Cyril Waechter"
 
+doc = rpw.revit.doc
 ComboBox = rpw.ui.forms.flexform.ComboBox
 Label = rpw.ui.forms.flexform.Label
 Button = rpw.ui.forms.flexform.Button
@@ -41,10 +42,7 @@ class RevitFluids(object):
 
     @property
     def names(self):
-        names_list = []
-        for fluid in self.fluids:
-            names_list.append(Element.Name.GetValue(fluid))
-        return names_list
+        return [Element.Name.GetValue(fluid) for fluid in self.fluids]
 
     @property
     def fluid_dict(self):
@@ -53,13 +51,20 @@ class RevitFluids(object):
             d[Element.Name.GetValue(fluid)] = RevitFluidType(fluid)
         return d
 
+    def __iter__(self):
+        return (fluid for fluid in self.fluids)
+
 
 class RevitFluidType(object):
     """
     FluidType Wrapper
     """
-    def __init__(self, revit_fluid):
-        self.revit_fluid = revit_fluid
+
+    def __init__(self, revit_fluid_or_id):
+        if isinstance(revit_fluid_or_id, FluidType):
+            self.revit_fluid = revit_fluid_or_id
+        else:
+            self.revit_fluid = doc.GetElement(revit_fluid_or_id)
 
     @property
     def name(self):
@@ -96,7 +101,22 @@ class RevitFluidType(object):
             d[temp.Density] = temp
         return d
 
+
 revit_fluids = RevitFluids()
+
+all_revit_fluids = FilteredElementCollector(doc).OfClass(FluidType)
+
+
+def revit_fluids_in_use():
+    return [RevitFluidType(fluid) for fluid in all_revit_fluids if fluid.IsFluidInUse(doc, fluid.Id)]
+
+
+logger.debug(revit_fluids_in_use())
+
+
+def revit_temperature_in_use(fluid_type, doc=doc):
+    pst_collector = FilteredElementCollector(doc).OfClass(PipingSystemType)
+    return {pst.FluidTemperature for pst in pst_collector if RevitFluidType(pst.FluidType).name == fluid_type.name}
 
 
 def change_temperature(source_fluid, source_temp, target_fluid, target_temp,
@@ -136,6 +156,7 @@ def change_temperature(source_fluid, source_temp, target_fluid, target_temp,
     t.Commit()
     logger.info("COMPLETED")
 
+
 class TemperatureSelection(WPFWindow):
     """
     Form used to get fluids inputs
@@ -143,31 +164,42 @@ class TemperatureSelection(WPFWindow):
 
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
-        self.cb_source_fluid_type.ItemsSource = revit_fluids.names
+        self.cb_source_fluid_type.ItemsSource = [fluid.name for fluid in revit_fluids_in_use()]
         self.cb_target_fluid_type.ItemsSource = revit_fluids.names
-        source_fluid = revit_fluids.fluid_dict[self.cb_source_fluid_type.SelectedItem]
-        target_fluid = revit_fluids.fluid_dict[self.cb_target_fluid_type.SelectedItem]
-        self.cb_source_fluid_temperature.ItemsSource = sorted(source_fluid.temperatures_dict.keys())
-        self.cb_target_fluid_temperature.ItemsSource = sorted(target_fluid.temperatures_dict.keys())
+        self.update_source_temperatures()
+        self.update_target_temperatures()
+
+    @property
+    def source_fluid(self):
+        return revit_fluids.fluid_dict[self.cb_source_fluid_type.SelectedItem]
+
+    @property
+    def target_fluid(self):
+        return revit_fluids.fluid_dict[self.cb_target_fluid_type.SelectedItem]
+
+    def update_source_temperatures(self):
+        self.cb_source_fluid_temperature.ItemsSource = revit_temperature_in_use(self.source_fluid)
+
+    def update_target_temperatures(self):
+        self.cb_target_fluid_temperature.ItemsSource = sorted(self.target_fluid.temperatures_dict.keys())
 
     # noinspection PyUnusedLocal
     def source_fluid_type_changed(self, sender, e):
-        source_fluid = revit_fluids.fluid_dict[sender.SelectedItem]
-        self.cb_source_fluid_temperature.ItemsSource = sorted(source_fluid.temperatures_dict.keys())
+        self.update_source_temperatures()
 
     # noinspection PyUnusedLocal
     def target_fluid_type_changed(self, sender, e):
-        target_fluid = revit_fluids.fluid_dict[sender.SelectedItem]
-        self.cb_target_fluid_temperature.ItemsSource = sorted(target_fluid.temperatures_dict.keys())
+        self.update_target_temperatures()
 
     # noinspection PyUnusedLocal
     def change_temp_click(self, sender, e):
         # Get form inputs
-        source_fluid = revit_fluids.fluid_dict[self.cb_source_fluid_type.SelectedItem].revit_fluid.Id
-        target_fluid = revit_fluids.fluid_dict[self.cb_target_fluid_type.SelectedItem].revit_fluid.Id
+        source_fluid_id = self.source_fluid.revit_fluid.Id
+        target_fluid_id = self.target_fluid.revit_fluid.Id
         source_temp = self.cb_source_fluid_temperature.SelectedItem
         target_temp = self.cb_target_fluid_temperature.SelectedItem
         # Apply temperature change
-        change_temperature(source_fluid, source_temp, target_fluid, target_temp)
+        change_temperature(source_fluid_id, source_temp, target_fluid_id, target_temp)
+
 
 TemperatureSelection('TemperatureSelection.xaml').ShowDialog()
