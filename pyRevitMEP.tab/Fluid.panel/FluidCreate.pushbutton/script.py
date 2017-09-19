@@ -8,7 +8,7 @@ from Autodesk.Revit.DB import Transaction, UnitUtils, DisplayUnitType
 from Autodesk.Revit.DB.Plumbing import FluidType, FluidTemperature
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.UI import TaskDialog, TaskDialogCommonButtons, TaskDialogResult
-from scriptutils import logger
+from scriptutils import logger, open_url
 from scriptutils.userinput import WPFWindow
 import ctypes
 import os
@@ -24,7 +24,8 @@ TextBox = rpw.ui.forms.flexform.TextBox
 Button = rpw.ui.forms.flexform.Button
 
 # Load CoolProp shared library and configure PropsSI c_types units
-CP = ctypes.cdll.LoadLibrary(os.path.join(__commandpath__, "CoolProp_x64.dll"))
+cool_prop_dir = os.path.abspath(__commandpath__ + "/../bin/")
+CP = ctypes.cdll.LoadLibrary(os.path.join(cool_prop_dir, "CoolProp_x64.dll"))
 PropsSI = CP.PropsSI
 PropsSI.argtypes = (ctypes.c_char_p,  # searched value. Example 'V' (Viscosity)
                     ctypes.c_char_p, ctypes.c_double,  # Fixed propriety 1. Example for temperature in K : 'T', 273.15
@@ -199,6 +200,9 @@ class FluidSelection(WPFWindow):
 
         # Finally add temperatures to Revit Project
         add_temperatures(t_start, t_end, fluid_type, coolprop_fluid, pressure)
+
+    def hyperlink(self, sender, e):
+        open_url(str(sender.NavigateUri))
 
 
 FluidSelection('FluidSelection.xaml').ShowDialog()
