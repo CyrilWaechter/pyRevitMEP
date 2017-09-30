@@ -79,6 +79,6 @@
             </StackPanel>
             <Button Content="Go" Height="30" Margin="10,10" Click="add_temperature_click"/>
             <TextBlock x:Name="warning" Text="" Width="Auto" HorizontalAlignment="Left" Foreground="#f00" TextWrapping="WrapWithOverflow" />
-            <TextBlock HorizontalAlignment="Center"><Hyperlink RequestNavigate="hyperlink" NavigateUri="https://github.com/CoolProp/CoolProp">This script get fluid properties with CoolProp under MIT License</Hyperlink></TextBlock>
+            <TextBlock HorizontalAlignment="Center"><Hyperlink RequestNavigate="hyperlink" NavigateUri="https://github.com/CoolProp/CoolProp">This script retrieves fluid properties using CoolProp under MIT License</Hyperlink></TextBlock>
         </StackPanel>
 </Window>
