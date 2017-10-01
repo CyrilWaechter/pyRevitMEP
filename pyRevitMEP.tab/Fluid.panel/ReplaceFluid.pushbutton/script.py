@@ -21,10 +21,16 @@ https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 from Autodesk.Revit.DB import FilteredElementCollector, Element, Transaction
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB.Plumbing import PipingSystemType, FluidTemperature
+# For future implementation in rpw
+# from rpw.db.plumbing import FluidType
+# Until done :
+import imp
+import os
+FluidType = imp.load_source('FluidType', os.path.join(__commandpath__, 'plumbing.py'))
+
+import rpw
 from revitutils import logger
 from scriptutils.forms import WPFWindow
-import rpw
-from rpw.db.plumbing import FluidType
 
 __doc__ = "Replace a selected fluid and temperature find in all systems by an other selected fluid and temperature"
 __title__ = "Replace fluid"
