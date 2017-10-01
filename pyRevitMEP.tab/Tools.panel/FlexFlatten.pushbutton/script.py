@@ -38,10 +38,11 @@ with rpw.db.Transaction('Aplanize flex objects'):
 
         # Make a new List of XYZ with same Z as first point
         new_points = List[XYZ]()
-        for xyz in flex_el.Points:
+        for xyz in list(flex_el.Points)[:-1]:
             try:
                 new_z
             except NameError:
                 new_z = xyz.Z
             new_points.Add(XYZ(xyz.X, xyz.Y, new_z))
+        new_points.Add(list(flex_el.Points)[-1])
         flex_el.Points = new_points
