@@ -18,7 +18,8 @@ https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 """
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import FilteredElementCollector, ViewFamilyType, CopyPasteOptions, ElementTransformUtils,\
-    ElementId, Transform, Transaction
+    ElementId, Transform, Transaction, Element, View
+from Autodesk.Revit import Exceptions
 # noinspection PyUnresolvedReferences
 from System.Collections.Generic import List
 
@@ -32,6 +33,12 @@ __author__ = "Cyril Waechter"
 ComboBox = rpw.ui.forms.flexform.ComboBox
 Label = rpw.ui.forms.flexform.Label
 Button = rpw.ui.forms.flexform.Button
+CheckBox = rpw.ui.forms.flexform.CheckBox
+
+
+def name(element):
+    return Element.Name.__get__(element)
+
 
 def get_all_viewfamilytype_ids(document):
     id_list = List[ElementId]()
@@ -40,12 +47,31 @@ def get_all_viewfamilytype_ids(document):
     return id_list
 
 
+def view_type_name_template_name_dict(document):
+    element_dict = {}
+    for element in FilteredElementCollector(document).OfClass(ViewFamilyType):
+        default_view_template = document.GetElement(element.DefaultTemplateId)
+        if default_view_template is not None:
+            element_dict[name(element)] = name(default_view_template)
+    logger.debug("view_type_name_template_name_dict : {}".format(element_dict))
+    return element_dict
+
+
+def view_template_name_to_id_dict(document):
+    element_dict = {}
+    for view in FilteredElementCollector(document).OfClass(View):
+        if view.IsTemplate:
+            element_dict[name(view)] = view.Id
+    logger.debug("view_template_name_to_id_dict : {}".format(element_dict))
+    return element_dict
+
+
 opened_docs_dict = {document.Title: document for document in rpw.revit.docs}
 
 components = [Label("Pick source document"),
-              ComboBox("source", opened_docs),
+              ComboBox("source", opened_docs_dict),
               Label("Pick target document"),
-              ComboBox("target", opened_docs),
+              ComboBox("target", opened_docs_dict),
               Button("Select")]
 
 form = rpw.ui.forms.FlexForm("Pick documents", components)
@@ -53,16 +79,29 @@ form.ShowDialog()
 try:
     source_doc = form.values["source"]
     target_doc = form.values["target"]
-    copypasteoptions = CopyPasteOptions()
-
-    id_list = get_all_viewfamilytype_ids(source_doc)
-
-    t = Transaction(target_doc, "Copy view types")
-
-    t.Start()
-    ElementTransformUtils.CopyElements(source_doc,id_list,target_doc,Transform.Identity,copypasteoptions)
-    t.Commit()
 except KeyError:
     logger.debug('No input or incorrect inputs')
 
+copypasteoptions = CopyPasteOptions()
 
+source_viewtype_id_list = get_all_viewfamilytype_ids(source_doc)
+
+source_doc_dict = view_type_name_template_name_dict(source_doc)
+
+with rpw.db.Transaction(doc=target_doc, name="Copy view types"):
+    # Copy view type
+    ElementTransformUtils.CopyElements(source_doc,
+                                       source_viewtype_id_list,
+                                       target_doc,
+                                       Transform.Identity,
+                                       copypasteoptions)
+
+    # Assign Default Template to ViewType
+    target_doc_dict = view_template_name_to_id_dict(target_doc)
+    for viewtype in FilteredElementCollector(target_doc).OfClass(ViewFamilyType):
+        try:
+            default_template_name  = source_doc_dict[name(viewtype)]
+            default_template_id = target_doc_dict[default_template_name]
+            viewtype.DefaultTemplateId = default_template_id
+        except KeyError:
+            logger.debug("{} has no view template".format(name(viewtype)))
