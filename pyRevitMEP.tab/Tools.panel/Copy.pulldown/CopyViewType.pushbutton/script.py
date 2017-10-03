@@ -19,7 +19,6 @@ https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import FilteredElementCollector, ViewFamilyType, CopyPasteOptions, ElementTransformUtils,\
     ElementId, Transform, Transaction, Element, View
-from Autodesk.Revit import Exceptions
 # noinspection PyUnresolvedReferences
 from System.Collections.Generic import List
 

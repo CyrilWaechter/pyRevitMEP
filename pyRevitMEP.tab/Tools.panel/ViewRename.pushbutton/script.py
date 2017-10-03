@@ -335,7 +335,8 @@ class ViewRename(WPFWindow):
                     project_info_param_set = rpw.db.ParameterSet(revit.doc.ProjectInformation)
                     param = project_info_param_set[self.storage_pattern_parameter]
                     pattern_textbox.Text = eval(param.value)[view_class]
-                except rpw.exceptions.RpwParameterNotFound:
+
+                except (rpw.exceptions.RpwParameterNotFound, SyntaxError) as error:
                     try:
                         # Try to load patterns from config file
                         pattern_textbox.Text = getattr(my_config, view_class).decode('utf8')
@@ -369,7 +370,7 @@ class ViewRename(WPFWindow):
         try:
             param = project_info_param_set[self.storage_pattern_parameter]
             pattern_dict = eval(param.value)
-        except rpw.exceptions.RpwParameterNotFound:
+        except (rpw.exceptions.RpwParameterNotFound, SyntaxError) as error:
             category_set = revit.app.Create.NewCategorySet()
             category = revit.doc.Settings.Categories.get_Item(DB.BuiltInCategory.OST_ProjectInformation)
             category_set.Insert(category)
