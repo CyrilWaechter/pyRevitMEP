@@ -7,3 +7,4 @@ BatchWorksetCreation
 CopyLegendsLocations
 MoveTitleBlockToOrigin
 BatchObjectParameterSetter
+BatchCreateSharedParameter

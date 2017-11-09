@@ -26,6 +26,7 @@ from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCancel
 from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
 # noinspection PyUnresolvedReferences
 from System import Guid
+from pyRevitMEP.parameter import create_shared_parameter_definition, create_project_parameter
 
 import operator
 import re
@@ -57,40 +58,6 @@ parameterBipRegex = re.compile(r"bip\((\w+)\)")
 
 # Create a regular expression to retrieve named parameters in a string
 parameterNameRegex = re.compile(r"name\(([\w\s]+)\)")  # Retrieve group(1)
-
-
-def create_shared_parameter(revit_app, name, group_name, parameter_type, visible=True):
-    # Open shared parameter file
-    definition_file = revit_app.OpenSharedParameterFile()
-    if not definition_file:
-        raise LookupError("No shared parameter file")
-
-    for dg in definition_file.Groups:
-        if dg.Name == group_name:
-            definition_group = dg
-            break
-
-    if 'definition_group' not in locals():
-        definition_group = definition_file.Groups.Create(group_name)
-
-    for definition in definition_group.Definitions:
-        if definition.Name == name:
-            break
-
-    if 'definition' not in locals():
-        external_definition_create_options = DB.ExternalDefinitionCreationOptions(name, parameter_type)
-        definition = definition_group.Definitions.Create(external_definition_create_options)
-
-    return definition
-
-
-def create_project_parameter(revit_app, definition, category_set, built_in_parameter_group, instance):
-    if instance:
-        binding = revit_app.Create.NewInstanceBinding(category_set)
-    else:
-        binding = revit.app.Create.NewTypeBinding(category_set)
-    parameter_bindings = revit.doc.ParameterBindings
-    parameter_bindings.Insert(definition, binding, built_in_parameter_group)
 
 
 def get_sampleviewfromclass(viewclass):
@@ -375,7 +342,7 @@ class ViewRename(WPFWindow):
             category = revit.doc.Settings.Categories.get_Item(DB.BuiltInCategory.OST_ProjectInformation)
             category_set.Insert(category)
             with rpw.db.Transaction("Add pyRevitMEP_viewrename_patterns to project parameters"):
-                definition = create_shared_parameter(revit.app, self.storage_pattern_parameter,
+                definition = create_shared_parameter_definition(revit.app, self.storage_pattern_parameter,
                                                      "pyRevitMEP", DB.ParameterType.Text)
                 create_project_parameter(revit.app, definition, category_set, DB.BuiltInParameterGroup.PG_PATTERN, True)
                 param = project_info_param_set[self.storage_pattern_parameter]
