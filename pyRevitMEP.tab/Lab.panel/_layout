@@ -8,3 +8,4 @@ CopyLegendsLocations
 MoveTitleBlockToOrigin
 BatchObjectParameterSetter
 BatchCreateSharedParameter
+StraightSegment

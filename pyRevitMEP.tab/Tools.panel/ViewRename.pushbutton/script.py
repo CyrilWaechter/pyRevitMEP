@@ -27,6 +27,7 @@ from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Resul
 # noinspection PyUnresolvedReferences
 from System import Guid
 from pyRevitMEP.parameter import create_shared_parameter_definition, create_project_parameter
+from pyRevitMEP.event import CustomizableEvent
 
 import operator
 import re
@@ -214,46 +215,7 @@ def rename_views(views_and_names):
                 logger.debug('Successfully renamed views')
 
 
-class CustomizableEvent:
-    def __init__(self):
-        self.function_or_method = None
-        self.args = ()
-        self.kwargs = {}
-
-    def raised_method(self):
-        self.function_or_method(*self.args, **self.kwargs)
-
-    def raise_event(self, function_or_method, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-        self.function_or_method = function_or_method
-        custom_event.Raise()
-
-
 customizable_event = CustomizableEvent()
-
-
-# Create a subclass of IExternalEventHandler
-class CustomHandler(IExternalEventHandler):
-    """Input : function or method. Execute input in a IExternalEventHandler"""
-
-    # Execute method run in Revit API environment.
-    # noinspection PyPep8Naming, PyUnusedLocal
-    def Execute(self, application):
-        try:
-            customizable_event.raised_method()
-        except InvalidOperationException:
-            # If you don't catch this exeption Revit may crash.
-            print "InvalidOperationException catched"
-
-    # noinspection PyMethodMayBeStatic, PyPep8Naming
-    def GetName(self):
-        return "Execute an function or method in a IExternalHandler"
-
-
-# Create an handler instance and his associated ExternalEvent
-custom_handler = CustomHandler()
-custom_event = ExternalEvent.Create(custom_handler)
 
 
 my_config = this_script.config
@@ -343,7 +305,7 @@ class ViewRename(WPFWindow):
             category_set.Insert(category)
             with rpw.db.Transaction("Add pyRevitMEP_viewrename_patterns to project parameters"):
                 definition = create_shared_parameter_definition(revit.app, self.storage_pattern_parameter,
-                                                     "pyRevitMEP", DB.ParameterType.Text)
+                                                                "pyRevitMEP", DB.ParameterType.Text)
                 create_project_parameter(revit.app, definition, category_set, DB.BuiltInParameterGroup.PG_PATTERN, True)
                 param = project_info_param_set[self.storage_pattern_parameter]
                 pattern_dict = {}

@@ -6,6 +6,7 @@ from rpw import DB, UI
 from Autodesk.Revit.Exceptions import InvalidOperationException
 from scriptutils import logger
 from scriptutils.userinput import WPFWindow
+from pyRevitMEP.event import CustomizableEvent
 
 __doc__ = "Copy legend location in active ViewSheet"
 __title__ = "CopyLegendsLocations"
@@ -51,46 +52,7 @@ class Legends:
                             viewport.SetBoxCenter(new_location)
 
 
-class CustomizableEvent:
-    def __init__(self):
-        self.function_or_method = None
-        self.args = ()
-        self.kwargs = {}
-
-    def raised_method(self):
-        self.function_or_method(*self.args, **self.kwargs)
-
-    def raise_event(self, function_or_method, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-        self.function_or_method = function_or_method
-        custom_event.Raise()
-
-
 customizable_event = CustomizableEvent()
-
-
-# Create a subclass of IExternalEventHandler
-class CustomHandler(UI.IExternalEventHandler):
-    """Input : function or method. Execute input in a IExternalEventHandler"""
-
-    # Execute method run in Revit API environment.
-    # noinspection PyPep8Naming, PyUnusedLocal
-    def Execute(self, application):
-        try:
-            customizable_event.raised_method()
-        except InvalidOperationException:
-            # If you don't catch this exeption Revit may crash.
-            print("InvalidOperationException catched")
-
-    # noinspection PyMethodMayBeStatic, PyPep8Naming
-    def GetName(self):
-        return "Execute an function or method in a IExternalHandler"
-
-
-# Create an handler instance and his associated ExternalEvent
-custom_handler = CustomHandler()
-custom_event = UI.ExternalEvent.Create(custom_handler)
 
 
 class CopyPasteGUI(WPFWindow):

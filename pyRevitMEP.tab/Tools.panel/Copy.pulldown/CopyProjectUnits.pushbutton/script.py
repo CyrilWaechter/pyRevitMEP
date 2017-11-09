@@ -34,13 +34,10 @@ try:
 
     source_units_list = source_units.GetModifiableUnitTypes()
 
-    t = Transaction(target_doc, "Copy view types")
-
-    t.Start()
-    for unit in source_units_list:
-        format_options = source_units.GetFormatOptions(unit)
-        target_units.SetFormatOptions(unit, format_options)
-    t.Commit()
+    with rpw.db.Transaction(doc=target_doc, name="Copy view types"):
+        for unit in source_units_list:
+            format_options = source_units.GetFormatOptions(unit)
+            target_units.SetFormatOptions(unit, format_options)
 
 except KeyError:
     logger.debug('No input or incorrect inputs')
