@@ -3,16 +3,19 @@
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit import Exceptions
 # noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import Transaction, UnitUtils, DisplayUnitType
+from Autodesk.Revit.UI import TaskDialog, TaskDialogCommonButtons, TaskDialogResult
+# noinspection PyUnresolvedReferences
+from Autodesk.Revit.DB import UnitUtils, DisplayUnitType
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB.Plumbing import FluidType, FluidTemperature
-# noinspection PyUnresolvedReferences
-from Autodesk.Revit.UI import TaskDialog, TaskDialogCommonButtons, TaskDialogResult
 from scriptutils import logger, open_url
 from scriptutils.userinput import WPFWindow
 import ctypes
 import os
 import rpw
+# noinspection PyUnresolvedReferences
+from rpw import revit
+# noinspection PyUnresolvedReferences
 
 __doc__ = "Create a Fluid with all temperatures within desired range"
 __title__ = "Create a fluid"
@@ -33,7 +36,7 @@ PropsSI.argtypes = (ctypes.c_char_p,  # searched value. Example 'V' (Viscosity)
                     ctypes.c_char_p)  # Fluid name
 PropsSI.restype = ctypes.c_double
 
-doc = rpw.revit.doc
+doc = revit.doc
 
 fluids_dict = {}
 
@@ -56,10 +59,8 @@ def create_fluid_type(fluid_name):
     """
     fluid_type = FluidType.GetFluidType(doc, fluid_name)
     if fluid_type is None:
-        t = Transaction(doc, "Create fluid type")
-        t.Start()
-        FluidType.Create(doc, fluid_name)
-        t.Commit()
+        with rpw.db.Transaction("Create fluid type"):
+            FluidType.Create(doc, fluid_name)
         fluid_type = FluidType.GetFluidType(doc, fluid_name)
     return fluid_type
 
@@ -122,36 +123,33 @@ def add_temperatures(t_start, t_end, fluid_type, coolprop_fluid, pressure, t_ini
     Add new temperature with associated heat capacity and viscosity
     :return: None
     """
-    t = Transaction(doc, "Add temperatures")
-    t.Start()
-    for i in xrange(t_start, t_end + 1):
-        # Call CoolProp to get fluid properties and convert it to internal units if necessary
-        temperature = t_init + i
-        viscosity = UnitUtils.ConvertToInternalUnits(PropsSI('V', 'T', temperature, 'P', pressure, coolprop_fluid),
-                                                     DisplayUnitType.DUT_PASCAL_SECONDS)
-        density = UnitUtils.ConvertToInternalUnits(PropsSI('D', 'T', temperature, 'P', pressure, coolprop_fluid),
-                                                   DisplayUnitType.DUT_KILOGRAMS_PER_CUBIC_METER)
-        logger.debug('ν={}, ρ={}'.format(viscosity, density))
-        # Catching exceptions and trying to overwrite temperature if asked by user in the TaskDialog
-        try:
-            fluid_type.AddTemperature(FluidTemperature(temperature, viscosity, density))
-        except Exceptions.ArgumentException:
-            result = TaskDialog.Show("Error", "Temperature already exist, do you want to overwrite it ?",
-                                     TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No |
-                                     TaskDialogCommonButtons.Cancel,
-                                     TaskDialogResult.Yes)
-            if result == TaskDialogResult.Yes:
-                try:
-                    fluid_type.RemoveTemperature(temperature)
-                    fluid_type.AddTemperature(FluidTemperature(temperature, viscosity, density))
-                except Exceptions.ArgumentException:
-                    TaskDialog.Show("Overwrite error", "Temperature is currently in use and cannot be overwritten")
-            elif result == TaskDialogResult.No:
-                pass
-            else:
-                break
-    t.Commit()
-
+    with rpw.db.Transaction("Add temperatures"):
+        for i in xrange(t_start, t_end + 1):
+            # Call CoolProp to get fluid properties and convert it to internal units if necessary
+            temperature = t_init + i
+            viscosity = UnitUtils.ConvertToInternalUnits(
+                PropsSI('V', 'T', temperature, 'P', pressure, coolprop_fluid), DisplayUnitType.DUT_PASCAL_SECONDS)
+            density = UnitUtils.ConvertToInternalUnits(PropsSI('D', 'T', temperature, 'P', pressure, coolprop_fluid),
+                                                          DisplayUnitType.DUT_KILOGRAMS_PER_CUBIC_METER)
+            logger.debug('ν={}, ρ={}'.format(viscosity, density))
+            # Catching exceptions and trying to overwrite temperature if asked by user in the TaskDialog
+            try:
+                fluid_type.AddTemperature(FluidTemperature(temperature, viscosity, density))
+            except Exceptions.ArgumentException:
+                result = TaskDialog.Show("Error", "Temperature already exist, do you want to overwrite it ?",
+                                         TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No |
+                                         TaskDialogCommonButtons.Cancel,
+                                         TaskDialogResult.Yes)
+                if result == TaskDialogResult.Yes:
+                    try:
+                        fluid_type.RemoveTemperature(temperature)
+                        fluid_type.AddTemperature(FluidTemperature(temperature, viscosity, density))
+                    except Exceptions.ArgumentException:
+                        TaskDialog.Show("Overwrite error", "Temperature is currently in use and cannot be overwritten")
+                elif result == TaskDialogResult.No:
+                    pass
+                else:
+                    break
 
 class FluidSelection(WPFWindow):
     """

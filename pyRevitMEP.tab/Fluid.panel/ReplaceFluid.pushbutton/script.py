@@ -26,7 +26,7 @@ from Autodesk.Revit.DB.Plumbing import PipingSystemType, FluidTemperature
 # Until done :
 import imp
 import os
-FluidType = imp.load_source('FluidType', os.path.join(__commandpath__, 'plumbing.py'))
+from pyRevitMEP.plumbing import FluidType
 
 import rpw
 from revitutils import logger
@@ -87,9 +87,9 @@ class TemperatureSelection(WPFWindow):
 
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
-        self.fluids_dict = {fluid_type.name:fluid_type for fluid_type in FluidType.all()}
+        self.fluids_dict = {FluidType(fluid_type).name:FluidType(fluid_type) for fluid_type in FluidType.collect()}
         self.cb_source_fluid_type.ItemsSource = {v['name'] for k, v in FluidType.in_use_dict().iteritems()}
-        self.cb_target_fluid_type.ItemsSource = [fluid.name for fluid in FluidType.all()]
+        self.cb_target_fluid_type.ItemsSource = [FluidType(fluid).name for fluid in FluidType.collect()]
         self.update_source_temperatures()
         self.update_target_temperatures()
 
