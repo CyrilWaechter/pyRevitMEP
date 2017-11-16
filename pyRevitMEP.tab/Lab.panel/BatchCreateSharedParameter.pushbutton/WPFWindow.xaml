@@ -1,0 +1,15 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Create shared parameters" Height="Auto" Width="Auto" ShowInTaskbar="False" Topmost="True"
+        WindowStartupLocation="Manual" Left="Auto" Top="Auto" HorizontalContentAlignment="Center">
+        <Grid Margin="20">
+            <DataGrid Name="datagrid" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding name}"/>
+                    <DataGridTextColumn Header="Group" Binding="{Binding group}"/>
+                    <DataGridCheckBoxColumn Header="Visible" Binding="{Binding visible}"/>
+                    <DataGridTextColumn Header="GUID" Binding="{Binding guid}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+</Window>
