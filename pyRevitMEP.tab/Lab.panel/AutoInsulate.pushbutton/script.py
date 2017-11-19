@@ -63,9 +63,6 @@ class ConnectorsBreadthFirstSearch:
         else:
             return self.nominal_diameter
 
-connector_bfs = ConnectorsBreadthFirstSearch(list(rpw.ui.Selection())[0])
-outside_diameter_bfs_result = connector_bfs.outside_diameter_search()
-logger.info(outside_diameter_bfs_result)
 
 def get_outer_diameter(element):
     if isinstance(element, DB.Plumbing.Pipe):
