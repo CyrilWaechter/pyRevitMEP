@@ -40,6 +40,5 @@ class Gui(WPFWindow):
         self.datagrid.ItemsSource = SharedParameter.read_from_csv()
 
 
-
 gui = Gui("WPFWindow.xaml")
 gui.ShowDialog()
