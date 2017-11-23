@@ -34,11 +34,11 @@ class Gui(WPFWindow):
             self.data_grid_content.Add(workset)
 
     # noinspection PyUnusedLocal
-    def add_workset(self, sender, e):
+    def add(self, sender, e):
         self.data_grid_content.Add(Workset(""))
 
     # noinspection PyUnusedLocal
-    def remove_workset(self, sender, e):
+    def remove(self, sender, e):
         for item in list(self.datagrid.SelectedItems):
             self.data_grid_content.Remove(item)
 

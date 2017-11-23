@@ -3,7 +3,7 @@ import rpw
 from rpw import DB
 
 __doc__ = "Move selected annotation to center (set 0,0,0 coordinates)"
-__title__ = "MoveTitleBlockToOrigin"
+__title__ = "TitleBlock"
 __author__ = "Cyril Waechter"
 __context__ = 'Selection'
 

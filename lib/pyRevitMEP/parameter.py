@@ -10,6 +10,16 @@ import csv
 
 
 class SharedParameter:
+    """Class used to manage Revit shared parameters
+        Args:
+            name (str) : Displayed shared parameter name
+            group (str) : Group used in parameter definition file (shared parameter file)
+            parameter_type (:obj:`Autodesk.Revit.DB.ParameterType`) : Exemple
+            visible (bool)
+            guid (Guid|str)
+        Returns:
+            None
+        """
     def __init__(self, name, group, parameter_type, visible=True, guid=None):
         if not guid:
             self.guid = Guid.NewGuid()
@@ -17,7 +27,7 @@ class SharedParameter:
             self.guid = guid
         self.visible = visible
         if isinstance(ParameterType.Text, ParameterType):
-            self.type = type
+            self.type = parameter_type
         elif parameter_type in ParameterType.GetNames(DB.ParameterType):
             self.type = getattr(ParameterType, parameter_type)
         else:
@@ -43,7 +53,7 @@ class SharedParameter:
             row_len = len(row)
             if row_len < 3:
                 print("Line {} is invalid, less than 3 column".format(file_reader.line_num))
-            name, group, type = row[0:3]
+            name, group, parameter_type = row[0:3]
             visible = True
             guid = None
             if row_len > 4:
@@ -51,14 +61,12 @@ class SharedParameter:
             if row_len > 5:
                 guid = Guid(row[4])
 
-            shared_parameter_list.append(SharedParameter(name, group, type, visible, guid))
-            print(shared_parameter_list)
-
+            shared_parameter_list.append(SharedParameter(name, group, parameter_type, visible, guid))
         return shared_parameter_list
 
     def write_to_definition_file(self, warning=True):
         """
-        Create a new parameter definition in cVrrent shared parameter file
+        Create a new parameter definition in current shared parameter file
         :param warning: warn user if a definition with given name already exist
         :return: definition
         """

@@ -3,7 +3,6 @@ CheckCreators
 ConvertToFlexPipe
 AnnotationCenter
 AutoInsulate
-BatchWorksetCreation
 CopyLegendsLocations
 MoveTitleBlockToOrigin
 BatchObjectParameterSetter

@@ -10,14 +10,12 @@
             <Button Click="load_from_file_click" Height="25" Width="40" Margin="5">
                 <Image x:Name="import_img" Height="20"/>
             </Button>
-            <Button Click="add_workset" Height="25" Width="40" Margin="5">
+            <Button Click="add" Height="25" Width="40" Margin="5">
                 <Image x:Name="plus_img" Height="20"/>
             </Button>
-            <Button Click="remove_workset" Height="25" Width="40" Margin="5">
+            <Button Click="remove" Height="25" Width="40" Margin="5">
                 <Image x:Name="minus_img" Height="20"/>
             </Button>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
         </StackPanel>
         <DataGrid Name="datagrid" AutoGenerateColumns="False" Grid.Row="2">
             <DataGrid.Columns>

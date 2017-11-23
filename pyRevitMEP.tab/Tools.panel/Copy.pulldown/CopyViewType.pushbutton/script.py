@@ -26,7 +26,7 @@ import rpw
 from scriptutils import logger
 
 __doc__ = "Copy all view types from a selected opened project to another"
-__title__ = "Copy view types"
+__title__ = "CopyViewTypes"
 __author__ = "Cyril Waechter"
 
 ComboBox = rpw.ui.forms.flexform.ComboBox

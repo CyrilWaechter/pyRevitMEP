@@ -9,7 +9,7 @@ from scriptutils.userinput import WPFWindow
 import csv
 from pyRevitMEP.parameter import SharedParameter
 # noinspection PyUnresolvedReferences
-from System.Collections.Generic import List
+from System.Collections.ObjectModel import ObservableCollection
 
 __doc__ = "Batch create project shared parameters from file"
 __title__ = "BatchCreateSharedParameters"
@@ -37,7 +37,33 @@ uidoc = rpw.uidoc
 class Gui(WPFWindow):
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
-        self.datagrid.ItemsSource = SharedParameter.read_from_csv()
+        self.data_grid_content = ObservableCollection[object]()
+        self.datagrid.ItemsSource = self.data_grid_content
+        self.set_image_source("plus_img", "icons8-plus-32.png")
+        self.set_image_source("minus_img", "icons8-minus-32.png")
+        self.set_image_source("import_img", "icons8-import-32.png")
+        self.set_image_source("ok_img","icons8-checkmark-32.png")
+
+    # noinspection PyUnusedLocal
+    def ok_click(self, sender, e):
+        with rpw.db.Transaction("Batch create shared parameters"):
+            for parameter in self.data_grid_content:
+                # TODO function to create parameters
+                return
+
+    # noinspection PyUnusedLocal
+    def load_from_file_click(self, sender, e):
+        for parameter in SharedParameter.read_from_csv():
+            self.data_grid_content.Add(parameter)
+
+    # noinspection PyUnusedLocal
+    def add(self, sender, e):
+        self.data_grid_content.Add(SharedParameter("","",""))
+
+    # noinspection PyUnusedLocal
+    def remove(self, sender, e):
+        for item in list(self.datagrid.SelectedItems):
+            self.data_grid_content.Remove(item)
 
 
 gui = Gui("WPFWindow.xaml")

@@ -29,7 +29,7 @@ from rpw import doc
 from scriptutils.userinput import WPFWindow
 
 __doc__ = "Copy pipe types from a selected opened document to active document"
-__title__ = "Copy pipe type"
+__title__ = "CopyPipeType"
 __author__ = "Cyril Waechter"
 
 
