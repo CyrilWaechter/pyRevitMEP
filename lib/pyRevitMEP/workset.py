@@ -1,7 +1,9 @@
 # coding: utf8
 import rpw
+# noinspection PyUnresolvedReferences
 from rpw import revit, DB
-from rpw.exceptions import RevitExceptions
+# noinspection PyUnresolvedReferences
+from Autodesk.Revit import Exceptions
 
 class Workset:
     def __init__(self, name):
@@ -21,7 +23,7 @@ class Workset:
     def create(self, doc=revit.doc):
         try:
             DB.Workset.Create(doc, self.name)
-        except RevitExceptions.ArgumentException as error:
+        except Exceptions.ArgumentException as error:
             print("Failed to create a workset named {}\n{}".format(self.name,error.Message))
 
     def save_to_file(self):
