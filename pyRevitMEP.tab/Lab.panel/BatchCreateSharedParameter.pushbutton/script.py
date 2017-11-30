@@ -6,8 +6,7 @@ from rpw import revit, DB, UI
 from Autodesk.Revit.Exceptions import InvalidOperationException
 from scriptutils import logger
 from scriptutils.userinput import WPFWindow
-import csv
-from pyRevitMEP.parameter import SharedParameter
+from pyRevitMEP.parameter import SharedParameter, ProjectParameter
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
 
@@ -42,7 +41,12 @@ class Gui(WPFWindow):
         self.set_image_source("plus_img", "icons8-plus-32.png")
         self.set_image_source("minus_img", "icons8-minus-32.png")
         self.set_image_source("import_img", "icons8-import-32.png")
-        self.set_image_source("ok_img","icons8-checkmark-32.png")
+        self.set_image_source("ok_img", "icons8-checkmark-32.png")
+
+        self.project_parameters_datagrid_content = ObservableCollection[object]()
+        for project_parameter in ProjectParameter.read_from_revit_doc():
+            self.project_parameters_datagrid_content.Add(project_parameter)
+        self.project_parameters_datagrid.ItemsSource = self.project_parameters_datagrid_content
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
@@ -58,12 +62,16 @@ class Gui(WPFWindow):
 
     # noinspection PyUnusedLocal
     def add(self, sender, e):
-        self.data_grid_content.Add(SharedParameter("","",""))
+        self.data_grid_content.Add(SharedParameter("", "", ""))
 
     # noinspection PyUnusedLocal
     def remove(self, sender, e):
         for item in list(self.datagrid.SelectedItems):
             self.data_grid_content.Remove(item)
+
+    # noinspection PyUnusedLocal
+    def binding_click(self, sender, e):
+        self.project_parameters_datagrid.SelectedItem
 
 
 gui = Gui("WPFWindow.xaml")

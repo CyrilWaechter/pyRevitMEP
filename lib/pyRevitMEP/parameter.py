@@ -64,15 +64,16 @@ class SharedParameter:
             shared_parameter_list.append(SharedParameter(name, group, parameter_type, visible, guid))
         return shared_parameter_list
 
-    def write_to_definition_file(self, warning=True):
+    def write_to_definition_file(self, definition_file=None, warning=True):
         """
         Create a new parameter definition in current shared parameter file
         :param warning: warn user if a definition with given name already exist
         :return: definition
         """
-        definition_file = revit.app.OpenSharedParameterFile()
         if not definition_file:
-            raise LookupError("No shared parameter file")
+            definition_file = revit.app.OpenSharedParameterFile()
+            if not definition_file:
+                raise LookupError("No shared parameter file defined")
 
         for dg in definition_file.Groups:
             if dg.Name == self.group:
@@ -94,6 +95,39 @@ class SharedParameter:
             definition = definition_group.Definitions.Create(external_definition_create_options)
 
         return definition
+
+    @staticmethod
+    def create_definition_file(path_and_name):
+        """Create a new DefinitionFile to store SharedParameter definitions
+        Args:
+            path_and_name (str): file path and name including extension (.txt file)
+        Returns:
+            DefinitionFile
+        """
+        with open(path_and_name, "w"):
+            pass
+        revit.app.SharedParametersFilename = path_and_name
+        return revit.app.OpenSharedParameterFile()
+
+class ProjectParameter:
+    def __init__(self, definition, binding):
+        self.definition = definition
+        self.binding = binding
+
+    def __repr__(self):
+        return "<{}> {}{}".format(self.__class__.__name__,
+                                  self.definition.Name,
+                                  [category.Name for category in self.binding.Categories])
+
+    @classmethod
+    def read_from_revit_doc(cls, doc=revit.doc):
+        project_parameter_list = []
+        for parameter in DB.FilteredElementCollector(doc).OfClass(DB.ParameterElement):
+            definition = parameter.GetDefinition()
+            binding = doc.ParameterBindings[definition]
+            if binding:
+                project_parameter_list.append(cls(definition, binding))
+        return project_parameter_list
 
 
 def create_shared_parameter_definition(revit_app, name, group_name, parameter_type, visible=True):
