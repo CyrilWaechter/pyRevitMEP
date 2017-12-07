@@ -3,9 +3,10 @@
 """
 Plumbing Wrapper
 """
-
+import rpw
 from rpw.db import Element
 from rpw import revit, DB
+import csv
 
 
 class FluidType(Element):
@@ -64,3 +65,40 @@ class FluidType(Element):
         [272.15000000000003, 277.59444444444449, 283.15000000000003, 288.70555555555563, ...]
         """
         return sorted([temp.Temperature for temp in self.fluid_temperatures])
+
+
+class PipingSystemType(Element):
+    _revit_object_class = DB.Plumbing.PipingSystemType
+    _collector_params = {'of_class': _revit_object_class, 'is_type': True}
+
+    def __repr__(self, data=None):
+        """ Adds data to Base __repr__ to add Parameter List Name """
+        if not data:
+            data = {}
+        data['name'] = self.name
+        return super(FluidType, self).__repr__(data=data)
+
+    def read_from_csv(csv_path=None):
+        if not csv_path:
+            csv_path = rpw.ui.forms.select_file(extensions='csv Files (*.csv*)|*.csv*', title='Select File',
+                                                multiple=False, restore_directory=True)
+
+        csv_file = open(csv_path)
+        file_reader = csv.reader(csv_file)
+
+        pipingsystemtype_list = []
+
+        for row in file_reader:
+            row_len = len(row)
+            if row_len < 3:
+                print("Line {} is invalid, less than 3 column".format(file_reader.line_num))
+            name, group, parameter_type = row[0:3]
+            visible = True
+            guid = None
+            if row_len > 4:
+                visible = bool(row[3])
+            if row_len > 5:
+                guid = Guid(row[4])
+
+            shared_parameter_list.append(SharedParameter(name, group, parameter_type, visible, guid))
+        return shared_parameter_list
