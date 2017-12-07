@@ -32,6 +32,7 @@ uidoc = rpw.uidoc
 #      for parameter_name in parameters_text:
 #         SharedParameter(revit.app, parameter_name, "MCR", DB.ParameterType.Text)
 
+
 class Gui(WPFWindow):
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
@@ -41,6 +42,11 @@ class Gui(WPFWindow):
         self.set_image_source("minus_img", "icons8-minus-32.png")
         self.set_image_source("import_img", "icons8-import-32.png")
         self.set_image_source("ok_img", "icons8-checkmark-32.png")
+
+        self.project_parameters_datagrid_content = ObservableCollection[object]()
+        for project_parameter in ProjectParameter.read_from_revit_doc():
+            self.project_parameters_datagrid_content.Add(project_parameter)
+        self.project_parameters_datagrid.ItemsSource = self.project_parameters_datagrid_content
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
