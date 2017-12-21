@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="55mm"
+   height="55mm"
+   viewBox="0 0 55 55"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.1 r15371"
+   sodipodi:docname="icon.svg"
+   inkscape:export-filename="C:\FichiersLocauxRevit\pyRevitMEP\pyRevitMEP.extension\pyRevitMEP.tab\Lab.panel\AutoInsulate.pushbutton\icon.png"
+   inkscape:export-xdpi="14.78"
+   inkscape:export-ydpi="14.78">
+  <title
+     id="title6206">AutoInsulate</title>
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient6178">
+      <stop
+         id="stop6176"
+         offset="0"
+         style="stop-color:#deff00;stop-opacity:0;" />
+      <stop
+         id="stop6174"
+         offset="1"
+         style="stop-color:#ded500;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient6123"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#ffff00;stop-opacity:1;"
+         offset="0"
+         id="stop6121" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient6178"
+       id="radialGradient6180"
+       cx="109.68615"
+       cy="188.3325"
+       fx="109.68615"
+       fy="188.3325"
+       r="24.999804"
+       gradientUnits="userSpaceOnUse"
+       spreadMethod="pad"
+       gradientTransform="matrix(1.627426,0.01343819,-0.01431225,1.7332764,-65.324899,-138.97297)" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient6178"
+       id="radialGradient6202"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(6.1509014,0.05079001,-0.05409354,6.5509659,-625.29165,-1063.5035)"
+       cx="109.68615"
+       cy="188.3325"
+       fx="109.68615"
+       fy="188.3325"
+       r="24.999804"
+       spreadMethod="pad" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.9899495"
+     inkscape:cx="114.43302"
+     inkscape:cy="-24.057196"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>AutoInsulate</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-nc-sa/4.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:prohibits
+           rdf:resource="http://creativecommons.org/ns#CommercialUse" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-100.0002,-141.9998)">
+    <path
+       style="fill:url(#radialGradient6202);fill-opacity:1;stroke:#ff0000;stroke-width:0.93354326;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       clip-path="none"
+       d="M 102.04688,11.806641 A 94.020672,94.020672 0 0 0 8.0253906,105.82812 94.020672,94.020672 0 0 0 102.04688,199.84766 94.020672,94.020672 0 0 0 196.06641,105.82812 94.020672,94.020672 0 0 0 102.04688,11.806641 Z m 0,56.412109 a 37.60827,37.60827 0 0 1 37.60937,37.60742 37.60827,37.60827 0 0 1 -37.60937,37.60938 37.60827,37.60827 0 0 1 -37.607427,-37.60938 37.60827,37.60827 0 0 1 37.607427,-37.60742 z"
+       transform="matrix(0.26458333,0,0,0.26458333,100.0002,141.9998)"
+       id="path4485"
+       inkscape:connector-curvature="0" />
+    <path
+       sodipodi:type="star"
+       style="fill:#ffe000;fill-opacity:1;stroke:#000000;stroke-width:0.54435354;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       sodipodi:sides="8"
+       sodipodi:cx="141.00587"
+       sodipodi:cy="150.86401"
+       sodipodi:r1="7.3658171"
+       sodipodi:r2="5.1560721"
+       sodipodi:arg1="0.32175055"
+       sodipodi:arg2="0.71444963"
+       inkscape:flatsided="false"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 147.9937,153.19329 -3.09265,1.04899 -0.60108,3.20992 -2.92859,-1.44509 -2.69478,1.84473 -1.04899,-3.09265 -3.20992,-0.60108 1.44508,-2.92859 -1.84472,-2.69478 3.09265,-1.04899 0.60108,-3.20992 2.92859,1.44508 2.69478,-1.84472 1.04899,3.09265 3.20992,0.60108 -1.44508,2.92858 z"
+       id="path4495"
+       inkscape:transform-center-x="5.4501978e-006"
+       inkscape:transform-center-y="9.6254611e-006"
+       transform="matrix(1.346265,0,0,1.3604397,-45.973311,-51.155041)" />
+    <circle
+       style="fill:#deffff;fill-opacity:1;stroke:#ff0000;stroke-width:0.09895758;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path4485-1"
+       cx="127.0002"
+       cy="169.9998"
+       r="9.9505215" />
+  </g>
+</svg>
