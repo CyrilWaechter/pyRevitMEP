@@ -17,8 +17,10 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 """
-from revitutils import doc, uidoc
-from scriptutils.userinput import WPFWindow
+import rpw
+from rpw import revit
+from pyrevit.forms import WPFWindow
+from pyRevitMEP.event import CustomizableEvent
 
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction, ElementTransformUtils, Line, XYZ, Location, UnitType, UnitUtils
@@ -33,6 +35,9 @@ from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCancel
 __doc__ = "Rotate object in any direction"
 __title__ = "3D Rotate"
 __author__ = "Cyril Waechter"
+
+doc = revit.doc
+uidoc = revit.uidoc
 
 # Get current project units for angles
 angle_unit = doc.GetUnits().GetFormatOptions(UnitType.UT_Angle).DisplayUnits
@@ -80,9 +85,7 @@ class RotateElement(object):
 
     def around_itself(self):
         """Method used to rotate elements on themselves"""
-        try:
-            t = Transaction(doc, "Rotate around itself")
-            t.Start()
+        with rpw.db.Transaction("Rotate around itself", doc):
             for elid in self.selection:
                 el_axis = xyz_axis(elid)
                 for i in range(3):
@@ -90,62 +93,18 @@ class RotateElement(object):
                         pass
                     else:
                         ElementTransformUtils.RotateElement(doc, elid, el_axis[i], self.angles[i])
-            t.Commit()
-        except InvalidOperationException:
-            import traceback
-            traceback.print_exc()
-        except:
-            import traceback
-            traceback.print_exc()
 
     def around_axis(self):
         """Method used to rotate elements around selected axis"""
-        try:
+        with rpw.db.Transaction("Rotate around axis", doc):
             axis = axis_selection()
-            t = Transaction(doc, "Rotate around axis")
-            t.Start()
             ElementTransformUtils.RotateElements(doc, self.selection, axis, self.angles)
-            t.Commit()
-        except InvalidOperationException:
-            import traceback
-            traceback.print_exc()
-        except:
-            import traceback
-            traceback.print_exc()
-        finally:
-            uidoc.Selection.SetElementIds(rotate_elements.selection)
+        uidoc.Selection.SetElementIds(rotate_elements.selection)
+
 
 rotate_elements = RotateElement()
 
-
-# Create a subclass of IExternalEventHandler
-class RotateElementHandler(IExternalEventHandler):
-    """Input : function or method. Execute input in a IExternalEventHandler"""
-
-    # __init__ is used to make function from outside of the class to be executed by the handler. \
-    # Instructions could be simply written under Execute method only
-    def __init__(self, do_this):
-        self.do_this = do_this
-
-    # Execute method run in Revit API environment.
-    # noinspection PyPep8Naming, PyUnusedLocal
-    def Execute(self, application):
-        try:
-            self.do_this()
-        except InvalidOperationException:
-            # If you don't catch this exeption Revit may crash.
-            print "InvalidOperationException catched"
-
-    # noinspection PyMethodMayBeStatic, PyPep8Naming
-    def GetName(self):
-        return "Execute an function or method in a IExternalHandler"
-
-# Create handler instances. Same class (2 instance) is used to call 2 different method.
-around_itself_handler = RotateElementHandler(rotate_elements.around_itself)
-around_axis_handler = RotateElementHandler(rotate_elements.around_axis)
-# Create ExternalEvent instance which pass these handlers
-around_itself_event = ExternalEvent.Create(around_itself_handler)
-around_axis_event = ExternalEvent.Create(around_axis_handler)
+customizable_event = CustomizableEvent()
 
 
 class RotateOptions(WPFWindow):
@@ -170,7 +129,7 @@ class RotateOptions(WPFWindow):
             self.warning.Text = "Incorrect angles, input format required '0.0'"
         else:
             self.warning.Text = ""
-            around_itself_event.Raise()
+            customizable_event.raise_event(rotate_elements.around_itself)
 
     # noinspection PyUnusedLocal
     def around_axis_click(self, sender, e):
@@ -180,6 +139,6 @@ class RotateOptions(WPFWindow):
         except ValueError:
             self.warning.Text = "Incorrect angles, input format required '0.0'"
         else:
-            around_axis_event.Raise()
+            customizable_event.raise_event(rotate_elements.around_axis)
 
 RotateOptions('RotateOptions.xaml').Show()

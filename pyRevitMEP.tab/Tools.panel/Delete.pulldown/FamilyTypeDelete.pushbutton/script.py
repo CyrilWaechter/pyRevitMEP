@@ -17,7 +17,9 @@ See this link for a copy of the GNU General Public License protecting this packa
 https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 """
 
-from revitutils import doc, selection
+import rpw
+doc = rpw.revit.doc
+uidoc = rpw.revit.uidoc
 
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction, FamilySymbol
@@ -27,19 +29,9 @@ __title__ = "Familytype delete"
 __author__ = "Cyril Waechter"
 __context__ = "Selection"
 
-t = Transaction(doc, "Delete families from project")
-t.Start()
-
-try:
+with rpw.db.Transaction("Delete families from project"):
     # Find families of selected object and delete it
-    for el in selection.elements:
+    for id in uidoc.Selection.GetElementIds():
+        el = doc.GetElement(id)
         familytype_id = el.GetTypeId()
         doc.Delete(familytype_id)
-
-except:  # print a stack trace and error messages for debugging
-    import traceback
-    traceback.print_exc()
-    t.RollBack()
-
-else:
-    t.Commit()

@@ -21,9 +21,10 @@ from Autodesk.Revit.DB import FilteredElementCollector, ViewFamilyType, CopyPast
     ElementId, Transform, Transaction, Element, View
 # noinspection PyUnresolvedReferences
 from System.Collections.Generic import List
-
 import rpw
-from scriptutils import logger
+from pyrevit import script
+
+logger = script.get_logger()
 
 __doc__ = "Copy all view types from a selected opened project to another"
 __title__ = "CopyViewTypes"
@@ -65,12 +66,13 @@ def view_template_name_to_id_dict(document):
     return element_dict
 
 
-opened_docs_dict = {document.Title: document for document in rpw.revit.docs}
+opened_docs = {d.Title:d for d in rpw.revit.docs}
+modifiable_docs = {d.Title:d for d in rpw.revit.docs if not d.IsLinked}
 
 components = [Label("Pick source document"),
-              ComboBox("source", opened_docs_dict),
+              ComboBox("source", opened_docs),
               Label("Pick target document"),
-              ComboBox("target", opened_docs_dict),
+              ComboBox("target", modifiable_docs),
               Button("Select")]
 
 form = rpw.ui.forms.FlexForm("Pick documents", components)

@@ -20,20 +20,24 @@ https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction, BuiltInParameter, Element, Level, MEPCurve, ElementId, FamilyInstance\
     , FilteredElementCollector
-from scriptutils.userinput import WPFWindow
-from revitutils import doc, selection
+from pyrevit.forms import WPFWindow
+import rpw
+from rpw import revit
+from pyRevitMEP.event import CustomizableEvent
 
 __doc__ = "Change selected elements level without moving it"
 __title__ = "Change Level"
 __author__ = "Cyril Waechter"
 
-t = Transaction(doc, "Change reference level")
+doc = revit.doc
+uidoc = revit.uidoc
 
 
 def get_level_from_object():
     """Ask user to select an object and retrieve its associated level"""
     try:
-        ref_object = selection.utils.pick_element("Select reference object")
+        ref_id = rpw.ui.Pick.pick_element("Select reference object").ElementId
+        ref_object = doc.GetElement(ref_id)
         if isinstance(ref_object, MEPCurve):
             level = ref_object.ReferenceLevel
         else:
@@ -44,13 +48,13 @@ def get_level_from_object():
 
 
 def change_level(ref_level):
-    try:
-        t.Start()
-
+    with rpw.db.Transaction("Change reference level"):
         # Change reference level and relative offset for each selected object in order to change reference plane without
         # moving the object
-        for el in selection.elements:
+        selection_ids = uidoc.Selection.GetElementIds()
 
+        for id in selection_ids:
+            el = doc.GetElement(id)
             # Change reference level of objects like ducts, pipes and cable trays
             if isinstance(el, MEPCurve):
                 el.ReferenceLevel = ref_level
@@ -68,12 +72,8 @@ def change_level(ref_level):
                 print "Warning. Following element was ignored. It is probably an hosted element."
                 print el
 
-        t.Commit()
 
-    except:  # print a stack trace and error messages for debugging
-        import traceback
-        traceback.print_exc()
-        t.RollBack()
+customizable_event = CustomizableEvent()
 
 
 class ReferenceLevelSelection(WPFWindow):
@@ -84,22 +84,20 @@ class ReferenceLevelSelection(WPFWindow):
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
 
-        self.levels_dict = {}
-        for level in FilteredElementCollector(doc).OfClass(Level):
-            self.levels_dict[level.Name] = level
-        self.combobox_levels.ItemsSource = self.levels_dict.keys()
+        self.levels = FilteredElementCollector(doc).OfClass(Level)
+        self.combobox_levels.DataContext = self.levels
 
-    def button_levelfromlist_click(self, sender, e):
-        self.Close()
-        if self.combobox_levels.SelectedItem in self.levels_dict:
-            level = self.levels_dict[self.combobox_levels.SelectedItem]
-            change_level(level)
-        else:
-            print("Incorrect level name")
+    # noinspection PyUnusedLocal
+    def from_list_click(self, sender, e):
+        level = self.combobox_levels.SelectedItem
+        customizable_event.raise_event(change_level, level)
 
-    def button_levelfromrefobject_click(self, sender, e):
-        self.Close()
+    # noinspection PyUnusedLocal
+    def from_object_click(self, sender, e):
+        selection = uidoc.Selection.GetElementIds()
         level = get_level_from_object()
-        change_level(level)
+        uidoc.Selection.SetElementIds(selection)
+        customizable_event.raise_event(change_level, level)
 
-ReferenceLevelSelection('ReferenceLevelSelection.xaml').ShowDialog()
+
+ReferenceLevelSelection('ReferenceLevelSelection.xaml').Show()

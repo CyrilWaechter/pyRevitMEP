@@ -26,23 +26,14 @@ from System.Collections.Generic import List
 
 import rpw
 from rpw import doc
-from scriptutils.userinput import WPFWindow
+from pyrevit.forms import WPFWindow
 
 __doc__ = "Copy pipe types from a selected opened document to active document"
 __title__ = "CopyPipeType"
 __author__ = "Cyril Waechter"
 
 
-opened_docs_dict = {document.Title: document for document in rpw.revit.docs}
-
-
-def get_all_pipetype(document):
-    """
-    Get all pipe type in a document
-    :param document: Autodesk.Revit.DB.Document
-    :return: dictionnary of pipe types
-    """
-    return {Element.Name.GetValue(pt): pt for pt in FilteredElementCollector(document).OfClass(PipeType)}
+opened_docs = {d.Title:d for d in rpw.revit.docs}
 
 
 def copy(source_doc, elem):
@@ -56,11 +47,8 @@ def copy(source_doc, elem):
     id_list = List[ElementId]()
     id_list.Add(elem.Id)
 
-    t = Transaction(doc, "Copy pipe type")
-
-    t.Start()
-    ElementTransformUtils.CopyElements(source_doc, id_list, doc, Transform.Identity, copypasteoptions)
-    t.Commit()
+    with rpw.db.Transaction("Copy pipe type", doc):
+        ElementTransformUtils.CopyElements(source_doc, id_list, doc, Transform.Identity, copypasteoptions)
 
 
 class PipeTypeSelectionForm(WPFWindow):
@@ -70,21 +58,20 @@ class PipeTypeSelectionForm(WPFWindow):
 
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
-
-        self.source_docs.ItemsSource = opened_docs_dict
-        self.source_doc = opened_docs_dict[self.source_docs.SelectedItem]
-        self.pipe_types = get_all_pipetype(self.source_doc)
+        self.source_docs.DataContext = rpw.revit.docs
 
     # noinspection PyUnusedLocal
     def source_doc_selection_changed(self, sender, e):
-        self.source_doc = opened_docs_dict[sender.SelectedItem]
-        self.pipe_types = get_all_pipetype(self.source_doc)
-        self.source_pipe.ItemsSource = self.pipe_types.keys()
+        try:
+            self.source_doc = sender.SelectedItem
+            self.source_pipe.DataContext = FilteredElementCollector(self.source_doc).OfClass(PipeType)
+        except:
+            pass
 
     # noinspection PyUnusedLocal
     def button_copy_click(self, sender, e):
         self.Close()
-        elem = self.pipe_types[self.source_pipe.SelectedItem]
+        elem = self.source_pipe.SelectedItem
         copy(self.source_doc, elem)
 
 

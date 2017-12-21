@@ -32,9 +32,9 @@ from pyRevitMEP.event import CustomizableEvent
 import operator
 import re
 import collections
-from revitutils import doc, uidoc
-from scriptutils.userinput import WPFWindow
-from scriptutils import logger, this_script
+from rpw import doc, uidoc
+from pyrevit.forms import WPFWindow
+from pyrevit import script
 import rpw
 # noinspection PyUnresolvedReferences
 from rpw import revit, DB
@@ -42,6 +42,7 @@ from rpw import revit, DB
 __doc__ = "Rename selected views according to a pattern"
 __title__ = "Rename views"
 __author__ = "Cyril Waechter"
+
 
 # Create a regular expression to retrieve Guid (including constructor) in a string
 parameterGuidRegex = re.compile(r'''
@@ -218,7 +219,8 @@ def rename_views(views_and_names):
 customizable_event = CustomizableEvent()
 
 
-my_config = this_script.config
+my_config = script.get_config()
+logger = script.get_logger()
 
 
 class ViewRename(WPFWindow):
@@ -329,7 +331,7 @@ class ViewRename(WPFWindow):
                 pattern_textbox = eval('self.{}_pattern'.format(view_class))
                 logger.debug(type(pattern_textbox.Text))
                 setattr(my_config, view_class, pattern_textbox.Text.encode('utf8'))
-        this_script.save_config()
+        script.save_config()
         logger.debug('End writing config file')
 
     # noinspection PyUnusedLocal

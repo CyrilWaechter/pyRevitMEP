@@ -1,15 +1,15 @@
 # coding: utf8
 
 import rpw
-from scriptutils import logger
+from pyrevit import script
 
+logger = script.get_logger()
 doc = rpw.revit.doc
 opened_docs = rpw.revit.docs
 Transaction = rpw.DB.Transaction
 
-opened_docs = {}
-for d in rpw.revit.docs:
-    opened_docs[d.Title] = d
+opened_docs = {d.Title:d for d in rpw.revit.docs}
+modifiable_docs = {d.Title:d for d in rpw.revit.docs if not d.IsLinked}
 
 ComboBox = rpw.ui.forms.flexform.ComboBox
 Label = rpw.ui.forms.flexform.Label
@@ -18,7 +18,7 @@ Button = rpw.ui.forms.flexform.Button
 components = [Label("Pick source document"),
               ComboBox("source", opened_docs),
               Label("Pick target document"),
-              ComboBox("target", opened_docs),
+              ComboBox("target", modifiable_docs),
               Button("Select")]
 
 form = rpw.ui.forms.FlexForm("Documents selection", components)
@@ -41,4 +41,3 @@ try:
 
 except KeyError:
     logger.debug('No input or incorrect inputs')
-

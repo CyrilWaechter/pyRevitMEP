@@ -16,11 +16,15 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 """
-
-from revitutils import doc, selection
-
 # noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import Element, Transaction, MEPModel, ConnectorManager, MEPSystem
+from Autodesk.Revit.DB import Element, ElementId, MEPModel, ConnectorManager, MEPSystem
+# noinspection PyUnresolvedReferences
+from System.Collections.Generic import List
+
+import rpw
+doc = rpw.revit.doc
+uidoc = rpw.revit.uidoc
+
 
 __doc__ = "Delete MEP system of selected objects"
 __title__ = "System delete"
@@ -28,22 +32,20 @@ __author__ = "Cyril Waechter"
 __context__ = "Selection"
 
 # Find systems id and delete it
-s = set()
-for el in selection.elements:
+system_list = List[ElementId]()
+for element_id in uidoc.Selection.GetElementIds():
+    el = doc.GetElement(element_id)
     try:
-        s.add(el.MEPSystem.Id)
+        system_list.Add(el.MEPSystem.Id)
     except AttributeError:
         try:
             connectors = el.MEPModel.ConnectorManager.Connectors
             for connector in connectors:
                 if connector.MEPSystem is not None:
                     elid = Element.Id.GetValue(connector.MEPSystem)
-                    s.add(elid)
+                    system_list.Add(elid)
         except AttributeError:
             pass
 
-t = Transaction(doc, "delete selected objects system")
-t.Start()
-for elid in s:
-    doc.Delete(elid)
-t.Commit()
+with rpw.db.Transaction("delete selected objects system"):
+    doc.Delete(system_list)
