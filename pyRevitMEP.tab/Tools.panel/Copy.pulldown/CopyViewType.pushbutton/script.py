@@ -66,8 +66,8 @@ def view_template_name_to_id_dict(document):
     return element_dict
 
 
-opened_docs = {d.Title:d for d in rpw.revit.docs}
-modifiable_docs = {d.Title:d for d in rpw.revit.docs if not d.IsLinked}
+opened_docs = {d.Title: d for d in rpw.revit.docs}
+modifiable_docs = {d.Title: d for d in rpw.revit.docs if not d.IsLinked}
 
 components = [Label("Pick source document"),
               ComboBox("source", opened_docs),
@@ -77,11 +77,14 @@ components = [Label("Pick source document"),
 
 form = rpw.ui.forms.FlexForm("Pick documents", components)
 form.ShowDialog()
+
 try:
     source_doc = form.values["source"]
     target_doc = form.values["target"]
 except KeyError:
     logger.debug('No input or incorrect inputs')
+    import sys
+    sys.exit()
 
 copypasteoptions = CopyPasteOptions()
 
@@ -101,7 +104,7 @@ with rpw.db.Transaction(doc=target_doc, name="Copy view types"):
     target_doc_dict = view_template_name_to_id_dict(target_doc)
     for viewtype in FilteredElementCollector(target_doc).OfClass(ViewFamilyType):
         try:
-            default_template_name  = source_doc_dict[name(viewtype)]
+            default_template_name = source_doc_dict[name(viewtype)]
             default_template_id = target_doc_dict[default_template_name]
             viewtype.DefaultTemplateId = default_template_id
         except KeyError:

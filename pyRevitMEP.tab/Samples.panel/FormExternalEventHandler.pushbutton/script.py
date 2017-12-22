@@ -22,8 +22,10 @@ from Autodesk.Revit.UI import IExternalEventHandler, ExternalEvent
 from Autodesk.Revit.DB import Transaction
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException
-from revitutils import selection, uidoc, doc
-from scriptutils.userinput import WPFWindow
+import rpw
+from pyrevit.forms import WPFWindow
+doc = rpw.revit.doc
+uidoc = rpw.revit.uidoc
 
 __doc__ = "A simple modeless form sample"
 __title__ = "Modeless Form"
@@ -31,12 +33,10 @@ __author__ = "Cyril Waechter"
 
 # Simple function we want to run
 def delete_elements():
-    t = Transaction(doc, "Delete selection")
-    t.Start()
-    for elid in uidoc.Selection.GetElementIds():
-        print elid
-        doc.Delete(elid)
-    t.Commit()
+    with rpw.db.Transaction("Delete selection"):
+        for elid in uidoc.Selection.GetElementIds():
+            print elid
+            doc.Delete(elid)
 
 # Create a subclass of IExternalEventHandler
 class SimpleEventHandler(IExternalEventHandler):

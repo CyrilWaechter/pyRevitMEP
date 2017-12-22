@@ -16,9 +16,7 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 """
-from scriptutils.userinput import WPFWindow
-import clr
-clr.AddReference("PresentationFramework")
+from pyrevit.forms import WPFWindow
 from System.Windows.Controls import TextBox
 
 class DataContextSample(WPFWindow):

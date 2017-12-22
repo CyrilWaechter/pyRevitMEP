@@ -8,8 +8,8 @@ from Autodesk.Revit.UI import TaskDialog, TaskDialogCommonButtons, TaskDialogRes
 from Autodesk.Revit.DB import UnitUtils, DisplayUnitType
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB.Plumbing import FluidType, FluidTemperature
-from scriptutils import logger, open_url
-from scriptutils.userinput import WPFWindow
+from pyrevit import script
+from pyrevit.forms import WPFWindow
 import ctypes
 import os
 import rpw
@@ -20,6 +20,8 @@ from rpw import revit
 __doc__ = "Create a Fluid with all temperatures within desired range"
 __title__ = "Create a fluid"
 __author__ = "Cyril Waechter"
+
+logger = script.get_logger()
 
 ComboBox = rpw.ui.forms.flexform.ComboBox
 Label = rpw.ui.forms.flexform.Label
@@ -200,7 +202,7 @@ class FluidSelection(WPFWindow):
         add_temperatures(t_start, t_end, fluid_type, coolprop_fluid, pressure)
 
     def hyperlink(self, sender, e):
-        open_url(str(sender.NavigateUri))
+        script.open_url(str(sender.NavigateUri))
 
 
 FluidSelection('FluidSelection.xaml').ShowDialog()

@@ -23,20 +23,18 @@ from Autodesk.Revit.DB import FilteredElementCollector, Element, Transaction
 from Autodesk.Revit.DB.Plumbing import PipingSystemType, FluidTemperature
 # For future implementation in rpw
 # from rpw.db.plumbing import FluidType
-# Until done :
-import imp
-import os
 from pyRevitMEP.plumbing import FluidType
 
 import rpw
-from revitutils import logger
-from scriptutils.forms import WPFWindow
+from pyrevit import script
+from pyrevit.forms import WPFWindow
 
 __doc__ = "Replace a selected fluid and temperature find in all systems by an other selected fluid and temperature"
 __title__ = "Replace fluid"
 __author__ = "Cyril Waechter"
 
 doc = rpw.revit.doc
+logger = script.get_logger()
 ComboBox = rpw.ui.forms.flexform.ComboBox
 Label = rpw.ui.forms.flexform.Label
 Button = rpw.ui.forms.flexform.Button
@@ -63,20 +61,19 @@ def change_temperature(source_fluid, source_temp, target_fluid, target_temp,
             if system.FluidTemperature == source_temp or any_source_temp:
                 system_list.append(system)
     logger.info("{} systems will get their fluid and or temperature changed".format(len(system_list)))
-    t = Transaction(doc, 'change systems fluid')
-    t.Start()
-    for system in system_list:
-        system.FluidType = target_fluid
-        if find_target_temp:
-            temp = doc.GetElement(system.FluidTemperature).Temperature
-            revit_temp = target_fluid.GetTemperature(temp)
-            if revit_temp is not None:
-                system.FluidTemperature = revit_temp
+
+    with rpw.db.Transaction('change systems fluid'):
+        for system in system_list:
+            system.FluidType = target_fluid
+            if find_target_temp:
+                temp = doc.GetElement(system.FluidTemperature).Temperature
+                revit_temp = target_fluid.GetTemperature(temp)
+                if revit_temp is not None:
+                    system.FluidTemperature = revit_temp
+                else:
+                    system.FluidTemperature = target_temp
             else:
                 system.FluidTemperature = target_temp
-        else:
-            system.FluidTemperature = target_temp
-    t.Commit()
     logger.info("COMPLETED")
 
 

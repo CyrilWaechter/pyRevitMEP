@@ -21,19 +21,22 @@ __doc__ = "simple external event which just delete selection"
 __title__ = "ExEvent Delete"
 __author__ = "Cyril Waechter"
 
+# noinspection PyUnresolvedReferences
 from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
+# noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction
+# noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException
-from revitutils import selection, uidoc, doc
+import rpw
+doc = rpw.revit.doc
+uidoc = rpw.revit.uidoc
 
 class ExternalEventMy(IExternalEventHandler):
     def Execute(self, uiapp):
         try:
-            tx = Transaction(doc)
-            tx.Start("MyEvent")
-            for elid in selection.element_ids:
-                doc.Delete(elid)
-            tx.Commit()
+            with rpw.db.Transaction("MyEvent"):
+                for elid in uidoc.Selection.GetElementIds():
+                    doc.Delete(elid)
         except InvalidOperationException:
             print "exception catched"
 
