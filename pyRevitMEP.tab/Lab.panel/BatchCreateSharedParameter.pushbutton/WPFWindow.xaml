@@ -2,20 +2,33 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Create shared parameters" MaxHeight="1000 px" Width="Auto" ShowInTaskbar="True" Topmost="False"
         WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" HorizontalContentAlignment="Center">
+    <Window.Resources>
+        <ControlTemplate x:Key="buttonTemplate" TargetType="{x:Type Button}">
+        </ControlTemplate>
+        <Style x:Key="buttonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="40"/>
+        </Style>
+    </Window.Resources>
     <StackPanel Orientation="Horizontal">
         <GroupBox Header="SharedParameter">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <Button Click="ok_click" Height="25" Width="40" Margin="5">
+                    <Button Click="ok_click"
+                            Style="{StaticResource buttonStyle}">
                         <Image x:Name="ok_img" Height="20"/>
                     </Button>
-                    <Button Click="load_from_file_click" Height="25" Width="40" Margin="5">
+                    <Button Click="load_from_file_click"
+                            Style="{StaticResource buttonStyle}">
                         <Image x:Name="import_img" Height="20"/>
                     </Button>
-                    <Button Click="add" Height="25" Width="40" Margin="5">
+                    <Button Click="add"
+                            Style="{StaticResource buttonStyle}">
                         <Image x:Name="plus_img" Height="20"/>
                     </Button>
-                    <Button Click="remove" Height="25" Width="40" Margin="5">
+                    <Button Click="remove"
+                            Style="{StaticResource buttonStyle}">
                         <Image x:Name="minus_img" Height="20"/>
                     </Button>
                 </StackPanel>
@@ -30,30 +43,6 @@
                     </DataGrid>
                 </Grid>
             </StackPanel>
-        </GroupBox>
-        <GroupBox Header="Project parameters">
-            <Grid Margin="20">
-                <Button Click="load_from_file_click" Height="25" Width="40" Margin="5">
-                    <Image x:Name="right_arrow_img" Height="20"/>
-                </Button>
-                <Button Click="add" Height="25" Width="40" Margin="5">
-                    <Image x:Name="left_arrow_img" Height="20"/>
-                </Button>
-                <DataGrid Name="project_parameters_datagrid" AutoGenerateColumns="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Definition" Binding="{Binding Path=definition.Name}"/>
-                        <DataGridTemplateColumn Header="Binding">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Click="binding_click">...</Button>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <!--<DataGridCheckBoxColumn Header="Visible" Binding="{Binding visible}"/>-->
-                        <!--<DataGridTextColumn Header="GUID" Binding="{Binding guid}"/>-->
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
         </GroupBox>
     </StackPanel>
 </Window>

@@ -6,6 +6,7 @@ from Autodesk.Revit.DB import ParameterType
 from rpw import revit, DB, UI
 # noinspection PyUnresolvedReferences
 from System import Guid
+from scriptutils.forms import WPFWindow
 import csv
 
 
@@ -26,15 +27,17 @@ class SharedParameter:
         else:
             self.guid = guid
         self.visible = visible
-        if isinstance(ParameterType.Text, ParameterType):
+        if isinstance(parameter_type, ParameterType):
             self.type = parameter_type
-        elif parameter_type in ParameterType.GetNames(DB.ParameterType):
-            self.type = getattr(ParameterType, parameter_type)
         else:
-            selected_type = rpw.ui.forms.SelectFromList("Select ParameterType",
+            try:
+                self.type = getattr(ParameterType, parameter_type)
+            except AttributeError:
+                selected_type = rpw.ui.forms.SelectFromList("Select ParameterType",
                                                         ParameterType.GetNames(ParameterType),
-                                                        "Invalid ParameterType please select a parameter type")
-            self.type = getattr(ParameterType, selected_type)
+                                                        "Invalid ParameterType please select a parameter type",
+                                                        sort=False)
+                self.type = getattr(ParameterType, selected_type)
         self.group = group
         self.name = name
 
@@ -109,10 +112,12 @@ class SharedParameter:
         revit.app.SharedParametersFilename = path_and_name
         return revit.app.OpenSharedParameterFile()
 
+
 class ProjectParameter:
     def __init__(self, definition, binding):
         self.definition = definition
         self.binding = binding
+        self.category_set = None
 
     def __repr__(self):
         return "<{}> {}{}".format(self.__class__.__name__,
@@ -128,6 +133,18 @@ class ProjectParameter:
             if binding:
                 project_parameter_list.append(cls(definition, binding))
         return project_parameter_list
+
+    @staticmethod
+    def all_categories():
+        category_set = revit.app.Create.NewCategorySet()
+        for category in revit.doc.Settings.Categories:
+            if category.AllowsBoundParameters:
+                category_set.Insert(category)
+        return category_set
+
+    def create(self, category_set=None):
+        if category_set is None:
+            category_set = self.all_categories()
 
 
 def create_shared_parameter_definition(revit_app, name, group_name, parameter_type, visible=True):
