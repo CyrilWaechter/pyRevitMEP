@@ -6,7 +6,7 @@ from Autodesk.Revit.DB import ParameterType
 from rpw import revit, DB, UI
 # noinspection PyUnresolvedReferences
 from System import Guid
-from scriptutils.forms import WPFWindow
+from pyrevit.forms import WPFWindow
 import csv
 
 
