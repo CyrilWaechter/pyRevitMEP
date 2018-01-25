@@ -11,18 +11,30 @@ class ExcelApp:
         self.app = app
         self.workbook = workbook
 
-    def initialise(self):
-        # If Excel is open, get it
-        try:
-            self.app = Marshal.GetActiveObject("Excel.Application")
-        # Else open it
-        except EnvironmentError:
-            self.app = Excel.ApplicationClass()
 
-    def get_workbook(self):
-        try:
-            self.workbook = self.app.ActiveWorkbook
-        except AttributeError:
-            self.workbook = self.app.Workbooks.Add()
+def initialise():
+    # If Excel is open, get it
+    try:
+        return Marshal.GetActiveObject("Excel.Application")
+    # Else open it
+    except EnvironmentError:
+        return Excel.ApplicationClass()
 
 
+def workbook_by_name(app, name):
+    for workbook in app.Workbooks:
+        if workbook.Name == name:
+            return workbook
+
+
+def none():
+    try:
+        workbook = app.ActiveWorkbook
+    except AttributeError:
+        workbook = app.Workbooks.Add()
+
+
+def worksheet_by_name(workbook, name):
+    for worksheet in workbook.Sheets:
+        if worksheet.Name == name:
+            return worksheet
