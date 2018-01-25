@@ -9,6 +9,8 @@ from scriptutils.userinput import WPFWindow
 from pyRevitMEP.parameter import SharedParameter, ProjectParameter
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
+from System import Uri, UriKind
+from System.Windows.Controls import Image
 
 __doc__ = "Batch create project shared parameters from file"
 __title__ = "BatchCreateSharedParameters"
@@ -40,7 +42,7 @@ class Gui(WPFWindow):
         self.set_image_source("plus_img", "icons8-plus-32.png")
         self.set_image_source("minus_img", "icons8-minus-32.png")
         self.set_image_source("import_img", "icons8-import-32.png")
-        self.set_image_source("ok_img", "icons8-checkmark-32.png")
+        # self.set_image_source("ok_img", "icons8-checkmark-32.png")
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
