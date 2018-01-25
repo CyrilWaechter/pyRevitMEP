@@ -8,41 +8,48 @@
         <Style x:Key="buttonStyle" TargetType="{x:Type Button}">
             <Setter Property="Margin" Value="5"/>
             <Setter Property="Height" Value="25"/>
-            <Setter Property="Width" Value="40"/>
+            <Setter Property="Width" Value="100"/>
         </Style>
     </Window.Resources>
     <StackPanel Orientation="Horizontal">
-        <GroupBox Header="SharedParameter">
+        <GroupBox Header="Action">
             <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Button Click="ok_click"
-                            Style="{StaticResource buttonStyle}">
-                        <Image x:Name="ok_img" Height="20"/>
-                    </Button>
-                    <Button Click="load_from_file_click"
-                            Style="{StaticResource buttonStyle}">
-                        <Image x:Name="import_img" Height="20"/>
-                    </Button>
-                    <Button Click="add"
-                            Style="{StaticResource buttonStyle}">
-                        <Image x:Name="plus_img" Height="20"/>
-                    </Button>
-                    <Button Click="remove"
-                            Style="{StaticResource buttonStyle}">
-                        <Image x:Name="minus_img" Height="20"/>
-                    </Button>
-                </StackPanel>
-                <Grid Margin="20">
-                    <DataGrid Name="datagrid" AutoGenerateColumns="False">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Binding="{Binding name}"/>
-                            <DataGridTextColumn Header="Group" Binding="{Binding group}"/>
-                            <DataGridCheckBoxColumn Header="Visible" Binding="{Binding visible}"/>
-                            <DataGridTextColumn Header="GUID" Binding="{Binding guid}"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
+                <Button Click="space_check_click"
+                        Style="{StaticResource buttonStyle}">
+                    SpaceCheck
+                </Button>
+                <Button Click="import_click"
+                        Style="{StaticResource buttonStyle}">
+                    Import
+                </Button>
+                <Button Click="export_click"
+                        Style="{StaticResource buttonStyle}">
+                    Export
+                </Button>
             </StackPanel>
         </GroupBox>
+        <GroupBox Header="Paramètres">
+            <StackPanel>
+                <TextBlock>Fichier principal</TextBlock>
+                <ComboBox x:Name="cb_main_workbook" SelectionChanged="main_workbook_changed"
+                          ItemsSource="{Binding}" DisplayMemberPath="Name"
+                          SelectedValuePath="Name" SelectedValue="{Binding Name, Mode=OneWay}"
+                          Padding="5" Margin="5">
+                </ComboBox>
+                <TextBlock>Feuille principale</TextBlock>
+                <ComboBox x:Name="cb_main_sheet"
+                          ItemsSource="{Binding}" DisplayMemberPath="Name"
+                          SelectedValuePath="Name" SelectedValue="{Binding Name, Mode=OneWay}"
+                          Padding="5" Margin="5">
+                </ComboBox>
+                <TextBlock>Colonne contenant le numéro de feuille</TextBlock>
+                <TextBox x:Name="tb_space_number_column" Width="Auto" Margin="5"/>
+                <TextBlock>À partir de la ligne</TextBlock>
+                <TextBox x:Name="tb_space_number_starting_row" Width="Auto" Margin="5"/>
+                <TextBlock>Colonne contenant le numéro de Service</TextBlock>
+                <TextBox x:Name="tb_space_service_column" Width="Auto" Margin="5"/>
+            </StackPanel>
+        </GroupBox>
+
     </StackPanel>
 </Window>
