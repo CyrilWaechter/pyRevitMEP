@@ -1,6 +1,6 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Create shared parameters" MaxHeight="1000 px" Width="Auto" ShowInTaskbar="True" Topmost="False"
+        Title="Vérification/import/export entre Revit et Excel" MaxHeight="1000 px" Width="Auto" ShowInTaskbar="True" Topmost="False"
         WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" HorizontalContentAlignment="Center">
     <Window.Resources>
         <ControlTemplate x:Key="buttonTemplate" TargetType="{x:Type Button}">
@@ -14,6 +14,10 @@
     <StackPanel Orientation="Horizontal">
         <GroupBox Header="Action">
             <StackPanel>
+                <Button Click="service_list_creation_click"
+                        Style="{StaticResource buttonStyle}">
+                    Lister services
+                </Button>
                 <Button Click="space_check_click"
                         Style="{StaticResource buttonStyle}">
                     SpaceCheck
@@ -26,30 +30,59 @@
                         Style="{StaticResource buttonStyle}">
                     Export
                 </Button>
+                <Button Click="test_click" Visibility="Hidden"
+                        Style="{StaticResource buttonStyle}">
+                    Bouton test
+                </Button>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="Services">
+            <StackPanel>
+                <CheckBox x:Name="tous_services">Tous</CheckBox>
+                <ListBox x:Name="service_selection" SelectionMode="Multiple"/>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="Paramètres">
             <StackPanel>
-                <TextBlock>Fichier principal</TextBlock>
-                <ComboBox x:Name="cb_main_workbook" SelectionChanged="main_workbook_changed"
-                          ItemsSource="{Binding}" DisplayMemberPath="Name"
-                          SelectedValuePath="Name" SelectedValue="{Binding Name, Mode=OneWay}"
-                          Padding="5" Margin="5">
-                </ComboBox>
-                <TextBlock>Feuille principale</TextBlock>
-                <ComboBox x:Name="cb_main_sheet"
-                          ItemsSource="{Binding}" DisplayMemberPath="Name"
-                          SelectedValuePath="Name" SelectedValue="{Binding Name, Mode=OneWay}"
-                          Padding="5" Margin="5">
-                </ComboBox>
-                <TextBlock>Colonne contenant le numéro de feuille</TextBlock>
-                <TextBox x:Name="tb_space_number_column" Width="Auto" Margin="5"/>
-                <TextBlock>À partir de la ligne</TextBlock>
-                <TextBox x:Name="tb_space_number_starting_row" Width="Auto" Margin="5"/>
-                <TextBlock>Colonne contenant le numéro de Service</TextBlock>
-                <TextBox x:Name="tb_space_service_column" Width="Auto" Margin="5"/>
+                <GroupBox Header="Généraux">
+                    <StackPanel>
+                        <TextBlock>Fichier principal</TextBlock>
+                        <ComboBox x:Name="cb_main_workbook" SelectionChanged="main_workbook_changed"
+                                  ItemsSource="{Binding}" DisplayMemberPath="Name"
+                                  SelectedValuePath="Name" SelectedValue="{Binding Name, Mode=OneWay}"
+                                  Padding="5" Margin="5">
+                        </ComboBox>
+                        <TextBlock>Feuille principale</TextBlock>
+                        <ComboBox x:Name="cb_main_sheet"
+                                  ItemsSource="{Binding}" DisplayMemberPath="Name"
+                                  SelectedValuePath="Name" SelectedValue="{Binding Name, Mode=OneWay}"
+                                  Padding="5" Margin="5">
+                        </ComboBox>
+                        <TextBlock>Colonne contenant le numéro de feuille</TextBlock>
+                        <TextBox x:Name="tb_space_number_column" Width="Auto" Margin="5"/>
+                        <TextBlock>À partir de la ligne</TextBlock>
+                        <TextBox x:Name="tb_space_number_starting_row" Width="Auto" Margin="5"/>
+                        <TextBlock>Colonne contenant le numéro de Service</TextBlock>
+                        <TextBox x:Name="tb_space_service_column" Width="Auto" Margin="5"/>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Import">
+                    <StackPanel>
+                        <TextBlock>Paramètres séparés par une virgule</TextBlock>
+                        <TextBox x:Name="tb_imported_parameters" Width="Auto" Margin="5"/>
+                        <TextBlock>Colonnes correspondantes séparées par une virgule</TextBlock>
+                        <TextBox x:Name="tb_imported_column" Width="Auto" Margin="5"/>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Export">
+                    <StackPanel>
+                        <TextBlock>Paramètres séparés par une virgule</TextBlock>
+                        <TextBox x:Name="tb_exported_parameters" Width="Auto" Margin="5"/>
+                        <TextBlock>Colonnes correspondantes séparées par une virgule</TextBlock>
+                        <TextBox x:Name="tb_exported_column" Width="Auto" Margin="5"/>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
         </GroupBox>
-
     </StackPanel>
 </Window>
