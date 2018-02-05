@@ -267,7 +267,7 @@ class ViewRename(WPFWindow):
                     param = project_info_param_set[self.storage_pattern_parameter]
                     pattern_textbox.Text = eval(param.value)[view_class]
 
-                except (rpw.exceptions.RpwParameterNotFound, SyntaxError, TypeError) as error:
+                except (TypeError, SyntaxError, rpw.exceptions.RpwParameterNotFound) as error:
                     try:
                         # Try to load patterns from config file
                         pattern_textbox.Text = getattr(my_config, view_class).decode('utf8')
