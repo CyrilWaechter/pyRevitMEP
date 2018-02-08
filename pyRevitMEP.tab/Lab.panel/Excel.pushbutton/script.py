@@ -16,6 +16,8 @@ report_workbook = xl_app.Workbooks.Add(report_template_path)
 check_sheet = report_workbook.Sheets("SpaceCheck")
 import_sheet = report_workbook.Sheets("Import")
 export_sheet = report_workbook.Sheets("Export")
+error_sheet = report_workbook.Sheets("ScriptError")
+
 
 class Gui(WPFWindow):
     def __init__(self, xaml_file_name):
@@ -39,8 +41,9 @@ class Gui(WPFWindow):
         self.tb_exported_column.Text = "T, CU, DH, DS, DY "
 
         self.check_row_count = 2
-        self.import_row_count = 1
-        self.export_row_count = 1
+        self.import_row_count = 3
+        self.export_row_count = 3
+        self.error_row_count = 1
         self.service_set = set()
         self.revit_spaces_dict = {}
         self.excel_spaces_dict = {}
@@ -182,13 +185,13 @@ class Gui(WPFWindow):
             import_sheet.Cells(2, index * 2 + 3).Value2 = "Après"
 
         # Import values and append modified values to report
-        report_row_count = 3
+        self.import_row_count = 3
         for number, row in self.excel_spaces_dict.items():
             service_number = main_worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
 
             # Check if report row is free (no number written yet)
-            if import_sheet.Cells(report_row_count, 1).Value2:
-                report_row_count += 1
+            if import_sheet.Cells(self.import_row_count, 1).Value2:
+                self.import_row_count += 1
 
             # Check if space is in an analysed service
             if not self.service_check(service_number):
@@ -214,13 +217,14 @@ class Gui(WPFWindow):
                 if main_worksheet.Cells(row, column).Value2 == parameter_value:
                     continue
                 else:
-                    import_sheet.Cells(report_row_count, 1).Value2 = number
-                    import_sheet.Cells(report_row_count, index*2 + 2).Value2 = main_worksheet.Cells(row, column).Value2
-                    import_sheet.Cells(report_row_count, index*2 + 3).Value2 = parameter_value
+                    import_sheet.Cells(self.import_row_count, 1).Value2 = number
+                    import_sheet.Cells(self.import_row_count, index*2 + 2).Value2 = main_worksheet.Cells(row,
+                                                                                                         column).Value2
+                    import_sheet.Cells(self.import_row_count, index*2 + 3).Value2 = parameter_value
                     main_worksheet.Cells(row, column).Value2 = parameter_value
         # Apply a TableStyle to the report
         data_range = import_sheet.Range(import_sheet.Cells(1, 1),
-                                        import_sheet.Cells(report_row_count, len(columns_list)*2 + 2))
+                                        import_sheet.Cells(self.import_row_count, len(columns_list)*2 + 2))
         excel.table_style(import_sheet, data_range)
 
     # noinspection PyUnusedLocal
@@ -244,14 +248,13 @@ class Gui(WPFWindow):
             export_sheet.Cells(2, index * 2 + 3).Value2 = "Après"
 
         # Export values and append modified values to report
-        report_row_count = 3
         with rpw.db.Transaction("Export excel values to Revit"):
             for number, row in self.excel_spaces_dict.items():
                 service_number = main_worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
 
                 # Check if report row is free (no number written yet)
-                if export_sheet.Cells(report_row_count, 1).Value2:
-                    report_row_count += 1
+                if export_sheet.Cells(self.export_row_count, 1).Value2:
+                    self.export_row_count += 1
 
                 # Check if space is in an analysed service
                 if not self.service_check(service_number):
@@ -267,21 +270,29 @@ class Gui(WPFWindow):
                 # with unit conversion if necessary (based on Revit DisplayUnitType)
                 for parameter_name, column, index in zip(parameters_list, columns_list, range(len(columns_list))):
                     parameter = revit_space.LookupParameter(parameter_name)
+                    cell_value = main_worksheet.Cells(row, column).Value2
                     if parameter.StorageType == StorageType.Integer:
-                        parameter_value = parameter.AsInteger()
-                        new_parameter_value = int(main_worksheet.Cells(row, column).Value2)
+                        if cell_value:
+                            parameter_value = parameter.AsInteger()
+                            new_parameter_value = int(cell_value)
+                        else:
+                            new_parameter_value = 0
                     elif parameter.StorageType == StorageType.String:
                         parameter_value = parameter.AsString()
-                        new_parameter_value = str(main_worksheet.Cells(row, column).Value2)
+                        new_parameter_value = str(cell_value)
                     elif parameter.StorageType == StorageType.Double:
-                        parameter_value = UnitUtils.ConvertFromInternalUnits(parameter.AsDouble(),
-                                                                             parameter.DisplayUnitType)
+                        if cell_value:
+                            parameter_value = UnitUtils.ConvertFromInternalUnits(parameter.AsDouble(),
+                                                                                 parameter.DisplayUnitType)
+                        else:
+                            cell_value = 0
                         try:
-                            new_parameter_value = UnitUtils.ConvertToInternalUnits(
-                            main_worksheet.Cells(row, column).Value2,
-                            parameter.DisplayUnitType)
+                            new_parameter_value = UnitUtils.ConvertToInternalUnits(cell_value,
+                                                                                   parameter.DisplayUnitType)
                         except TypeError:
-                            logger.debug(main_worksheet.Cells(row, column).Value2)
+                            error_sheet.Cells(self.error_row_count, 1).Value2 = \
+                                "TypeError avec la valeur {} ligne {} colonne {}". format(cell_value, row, column)
+                            self.error_row_count += 1
                             new_parameter_value = 0
 
                     else:
@@ -289,14 +300,14 @@ class Gui(WPFWindow):
                     if main_worksheet.Cells(row, column).Value2 == parameter_value:
                         continue
                     else:
-                        export_sheet.Cells(report_row_count, 1).Value2 = number
-                        export_sheet.Cells(report_row_count, index*2 + 2).Value2 = parameter_value
-                        export_sheet.Cells(report_row_count, index*2 + 3).Value2 = main_worksheet.Cells(row,
-                                                                                                        column).Value2
+                        export_sheet.Cells(self.export_row_count, 1).Value2 = number
+                        export_sheet.Cells(self.export_row_count, index*2 + 2).Value2 = parameter_value
+                        export_sheet.Cells(self.export_row_count, index * 2 + 3).Value2 = \
+                            main_worksheet.Cells(row, column).Value2
                         parameter.Set(new_parameter_value)
         # Apply a TableStyle to the report
         data_range = export_sheet.Range(export_sheet.Cells(1, 1),
-                                        export_sheet.Cells(report_row_count, len(columns_list)*2 + 2))
+                                        export_sheet.Cells(self.export_row_count, len(columns_list)*2 + 2))
         excel.table_style(export_sheet, data_range)
 
     # noinspection PyUnusedLocal
@@ -313,7 +324,10 @@ class Gui(WPFWindow):
             os.makedirs(folder)
         file_name = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S.xlsx')
         # Save report to main_sheet path under designated subfolder
-        report_workbook.SaveAs(os.path.join(folder, file_name))
+        try:
+            report_workbook.SaveAs(os.path.join(folder, file_name))
+        except EnvironmentError:
+            return
 
         # Release COM Object
         logger.debug("RELEASE EXCEL COM OBJECT ON WINDOW CLOSED")

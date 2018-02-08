@@ -1,6 +1,7 @@
 import rpw
-from scriptutils import logger
+from pyrevit.script import get_logger
 
+logger = get_logger()
 selection = rpw.ui.Selection()
 
 # TODO check in only one loop

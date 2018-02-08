@@ -3,7 +3,7 @@
 import rpw
 from rpw import revit, DB
 from Autodesk.Revit.DB.Plumbing import PipingSystemType
-from scriptutils.forms import WPFWindow
+from pyrevit.forms import WPFWindow
 from pyRevitMEP.workset import Workset
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
@@ -52,8 +52,5 @@ class Gui(WPFWindow):
             self.data_grid_content.Remove(item)
 
 
-if not revit.doc.IsWorkshared:
-    rpw.ui.forms.Alert("Current document is not workshared. You cannot create worksets.")
-else:
-    gui = Gui("WPFWindow.xaml")
-    gui.ShowDialog()
+gui = Gui("WPFWindow.xaml")
+gui.ShowDialog()

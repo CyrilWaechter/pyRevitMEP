@@ -1,6 +1,6 @@
 # coding: utf8
 import rpw
-from rpw import DB, revi
+from rpw import DB, revit
 
 __doc__ = "Quick dimension selected pipes"
 __title__ = "QuickDimensionPipe"

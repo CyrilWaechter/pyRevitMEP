@@ -19,7 +19,9 @@ https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
 
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import WorksharingUtils, FilteredElementCollector
-from revitutils import doc
+from rpw import revit
+
+doc = revit.doc
 
 elem_list = ""
 # FilteredElementCollector(doc).WhereElementIsNotElementType() is a way to retrieve all elements in doc

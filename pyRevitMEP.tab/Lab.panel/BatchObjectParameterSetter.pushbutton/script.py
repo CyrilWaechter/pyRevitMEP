@@ -4,14 +4,15 @@ import rpw
 from rpw import DB, UI
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException
-from scriptutils import logger
-from scriptutils.userinput import WPFWindow
+from pyrevit.script import get_logger
+from pyrevit.forms import WPFWindow
 import re
 
 __doc__ = "Batch parameter setter"
 __title__ = "BatchParamSetter"
 __author__ = "Cyril Waechter"
 
+logger = get_logger()
 doc = rpw.revit.doc
 uidoc = rpw.uidoc
 

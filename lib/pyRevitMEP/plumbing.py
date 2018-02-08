@@ -5,7 +5,8 @@ Plumbing Wrapper
 """
 import rpw
 from rpw.db import Element
-from rpw import revit, DB
+from rpw import revit
+from Autodesk.Revit import DB
 import csv
 
 

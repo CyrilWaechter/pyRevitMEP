@@ -4,14 +4,15 @@ import rpw
 from rpw import DB, UI
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException
-from scriptutils import logger
-from scriptutils.userinput import WPFWindow
+from pyrevit.script import get_logger
+from pyrevit.forms import WPFWindow
 from pyRevitMEP.event import CustomizableEvent
 
 __doc__ = "Copy legend location in active ViewSheet"
 __title__ = "CopyLegendsLocations"
 __author__ = "Cyril Waechter"
 
+logger = get_logger()
 doc = rpw.revit.doc
 uidoc = rpw.uidoc
 

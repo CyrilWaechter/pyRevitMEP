@@ -2,7 +2,7 @@
 import rpw
 # noinspection PyUnresolvedReferences
 from rpw import revit, DB, UI
-from scriptutils.forms import WPFWindow
+from pyrevit.forms import WPFWindow
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
 import os

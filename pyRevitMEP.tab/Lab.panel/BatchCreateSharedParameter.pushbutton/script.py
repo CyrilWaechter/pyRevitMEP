@@ -4,8 +4,8 @@ import rpw
 from rpw import revit, DB, UI
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException
-from scriptutils import logger
-from scriptutils.userinput import WPFWindow
+from pyrevit.script import get_logger
+from pyrevit.forms import WPFWindow
 from pyRevitMEP.parameter import SharedParameter, ProjectParameter
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
