@@ -31,6 +31,12 @@ class Gui(WPFWindow):
         # Default import config
         self.tb_imported_parameters.Text = "Surface, Nom"
         self.tb_imported_column.Text = "M, K"
+        self.tb_exported_parameters.Text = "SYS, " \
+                                           "Ecoulement de soufflage spécifié, " \
+                                           "Ecoulement d'air de retour spécifié, " \
+                                           "Charge de chauffage de conception, " \
+                                           "Charge de refroidissement de conception"
+        self.tb_exported_column.Text = "T, CU, DH, DS, DY "
 
         self.check_row_count = 2
         self.import_row_count = 1
@@ -60,24 +66,26 @@ class Gui(WPFWindow):
         worksheet = self.main_worksheet
         row_count = self.starting_row
         number_column = self.number_column
+        service_column = self.service_column
 
         blank_row_count = 0
 
-        while blank_row_count <= 5:
+        while blank_row_count <= 10:
             if worksheet.Cells(row_count, number_column).Value2:
                 blank_row_count = 0
                 current_row = row_count
                 row_count += 1
                 yield current_row
             else:
-                blank_row_count += 1
+                if not worksheet.Cells(row_count, service_column).MergeArea.Cells(1, 1).Value2:
+                    blank_row_count += 1
                 row_count += 1
 
     # noinspection PyUnusedLocal
     def test_click(self, sender, e):
-        data_range = import_sheet.Range(import_sheet.Cells(1,1),
-                                        import_sheet.Cells(10, 10))
-        excel.table_style(import_sheet, data_range)
+        value = self.main_worksheet.Cells(7, "DY").Value2
+        print(type(value))
+        print(value)
 
     # noinspection PyUnusedLocal
     def service_list_creation_click(self, sender, e):
@@ -158,8 +166,8 @@ class Gui(WPFWindow):
         main_worksheet = self.main_worksheet
         service_column = self.service_column
 
-        parameters_list = self.tb_imported_parameters.Text.replace(" ", "").split(",")
-        columns_list = self.tb_imported_column.Text.replace(" ", "").split(",")
+        parameters_list = [parameter.strip() for parameter in self.tb_imported_parameters.Text.split(",")]
+        columns_list = [column.strip() for column in self.tb_imported_column.Text.split(",")]
 
         # popup a message if same amount of parameter and column
         if len(parameters_list) != len(columns_list):
@@ -211,7 +219,7 @@ class Gui(WPFWindow):
                     import_sheet.Cells(report_row_count, index*2 + 3).Value2 = parameter_value
                     main_worksheet.Cells(row, column).Value2 = parameter_value
         # Apply a TableStyle to the report
-        data_range = import_sheet.Range(import_sheet.Cells(1,1),
+        data_range = import_sheet.Range(import_sheet.Cells(1, 1),
                                         import_sheet.Cells(report_row_count, len(columns_list)*2 + 2))
         excel.table_style(import_sheet, data_range)
 
@@ -220,8 +228,8 @@ class Gui(WPFWindow):
         main_worksheet = self.main_worksheet
         service_column = self.service_column
 
-        parameters_list = self.tb_exported_parameters.Text.replace(" ", "").split(",")
-        columns_list = self.tb_exported_column.Text.replace(" ", "").split(",")
+        parameters_list = [parameter.strip() for parameter in self.tb_exported_parameters.Text.split(",")]
+        columns_list = [column.strip() for column in self.tb_exported_column.Text.split(",")]
 
         # popup a message if same amount of parameter and column
         if len(parameters_list) != len(columns_list):
@@ -237,53 +245,59 @@ class Gui(WPFWindow):
 
         # Export values and append modified values to report
         report_row_count = 3
-        for number, row in self.excel_spaces_dict.items():
-            service_number = main_worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
+        with rpw.db.Transaction("Export excel values to Revit"):
+            for number, row in self.excel_spaces_dict.items():
+                service_number = main_worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
 
-            # Check if report row is free (no number written yet)
-            if export_sheet.Cells(report_row_count, 1).Value2:
-                report_row_count += 1
+                # Check if report row is free (no number written yet)
+                if export_sheet.Cells(report_row_count, 1).Value2:
+                    report_row_count += 1
 
-            # Check if space is in an analysed service
-            if not self.service_check(service_number):
-                continue
-
-            # Retrieve Revit space if it exist
-            try:
-                revit_space = revit.doc.GetElement(self.revit_spaces_dict[number])
-            except KeyError:
-                continue
-
-            # Retrieve parameter value from revit spaces
-            # with unit conversion if necessary (based on Revit DisplayUnitType)
-            for parameter_name, column, index in zip(parameters_list, columns_list, range(len(columns_list))):
-                parameter = revit_space.LookupParameter(parameter_name)
-                if parameter.StorageType == StorageType.Integer:
-                    parameter_value = parameter.AsInteger()
-                    new_parameter_value = int(main_worksheet.Cells(row, column).Value2)
-                elif parameter.StorageType == StorageType.String:
-                    parameter_value = parameter.AsString()
-                    new_parameter_value = str(main_worksheet.Cells(row, column).Value2)
-                elif parameter.StorageType == StorageType.Double:
-                    parameter_value = UnitUtils.ConvertFromInternalUnits(parameter.AsDouble(),
-                                                                         parameter.DisplayUnitType)
-                    new_parameter_value = UnitUtils.ConvertToInternalUnits(
-                        float(main_worksheet.Cells(row, column).Value2),
-                        parameter.DisplayUnitType)
-                else:
+                # Check if space is in an analysed service
+                if not self.service_check(service_number):
                     continue
-                if main_worksheet.Cells(row, column).Value2 == parameter_value:
+
+                # Retrieve Revit space if it exist
+                try:
+                    revit_space = revit.doc.GetElement(self.revit_spaces_dict[number])
+                except KeyError:
                     continue
-                else:
-                    import_sheet.Cells(report_row_count, 1).Value2 = number
-                    import_sheet.Cells(report_row_count, index*2 + 2).Value2 = parameter_value
-                    import_sheet.Cells(report_row_count, index*2 + 3).Value2 = main_worksheet.Cells(row, column).Value2
-                    parameter.Set(new_parameter_value)
+
+                # Retrieve parameter value from revit spaces
+                # with unit conversion if necessary (based on Revit DisplayUnitType)
+                for parameter_name, column, index in zip(parameters_list, columns_list, range(len(columns_list))):
+                    parameter = revit_space.LookupParameter(parameter_name)
+                    if parameter.StorageType == StorageType.Integer:
+                        parameter_value = parameter.AsInteger()
+                        new_parameter_value = int(main_worksheet.Cells(row, column).Value2)
+                    elif parameter.StorageType == StorageType.String:
+                        parameter_value = parameter.AsString()
+                        new_parameter_value = str(main_worksheet.Cells(row, column).Value2)
+                    elif parameter.StorageType == StorageType.Double:
+                        parameter_value = UnitUtils.ConvertFromInternalUnits(parameter.AsDouble(),
+                                                                             parameter.DisplayUnitType)
+                        try:
+                            new_parameter_value = UnitUtils.ConvertToInternalUnits(
+                            main_worksheet.Cells(row, column).Value2,
+                            parameter.DisplayUnitType)
+                        except TypeError:
+                            logger.debug(main_worksheet.Cells(row, column).Value2)
+                            new_parameter_value = 0
+
+                    else:
+                        continue
+                    if main_worksheet.Cells(row, column).Value2 == parameter_value:
+                        continue
+                    else:
+                        export_sheet.Cells(report_row_count, 1).Value2 = number
+                        export_sheet.Cells(report_row_count, index*2 + 2).Value2 = parameter_value
+                        export_sheet.Cells(report_row_count, index*2 + 3).Value2 = main_worksheet.Cells(row,
+                                                                                                        column).Value2
+                        parameter.Set(new_parameter_value)
         # Apply a TableStyle to the report
-        data_range = import_sheet.Range(import_sheet.Cells(1,1),
-                                        import_sheet.Cells(report_row_count, len(columns_list)*2 + 2))
-        excel.table_style(import_sheet, data_range)
-
+        data_range = export_sheet.Range(export_sheet.Cells(1, 1),
+                                        export_sheet.Cells(report_row_count, len(columns_list)*2 + 2))
+        excel.table_style(export_sheet, data_range)
 
     # noinspection PyUnusedLocal
     def main_workbook_changed(self, sender, e):
