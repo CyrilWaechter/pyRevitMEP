@@ -1,22 +1,34 @@
 # coding: utf8
-import rpw
-# noinspection PyUnresolvedReferences
-from rpw import revit, DB, UI
-from pyrevit.forms import WPFWindow
-# noinspection PyUnresolvedReferences
-from System.Collections.ObjectModel import ObservableCollection
 import os
 
+import rpw
+from rpw import revit
+from pyrevit.forms import WPFWindow
+from Autodesk.Revit.DB import BuiltInCategory, Category
+from System.Collections.ObjectModel import ObservableCollection
 
-class Category:
-    def __init__(self, built_in_name):
-        self.built_in_name = built_in_name
-        self.category = DB.Category.GetCategory(revit.doc, built_in_name)
 
-    @staticmethod
-    def selection_window():
-        gui = Gui(os.path.join(os.path.dirname(__file__),"category/WPFWindow.xaml"))
-        gui.ShowDialog()
+def get_full_name(category):
+    if category:
+        parent = category.Parent
+        if not parent:
+            name = category.Name
+        else:
+            name = "{} - {}".format(parent.Name, category.Name)
+        return name
+
+
+def categories_description():
+    for category_id in BuiltInCategory.GetValues(BuiltInCategory):
+        try:
+            category = Category.GetCategory(revit.doc, category_id)
+        except:
+            raise
+        print(get_full_name(category))
+
+def selection_window():
+    gui = Gui(os.path.join(os.path.dirname(__file__),"category/WPFWindow.xaml"))
+    gui.ShowDialog()
 
 
 class Gui(WPFWindow):
