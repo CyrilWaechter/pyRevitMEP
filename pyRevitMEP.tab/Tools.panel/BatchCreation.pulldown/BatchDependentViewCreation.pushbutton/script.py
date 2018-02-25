@@ -12,6 +12,7 @@ from System.Collections.ObjectModel import ObservableCollection
 __doc__ = "Batch create worksets from a text file or on the fly by creating a list"
 __title__ = "DependentViews"
 __author__ = "Cyril Waechter"
+__context__ = "selection"
 
 doc = rpw.revit.doc
 logger = script.get_logger()
