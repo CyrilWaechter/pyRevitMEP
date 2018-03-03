@@ -1,0 +1,51 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RoomToSpace" MaxHeight="1000 px" Width="Auto" ShowInTaskbar="True" Topmost="False"
+        WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" HorizontalContentAlignment="Center" Closed="window_closed">
+    <Window.Resources>
+        <ControlTemplate x:Key="buttonTemplate" TargetType="{x:Type Button}">
+        </ControlTemplate>
+        <Style x:Key="buttonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="100"/>
+        </Style>
+    </Window.Resources>
+    <StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <GroupBox Header="Room">
+                <StackPanel>
+                    <TextBlock Margin="5"><Bold>Pick Source Project</Bold></TextBlock>
+                    <ComboBox x:Name="source_project" SelectionChanged="source_project_changed"
+                              ItemsSource="{Binding}" DisplayMemberPath="Title"
+                              SelectedValuePath="Title" SelectedValue="{Binding Title, Mode=OneWay}"/>
+                    <TextBlock Margin="5">
+                        <Bold>Enter source parameters or text separated with tab</Bold><LineBreak />
+                        Every source on a single line will be concatenated :<LineBreak />
+                        %Number |TAB| %separator |TAB| %CustomParameterName<LineBreak />
+                        %Name<LineBreak />
+                        %Comments |TAB| %separator |TAB| %CustomParameterName
+                    </TextBlock>
+                    <TextBox x:Name="source_parameters" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Space">
+                <StackPanel>
+                    <TextBlock Margin="5"><Bold>Target Project</Bold></TextBlock>
+                    <ComboBox x:Name="target_project" SelectionChanged="target_project_changed"
+                              ItemsSource="{Binding}" DisplayMemberPath="Title"
+                              SelectedValuePath="Title" SelectedValue="{Binding Title, Mode=OneWay}"/>
+                    <TextBlock Margin="5">
+                        <Bold>Enter target parameters.</Bold><LineBreak />
+                        One per line corresponding to each source line :<LineBreak />
+                        %Number<LineBreak />
+                        %Name<LineBreak />
+                        %Comments
+                    </TextBlock>
+                    <TextBox x:Name="target_parameters" TextWrapping="Wrap" AcceptsReturn="True"/>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+        <Button Content="Ok" Click="ok_click" IsDefault="True" Width="100" Margin="5"/>
+    </StackPanel>
+</Window>
