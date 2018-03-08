@@ -207,6 +207,7 @@ class Gui(WPFWindow):
             try:
                 revit_space = revit.doc.GetElement(self.revit_spaces_dict[number])
             except KeyError:
+                logger.info("L'espace {} n'a pas été trouvé dans le dictionnaire d'espaces Revit".format(number))
                 continue
 
             # Retrieve parameter value from revit spaces
@@ -220,6 +221,7 @@ class Gui(WPFWindow):
                 elif parameter.StorageType == StorageType.Double:
                     parameter_value = UnitUtils.ConvertFromInternalUnits(parameter.AsDouble(),
                                                                          parameter.DisplayUnitType)
+                    parameter_value = round(parameter_value, 1)
                 if main_worksheet.Cells(row, column).Value2 == parameter_value:
                     continue
                 else:
@@ -270,6 +272,7 @@ class Gui(WPFWindow):
                 try:
                     revit_space = revit.doc.GetElement(self.revit_spaces_dict[number])
                 except KeyError:
+                    logger.info("L'espace {} n'a pas été trouvé dans le dictionnaire d'espaces Revit".format(number))
                     continue
 
                 # Retrieve parameter value from revit spaces
