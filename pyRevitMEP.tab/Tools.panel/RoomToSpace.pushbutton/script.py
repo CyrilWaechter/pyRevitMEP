@@ -1,7 +1,7 @@
 # coding: utf8
 import rpw
 from rpw import revit
-from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, StorageType, UnitUtils, Transaction
+from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, Transaction
 from pyrevit.forms import WPFWindow
 from pyrevit import script
 
@@ -58,15 +58,15 @@ class Gui(WPFWindow):
             raise ValueError("There is no room in source project")
         if not space:
             raise ValueError("There is no space in target project")
-        room_attributes = self.source_parameters.Text
-        space_parameters = self.target_parameters.Text
+        room_attributes = self.source_parameters.Text.replace("\r", "")
+        space_parameters = self.target_parameters.Text.replace("\r", "")
         logger.debug(space_parameters.Split("\n"))
         for room_field, space_param in zip(room_attributes.Split("\n"), \
                                            space_parameters.Split("\n")):
-            space_param = space_param.replace("\r", "")
+            space_param = space_param
             value = ""
             for room_attr in room_field.split("\t"):
-                room_attr = room_attr.replace("\r", "")
+                room_attr = room_attr
                 param = room.LookupParameter(room_attr)
                 if param:
                     if param.AsString():
