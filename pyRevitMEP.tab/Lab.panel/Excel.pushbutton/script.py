@@ -2,11 +2,15 @@
 import rpw
 from rpw import revit
 from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, StorageType, UnitUtils
-from pyrevit.forms import WPFWindow, logger
+from pyrevit.forms import WPFWindow
+from pyrevit.script import get_logger
+
 import os
 import datetime
 
 from pyRevitMEP import excel
+
+logger = get_logger()
 
 xl_app = excel.initialise()
 
@@ -120,7 +124,7 @@ class Gui(WPFWindow):
 
         # Revit space dict creation
         for space in FilteredElementCollector(revit.doc).OfCategory(BuiltInCategory.OST_MEPSpaces):
-            self.revit_spaces_dict[space.Number.replace(" ", "")] = space.Id
+            self.revit_spaces_dict[space.Number] = space.Id
 
         logger.debug(self.revit_spaces_dict)
 
@@ -128,28 +132,30 @@ class Gui(WPFWindow):
         sheet_rows = self.sheet_loop_generator()
         for row in sheet_rows:
             current_cell_value = worksheet.Cells(row, number_column).Value2
-            self.excel_spaces_dict[str(current_cell_value).replace(" ", "")] = row
+            service_number = worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
+            self.excel_spaces_dict["{} {}".format(service_number, current_cell_value)] = row
         logger.debug(self.excel_spaces_dict)
 
         # Add Service number to Revit spaces and check if space are missing in the model
-        with rpw.db.Transaction("Add Service number to Revit spaces"):
-            for number, row in self.excel_spaces_dict.items():
-                service_number = worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
-                if not self.service_check(service_number):
-                    continue
-                try:
-                    revit_space_id = self.revit_spaces_dict[number]
-                    revit_space = revit.doc.GetElement(revit_space_id)
-                    parameter = revit_space.LookupParameter("AAA_Service")
-                    if service_number:
-                        parameter.Set(str(service_number))
-                except KeyError:
-                    check_sheet.Cells(self.check_row_count, 1).Value2 = service_number
-                    check_sheet.Cells(self.check_row_count, 2).Value2 = number
-                    check_sheet.Cells(self.check_row_count, 3).Value2 = \
-                        "Le local existe dans le tableur mais pas dans le modèle"
-                    self.check_row_count += 1
+        # with rpw.db.Transaction("Add Service number to Revit spaces"):
+        for number, row in self.excel_spaces_dict.items():
+            service_number = worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
+            if not self.service_check(service_number):
+                continue
+            try:
+                revit_space_id = self.revit_spaces_dict[number]
+                # revit_space = revit.doc.GetElement(revit_space_id)
+                # parameter = revit_space.LookupParameter("AAA_Service")
+                # if service_number:
+                #     parameter.Set(str(service_number))
+            except KeyError:
+                check_sheet.Cells(self.check_row_count, 1).Value2 = service_number
+                check_sheet.Cells(self.check_row_count, 2).Value2 = number
+                check_sheet.Cells(self.check_row_count, 3).Value2 = \
+                    "Le local existe dans le tableur mais pas dans le modèle"
+                self.check_row_count += 1
 
+        # Check if some space in the model are missing in the spreadsheet
         for number, revit_id in self.revit_spaces_dict.items():
             revit_space = revit.doc.GetElement(revit_id)
             service_number = revit_space.LookupParameter("AAA_Service").AsString()
@@ -201,6 +207,7 @@ class Gui(WPFWindow):
             try:
                 revit_space = revit.doc.GetElement(self.revit_spaces_dict[number])
             except KeyError:
+                logger.info("L'espace {} n'a pas été trouvé dans le dictionnaire d'espaces Revit".format(number))
                 continue
 
             # Retrieve parameter value from revit spaces
@@ -214,6 +221,7 @@ class Gui(WPFWindow):
                 elif parameter.StorageType == StorageType.Double:
                     parameter_value = UnitUtils.ConvertFromInternalUnits(parameter.AsDouble(),
                                                                          parameter.DisplayUnitType)
+                    parameter_value = round(parameter_value, 1)
                 if main_worksheet.Cells(row, column).Value2 == parameter_value:
                     continue
                 else:
@@ -264,13 +272,18 @@ class Gui(WPFWindow):
                 try:
                     revit_space = revit.doc.GetElement(self.revit_spaces_dict[number])
                 except KeyError:
+                    logger.info("L'espace {} n'a pas été trouvé dans le dictionnaire d'espaces Revit".format(number))
                     continue
 
                 # Retrieve parameter value from revit spaces
                 # with unit conversion if necessary (based on Revit DisplayUnitType)
                 for parameter_name, column, index in zip(parameters_list, columns_list, range(len(columns_list))):
                     parameter = revit_space.LookupParameter(parameter_name)
+                    if not parameter:
+                        logger.info("Parameter «{}» was not found".format(parameter_name))
+                        continue
                     cell_value = main_worksheet.Cells(row, column).Value2
+                    parameter_value = None
                     if parameter.StorageType == StorageType.Integer:
                         if cell_value:
                             parameter_value = parameter.AsInteger()
