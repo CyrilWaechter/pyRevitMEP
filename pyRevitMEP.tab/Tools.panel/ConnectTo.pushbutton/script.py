@@ -2,6 +2,7 @@
 from math import pi
 from Autodesk.Revit.DB import Line, XYZ
 from Autodesk.Revit.UI.Selection import ObjectType, ObjectSnapTypes
+from Autodesk.Revit import Exceptions
 import rpw
 
 uidoc = rpw.revit.uidoc
@@ -34,12 +35,16 @@ def get_connector_closest_to(connectors, xyz):
 
 
 # Prompt user to select elements and points to connect
-moved_element = doc.GetElement(
-    uidoc.Selection.PickObject(ObjectType.Element, "Pick element to move"))
-moved_point = uidoc.Selection.PickPoint(ObjectSnapTypes.Points, "Pick point to connect")
-target_element = doc.GetElement(
-    uidoc.Selection.PickObject(ObjectType.Element, "Pick element to be connected to"))
-target_point = uidoc.Selection.PickPoint(ObjectSnapTypes.Points, "Pick point to be connected to")
+try:
+    moved_element = doc.GetElement(
+        uidoc.Selection.PickObject(ObjectType.Element, "Pick element to move"))
+    moved_point = uidoc.Selection.PickPoint(ObjectSnapTypes.Points, "Pick point to connect")
+    target_element = doc.GetElement(
+        uidoc.Selection.PickObject(ObjectType.Element, "Pick element to be connected to"))
+    target_point = uidoc.Selection.PickPoint(ObjectSnapTypes.Points, "Pick point to be connected to")
+except Exceptions.OperationCanceledException:
+    import sys
+    sys.exit()
 
 
 # Get associated connectors
@@ -57,8 +62,11 @@ with rpw.db.Transaction("Connect elements"):
     # If connector direction is same, rotate it
     angle = moved_direction.AngleTo(target_direction)
     if angle != pi:
-        cross_product = moved_direction.CrossProduct(target_direction)
-        line = Line.CreateBound(moved_point, moved_point+cross_product)
+        if angle == 0:
+            vector = moved_connector.CoordinateSystem.BasisY
+        else:
+            vector = moved_direction.CrossProduct(target_direction)
+        line = Line.CreateBound(moved_point, moved_point+vector)
         moved_element.Location.Rotate(line, angle - pi)
     # Move element in order match connector position
     moved_element.Location.Move(target_connector.Origin - moved_connector.Origin)
