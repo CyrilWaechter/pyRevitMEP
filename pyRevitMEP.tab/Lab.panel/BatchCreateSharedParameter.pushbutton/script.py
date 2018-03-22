@@ -9,6 +9,7 @@ from pyrevit.forms import WPFWindow
 from pyRevitMEP.parameter import SharedParameter, ProjectParameter
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
+from System.Collections.Generic import List
 from System import Uri, UriKind
 from System.Windows.Controls import Image
 
@@ -42,7 +43,8 @@ class Gui(WPFWindow):
         self.set_image_source("plus_img", "icons8-plus-32.png")
         self.set_image_source("minus_img", "icons8-minus-32.png")
         self.set_image_source("import_img", "icons8-import-32.png")
-        # self.set_image_source("ok_img", "icons8-checkmark-32.png")
+        self.set_image_source("import_revit_img", "icons8-import-32.png")
+        self.set_image_source("ok_img", "icons8-checkmark-32.png")
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
@@ -54,6 +56,11 @@ class Gui(WPFWindow):
     # noinspection PyUnusedLocal
     def load_from_file_click(self, sender, e):
         for parameter in SharedParameter.read_from_csv():
+            self.data_grid_content.Add(parameter)
+
+    # noinspection PyUnusedLocal
+    def load_from_definition_file_click(self, sender, e):
+        for parameter in SharedParameter.read_from_definition_file():
             self.data_grid_content.Add(parameter)
 
     # noinspection PyUnusedLocal

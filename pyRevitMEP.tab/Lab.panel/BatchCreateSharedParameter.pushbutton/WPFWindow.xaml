@@ -23,6 +23,10 @@
                             Style="{StaticResource buttonStyle}">
                         <Image x:Name="import_img" Height="20"/>
                     </Button>
+                    <Button Click="load_from_definition_file_click"
+                            Style="{StaticResource buttonStyle}">
+                        <Image x:Name="import_revit_img" Height="20"/>
+                    </Button>
                     <Button Click="add"
                             Style="{StaticResource buttonStyle}">
                         <Image x:Name="plus_img" Height="20"/>

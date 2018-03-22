@@ -67,6 +67,32 @@ class SharedParameter:
             shared_parameter_list.append(SharedParameter(name, group, parameter_type, visible, guid))
         return shared_parameter_list
 
+    @classmethod
+    def read_from_definition_file(cls, definition_groups=None, definition_names=None, definition_file=None):
+        if not definition_groups:
+            definition_groups = []
+
+        if not definition_names:
+            definition_names = []
+
+        if not definition_file:
+            definition_file = revit.app.OpenSharedParameterFile()
+            if not definition_file:
+                raise LookupError("No shared parameter file defined")
+
+        shared_parameter_list = []
+
+        for dg in definition_file.Groups:
+            if definition_groups and dg.Name not in definition_groups:
+                continue
+            for dn in dg.Definitions:
+                if definition_names and dn.Name not in definition_names:
+                    continue
+                shared_parameter_list.append(cls(dn.Name, dg.Name, dn.ParameterType, dn.Visible, dn.GUID))
+
+        return shared_parameter_list
+
+
     def write_to_definition_file(self, definition_file=None, warning=True):
         """
         Create a new parameter definition in current shared parameter file
