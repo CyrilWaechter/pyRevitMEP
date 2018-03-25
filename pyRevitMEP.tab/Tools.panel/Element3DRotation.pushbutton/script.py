@@ -23,7 +23,7 @@ from pyrevit.forms import WPFWindow
 from pyRevitMEP.event import CustomizableEvent
 
 # noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import Transaction, ElementTransformUtils, Line, XYZ, Location, UnitType, UnitUtils
+from Autodesk.Revit.DB import Transaction, ElementTransformUtils, Line, XYZ, Location, UnitType, UnitUtils, ElementId
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.UI.Selection import ObjectType, ISelectionFilter
 # noinspection PyUnresolvedReferences
@@ -44,14 +44,11 @@ angle_unit = doc.GetUnits().GetFormatOptions(UnitType.UT_Angle).DisplayUnits
 
 
 def xyz_axis(element_id):
-    """Input : Element, Output : xyz axis of the element"""
-    origin = doc.GetElement(element_id).Location.Point
-    xyz_direction = [XYZ(origin.X + 1, origin.Y, origin.Z),
-                     XYZ(origin.X, origin.Y + 1, origin.Z),
-                     XYZ(origin.X, origin.Y, origin.Z + 1)]
-    axis = []
-    for direction in xyz_direction:
-        axis.append(Line.CreateBound(origin, direction))
+    """Input : Element, Output : xyz axis of the element
+    :type element_id: ElementId
+    """
+    transform = doc.GetElement(element_id).GetTransform()
+    axis = [Line.CreateBound(transform.Origin, transform.Origin + transform.Basis[i]) for i in range(3)]
     return axis
 
 
@@ -122,9 +119,8 @@ class RotateOptions(WPFWindow):
         try:
             rotate_elements.selection = uidoc.Selection.GetElementIds()
             angles = [self.x_axis.Text, self.y_axis.Text, self.z_axis.Text]
-            for i in range(3):
-                angles[i] = UnitUtils.ConvertToInternalUnits(float(angles[i]), angle_unit)
-            rotate_elements.angles = angles
+            internal_angles = [UnitUtils.ConvertToInternalUnits(float(i), angle_unit) for i in angles]
+            rotate_elements.angles = internal_angles
         except ValueError:
             self.warning.Text = "Incorrect angles, input format required '0.0'"
         else:
