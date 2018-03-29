@@ -19,32 +19,34 @@ __author__ = "Cyril Waechter"
 
 doc = rpw.revit.doc
 uidoc = rpw.uidoc
+logger = get_logger()
 
-# text_box = TextBox("parameters_text",text_text, Height=400, Width=400)
-# components = [text_box]
-#
-# form = rpw.ui.forms.FlexForm("Parameters to create check", components)
-# form.ShowDialog()
-#
-# parameters_text = text_box.Text.split("\n")
-#
-# for parameter in parameters_text:
-#     print parameter
-#
-# with rpw.db.Transaction("Batch create shared parameters from file"):
-#      for parameter_name in parameters_text:
-#         SharedParameter(revit.app, parameter_name, "MCR", DB.ParameterType.Text)
 
 class Gui(WPFWindow):
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
         self.data_grid_content = ObservableCollection[object]()
+        # self.datagrid.AutoGeneratingColumn =
         self.datagrid.ItemsSource = self.data_grid_content
         self.set_image_source("plus_img", "icons8-plus-32.png")
         self.set_image_source("minus_img", "icons8-minus-32.png")
         self.set_image_source("import_img", "icons8-import-32.png")
         self.set_image_source("import_revit_img", "icons8-import-32.png")
         self.set_image_source("ok_img", "icons8-checkmark-32.png")
+
+    def auto_generating_column(self, sender, e):
+        headername = e.Column.Header.ToString()
+        headerdict = {"name": "Name",
+                      "type": "Type",
+                      "group": "Group",
+                      "guid": "Guid",
+                      "description": "Description",
+                      "modifiable": "UserModifiable",
+                      "visible": "Visible"}
+        if headername in headerdict.keys():
+            e.Column.Header = headerdict[headername]
+        else:
+            e.Cancel = True
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):

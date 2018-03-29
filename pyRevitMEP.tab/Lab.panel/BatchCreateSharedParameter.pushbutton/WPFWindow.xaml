@@ -37,13 +37,15 @@
                     </Button>
                 </StackPanel>
                 <Grid Margin="20">
-                    <DataGrid Name="datagrid" AutoGenerateColumns="False">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Binding="{Binding name}"/>
-                            <DataGridTextColumn Header="Group" Binding="{Binding group}"/>
-                            <DataGridCheckBoxColumn Header="Visible" Binding="{Binding visible}"/>
-                            <DataGridTextColumn Header="GUID" Binding="{Binding guid}"/>
-                        </DataGrid.Columns>
+                    <DataGrid Name="datagrid" AutoGenerateColumns="True" AutoGeneratingColumn="auto_generating_column">
+                        <!--<DataGrid.Columns>-->
+                            <!--<DataGridTextColumn Header="Name" Binding="{Binding name}"/>-->
+                            <!--<DataGridTextColumn Header="Type" Binding="{Binding type}"/>-->
+                            <!--<DataGridTextColumn Header="Group" Binding="{Binding group}"/>-->
+                            <!--<DataGridTextColumn Header="GUID" Binding="{Binding guid}"/>-->
+                            <!--<DataGridCheckBoxColumn Header="UserModifiable" Binding="{Binding modifiable}"/>-->
+                            <!--<DataGridCheckBoxColumn Header="Visible" Binding="{Binding visible}"/>-->
+                        <!--</DataGrid.Columns>-->
                     </DataGrid>
                 </Grid>
             </StackPanel>

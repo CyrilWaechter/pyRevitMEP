@@ -314,7 +314,7 @@ class Gui(WPFWindow):
                         continue
                     else:
                         export_sheet.Cells(self.export_row_count, 1).Value2 = number
-                        export_sheet.Cells(self.export_row_count, index*2 + 2).Value2 = parameter_value
+                        export_sheet.Cells(self.export_row_count, index * 2 + 2).Value2 = parameter_value
                         export_sheet.Cells(self.export_row_count, index * 2 + 3).Value2 = \
                             main_worksheet.Cells(row, column).Value2
                         parameter.Set(new_parameter_value)

@@ -1,7 +1,7 @@
 # coding: utf8
 import rpw
 # noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import ParameterType
+from Autodesk.Revit.DB import ParameterType, DefinitionGroups, DefinitionGroup, UnitType
 # noinspection PyUnresolvedReferences
 from rpw import revit, DB, UI
 # noinspection PyUnresolvedReferences
@@ -9,66 +9,83 @@ from System import Guid
 from pyrevit.forms import WPFWindow
 import csv
 
-
 class SharedParameter:
-    """Class used to manage Revit shared parameters
-        Args:
-            name (str) : Displayed shared parameter name
-            group (str) : Group used in parameter definition file (shared parameter file)
-            parameter_type (:obj:`Autodesk.Revit.DB.ParameterType`) : Exemple
-            visible (bool)
-            guid (Guid|str)
-        Returns:
-            None
-        """
-    def __init__(self, name, group, parameter_type, visible=True, guid=None):
+    """
+    Class used to manage Revit shared parameters
+    :param name: Displayed shared parameter name
+    :param group: Group used in parameter definition file (shared parameter file)
+    :param type : Parameter type like Text, PipingFlow etc…
+    :param guid: Parameter globally unique identifier
+    :param description: Parameter description hint
+    :param user_modifiable: This property indicates whether this parameter can be modified by UI user or not.
+    :param visible: If false parameter is stored without being visible.
+    """
+    def __init__(self, name, type, group="pyRevitMEP", guid=None,
+                 description=None, modifiable=True, visible=True):
+        # type: (str, ParameterType or str, DefinitionGroup, Guid, str, bool, bool) -> None
+
+        self.name = name
+        self.description = description
+        self.group = group
+
+        true_tuple = (True, "", None, "True", "Yes", "Oui")
+        if modifiable in true_tuple:
+            self.modifiable = True
+        if visible in true_tuple:
+            self.visible = True
+
+        # Check if a Guid is given. If not a new one is created
         if not guid:
             self.guid = Guid.NewGuid()
         else:
             self.guid = guid
-        self.visible = visible
-        if isinstance(parameter_type, ParameterType):
-            self.type = parameter_type
+        # Check if given parameter type is valid. If not user is prompted to choose one.
+        if isinstance(type, ParameterType):
+            self.type = type
         else:
             try:
-                self.type = getattr(ParameterType, parameter_type)
+                self.type = getattr(ParameterType, type)
             except AttributeError:
-                selected_type = rpw.ui.forms.SelectFromList("Select ParameterType",
-                                                        ParameterType.GetNames(ParameterType),
-                                                        "Invalid ParameterType please select a parameter type",
-                                                        sort=False)
+                selected_type = rpw.ui.forms.SelectFromList(
+                    "Select ParameterType",
+                    ParameterType.GetNames(ParameterType),
+                    "Parameter {} ParameterType: {} is not valid. Please select a parameter type".format(name, type),
+                    sort=False)
                 self.type = getattr(ParameterType, selected_type)
-        self.group = group
-        self.name = name
 
     @staticmethod
     def read_from_csv(csv_path=None):
+        """
+        Retrieve shared parameters from a csv file.
+        csv file need to be formatter this way :
+        <Parameter Name>, <ParameterType>, <DefinitionGroup>, (Optional)<Guid>,(Optional)<Description>,
+        (Optional)<UserModifiable> True or False, (Optional)<Visible> True or False
+        :param csv_path: absolute path to csv file
+        """
         if not csv_path:
             csv_path = rpw.ui.forms.select_file(extensions='csv Files (*.csv*)|*.csv*', title='Select File',
                                                 multiple=False, restore_directory=True)
-
-        csv_file = open(csv_path)
-        file_reader = csv.reader(csv_file)
-
         shared_parameter_list = []
 
-        for row in file_reader:
-            row_len = len(row)
-            if row_len < 3:
-                print("Line {} is invalid, less than 3 column".format(file_reader.line_num))
-            name, group, parameter_type = row[0:3]
-            visible = True
-            guid = None
-            if row_len > 4:
-                visible = bool(row[3])
-            if row_len > 5:
-                guid = Guid(row[4])
+        with open(csv_path, "r") as csv_file:
+            file_reader = csv.reader(csv_file)
+            file_reader.next()
 
-            shared_parameter_list.append(SharedParameter(name, group, parameter_type, visible, guid))
+            for row in file_reader:
+                shared_parameter_list.append(SharedParameter(*row))
+
         return shared_parameter_list
 
     @classmethod
     def read_from_definition_file(cls, definition_groups=None, definition_names=None, definition_file=None):
+        """Retrieve
+        
+        :type definition_groups: Autodesk.Revit.DB.DefinitionGroup
+        :param definition_groups:
+        :param definition_names: 
+        :param definition_file: 
+        :return: 
+        """
         if not definition_groups:
             definition_groups = []
 
@@ -120,7 +137,7 @@ class SharedParameter:
             external_definition_create_options = DB.ExternalDefinitionCreationOptions(self.name,
                                                                                       self.type,
                                                                                       GUID=self.guid,
-                                                                                      Visible=self.visible)
+                                                                                      Visible=self.unit)
             definition = definition_group.Definitions.Create(external_definition_create_options)
 
         return definition
