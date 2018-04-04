@@ -1,7 +1,8 @@
 # coding: utf8
 import rpw
 # noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import ParameterType, DefinitionGroups, DefinitionGroup, UnitType
+from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroups, DefinitionGroup, UnitType, \
+    ExternalDefinition
 # noinspection PyUnresolvedReferences
 from rpw import revit, DB, UI
 # noinspection PyUnresolvedReferences
@@ -53,6 +54,9 @@ class SharedParameter:
                     sort=False)
                 self.type = getattr(ParameterType, selected_type)
 
+    def __repr__(self):
+        return "<{}> {}{}".format(self.__class__.__name__, self.name, self.guid)
+
     @staticmethod
     def read_from_csv(csv_path=None):
         """
@@ -78,9 +82,9 @@ class SharedParameter:
 
     @classmethod
     def read_from_definition_file(cls, definition_groups=None, definition_names=None, definition_file=None):
-        """Retrieve
-        
-        :type definition_groups: Autodesk.Revit.DB.DefinitionGroup
+        # type: (list, list, DefinitionFile) -> list
+        """
+        Retrieve definitions from a definition file
         :param definition_groups:
         :param definition_names: 
         :param definition_file: 
@@ -109,12 +113,13 @@ class SharedParameter:
 
         return shared_parameter_list
 
-
     def write_to_definition_file(self, definition_file=None, warning=True):
+        # type: (DefinitionFile, bool) -> ExternalDefinition
         """
         Create a new parameter definition in current shared parameter file
-        :param warning: warn user if a definition with given name already exist
-        :return: definition
+        :param definition_file: (Optional) definition file
+        :param warning: (Optional) Warn user if a definition with given name already exist
+        :return: External definition which have just been written
         """
         if not definition_file:
             definition_file = revit.app.OpenSharedParameterFile()
@@ -145,10 +150,8 @@ class SharedParameter:
     @staticmethod
     def create_definition_file(path_and_name):
         """Create a new DefinitionFile to store SharedParameter definitions
-        Args:
-            path_and_name (str): file path and name including extension (.txt file)
-        Returns:
-            DefinitionFile
+        :param path_and_name: file path and name including extension (.txt file)
+        :rtype: DefinitionFile
         """
         with open(path_and_name, "w"):
             pass

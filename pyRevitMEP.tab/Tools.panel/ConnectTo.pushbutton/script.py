@@ -59,7 +59,7 @@ try:
     reference = uidoc.Selection.PickObject(ObjectType.Element, NoInsulation(), "Pick element to move")
     moved_element = doc.GetElement(reference)
     moved_point = reference.GlobalPoint
-    reference = uidoc.Selection.PickObject(ObjectType.Element, "Pick element to be connected to")
+    reference = uidoc.Selection.PickObject(ObjectType.Element, NoInsulation(), "Pick element to be connected to")
     target_element = doc.GetElement(reference)
     target_point = reference.GlobalPoint
 except Exceptions.OperationCanceledException:
