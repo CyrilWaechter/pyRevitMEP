@@ -9,6 +9,9 @@ from rpw import revit, DB, UI
 from System import Guid
 from pyrevit.forms import WPFWindow
 import csv
+from pyrevit import script
+
+logger = script.get_logger()
 
 class SharedParameter:
     """
@@ -58,6 +61,14 @@ class SharedParameter:
         return "<{}> {}{}".format(self.__class__.__name__, self.name, self.guid)
 
     @staticmethod
+    def get_definition_file():
+        # type: () -> DefinitionFile
+        definition_file = revit.app.OpenSharedParameterFile()
+        if not definition_file:
+            raise LookupError("No shared parameter file defined")
+        return definition_file
+
+    @staticmethod
     def read_from_csv(csv_path=None):
         """
         Retrieve shared parameters from a csv file.
@@ -69,6 +80,8 @@ class SharedParameter:
         if not csv_path:
             csv_path = rpw.ui.forms.select_file(extensions='csv Files (*.csv*)|*.csv*', title='Select File',
                                                 multiple=False, restore_directory=True)
+            if not csv_path:
+                raise ValueError("No file selected")
         shared_parameter_list = []
 
         with open(csv_path, "r") as csv_file:
@@ -104,8 +117,12 @@ class SharedParameter:
         shared_parameter_list = []
 
         for dg in definition_file.Groups:
-            if definition_groups and dg.Name not in definition_groups:
-                continue
+            logger.debug(definition_groups)
+            if definition_groups:
+                try:
+                    definition_groups.Item[dg.Name]
+                except KeyError:
+                    continue
             for dn in dg.Definitions:
                 if definition_names and dn.Name not in definition_names:
                     continue
@@ -122,9 +139,7 @@ class SharedParameter:
         :return: External definition which have just been written
         """
         if not definition_file:
-            definition_file = revit.app.OpenSharedParameterFile()
-            if not definition_file:
-                raise LookupError("No shared parameter file defined")
+            self.get_definition_file()
 
         for dg in definition_file.Groups:
             if dg.Name == self.group:

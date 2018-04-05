@@ -1,17 +1,14 @@
 # coding: utf8
 import rpw
 # noinspection PyUnresolvedReferences
-from rpw import revit, DB, UI
+from rpw import revit
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException
 from pyrevit.script import get_logger
-from pyrevit.forms import WPFWindow
-from pyRevitMEP.parameter import SharedParameter, ProjectParameter
+from pyrevit.forms import WPFWindow, SelectFromList
+from pyRevitMEP.parameter import SharedParameter
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
-from System.Collections.Generic import List
-from System import Uri, UriKind
-from System.Windows.Controls import Image
 
 __doc__ = "Batch create project shared parameters from file"
 __title__ = "BatchCreateSharedParameters"
@@ -33,6 +30,7 @@ class Gui(WPFWindow):
         self.set_image_source("import_img", "icons8-import-32.png")
         self.set_image_source("import_revit_img", "icons8-import-32.png")
         self.set_image_source("ok_img", "icons8-checkmark-32.png")
+        self.set_image_source("save_img", "icons8-save-32.png")
 
     def auto_generating_column(self, sender, e):
         headername = e.Column.Header.ToString()
@@ -50,20 +48,33 @@ class Gui(WPFWindow):
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
-        with rpw.db.Transaction("Batch create shared parameters"):
-            for parameter in self.data_grid_content:
-                # TODO function to create parameters
-                return
+        """Return listed definitions"""
+        self.Close()
+        return self.data_grid_content
+
+    # noinspection PyUnusedLocal
+    def save_click(self, sender, e):
+        """Return listed definitions"""
+        for parameter in self.data_grid_content:
+            return self.data_grid_content
 
     # noinspection PyUnusedLocal
     def load_from_file_click(self, sender, e):
-        for parameter in SharedParameter.read_from_csv():
-            self.data_grid_content.Add(parameter)
+        try:
+            for parameter in SharedParameter.read_from_csv():
+                self.data_grid_content.Add(parameter)
+        except ValueError:
+            return
 
     # noinspection PyUnusedLocal
     def load_from_definition_file_click(self, sender, e):
-        for parameter in SharedParameter.read_from_definition_file():
-            self.data_grid_content.Add(parameter)
+        available_groups = SharedParameter.get_definition_file().Groups
+        groups = SelectFromList(available_groups, "Select groups", 200, 200).show_dialog()
+        try:
+            for parameter in SharedParameter.read_from_definition_file(definition_groups=groups):
+                self.data_grid_content.Add(parameter)
+        except LookupError as e:
+            logger.info(e)
 
     # noinspection PyUnusedLocal
     def add(self, sender, e):
@@ -78,6 +89,15 @@ class Gui(WPFWindow):
     def binding_click(self, sender, e):
         self.project_parameters_datagrid.SelectedItem
 
+    @classmethod
+    def show_dialog(cls):
+        gui = Gui("WPFWindow.xaml")
+        gui.ShowDialog()
 
-gui = Gui("WPFWindow.xaml")
-gui.ShowDialog()
+        return gui.data_grid_content
+
+if __name__ == '__main__':
+    definitions = Gui.show_dialog()
+    for d in definitions:
+        logger.debug(d)
+

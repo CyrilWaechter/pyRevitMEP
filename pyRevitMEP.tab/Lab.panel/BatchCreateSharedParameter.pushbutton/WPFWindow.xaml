@@ -19,6 +19,10 @@
                             Style="{StaticResource buttonStyle}">
                         <Image x:Name="ok_img" Height="20"/>
                     </Button>
+                    <Button Click="save_click"
+                            Style="{StaticResource buttonStyle}">
+                        <Image x:Name="save_img" Height="20"/>
+                    </Button>
                     <Button Click="load_from_file_click"
                             Style="{StaticResource buttonStyle}">
                         <Image x:Name="import_img" Height="20"/>
