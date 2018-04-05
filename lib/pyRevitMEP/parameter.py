@@ -2,16 +2,13 @@
 import rpw
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroups, DefinitionGroup, UnitType, \
-    ExternalDefinition
+    ExternalDefinition, ExternalDefinitionCreationOptions
 # noinspection PyUnresolvedReferences
 from rpw import revit, DB, UI
 # noinspection PyUnresolvedReferences
 from System import Guid
-from pyrevit.forms import WPFWindow
+from pyrevit.forms import WPFWindow, alert
 import csv
-from pyrevit import script
-
-logger = script.get_logger()
 
 class SharedParameter:
     """
@@ -25,8 +22,8 @@ class SharedParameter:
     :param visible: If false parameter is stored without being visible.
     """
     def __init__(self, name, type, group="pyRevitMEP", guid=None,
-                 description=None, modifiable=True, visible=True):
-        # type: (str, ParameterType or str, DefinitionGroup, Guid, str, bool, bool) -> None
+                 description="", modifiable=True, visible=True):
+        # type: (str, ParameterType or str, str, Guid, str, bool, bool) -> None
 
         self.name = name
         self.description = description
@@ -58,7 +55,7 @@ class SharedParameter:
                 self.type = getattr(ParameterType, selected_type)
 
     def __repr__(self):
-        return "<{}> {}{}".format(self.__class__.__name__, self.name, self.guid)
+        return "<{}> {} {}".format(self.__class__.__name__, self.name, self.guid)
 
     @staticmethod
     def get_definition_file():
@@ -110,23 +107,25 @@ class SharedParameter:
             definition_names = []
 
         if not definition_file:
-            definition_file = revit.app.OpenSharedParameterFile()
-            if not definition_file:
-                raise LookupError("No shared parameter file defined")
+            definition_file = cls.get_definition_file()
 
         shared_parameter_list = []
 
         for dg in definition_file.Groups:
-            logger.debug(definition_groups)
-            if definition_groups:
-                try:
-                    definition_groups.Item[dg.Name]
-                except KeyError:
+            if definition_groups and dg.Name not in (dg.Name for dg in definition_groups):
+                continue
+            for definition in dg.Definitions:
+                if definition_names and definition.Name not in definition_names:
                     continue
-            for dn in dg.Definitions:
-                if definition_names and dn.Name not in definition_names:
-                    continue
-                shared_parameter_list.append(cls(dn.Name, dg.Name, dn.ParameterType, dn.Visible, dn.GUID))
+                shared_parameter_list.append(cls(definition.Name,
+                                                 definition.ParameterType,
+                                                 dg.Name,
+                                                 definition.GUID,
+                                                 definition.Description,
+                                                 definition.UserModifiable,
+                                                 definition.Visible
+                                                 )
+                                             )
 
         return shared_parameter_list
 
@@ -139,28 +138,35 @@ class SharedParameter:
         :return: External definition which have just been written
         """
         if not definition_file:
-            self.get_definition_file()
+            definition_file = self.get_definition_file()
 
-        for dg in definition_file.Groups:
-            if dg.Name == self.group:
-                definition_group = dg
-                break
-        else:
+        if not self.group:
+            self.group = "pyRevitMEP"
+
+        definition_group = definition_file.Groups[self.group]
+        if not definition_group:
             definition_group = definition_file.Groups.Create(self.group)
 
-        for definition in definition_group.Definitions:
-            if definition.Name == self.name:
-                if warning:
-                    print("A parameter definition named {} already exist")
-                break
+        if definition_group.Definitions[self.name] and warning:
+            alert("A parameter definition named {} already exist")
         else:
-            external_definition_create_options = DB.ExternalDefinitionCreationOptions(self.name,
-                                                                                      self.type,
-                                                                                      GUID=self.guid,
-                                                                                      Visible=self.unit)
+            external_definition_create_options = ExternalDefinitionCreationOptions(self.name,
+                                                                                   self.type,
+                                                                                   GUID=self.guid,
+                                                                                   UserModifiable=self.modifiable,
+                                                                                   Description = self.description,
+                                                                                   Visible=self.visible)
             definition = definition_group.Definitions.Create(external_definition_create_options)
 
         return definition
+
+    def delete_from_definition_file(self, definition_file=None, warning=True):
+        # type: (DefinitionFile, bool) -> None
+
+        with open(definition_file, 'w') as df:
+            csv.writer()
+
+
 
     @staticmethod
     def create_definition_file(path_and_name):

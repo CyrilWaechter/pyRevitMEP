@@ -31,6 +31,7 @@ class Gui(WPFWindow):
         self.set_image_source("import_revit_img", "icons8-import-32.png")
         self.set_image_source("ok_img", "icons8-checkmark-32.png")
         self.set_image_source("save_img", "icons8-save-32.png")
+        self.set_image_source("delete_img", "icons8-trash-32.png")
 
     def auto_generating_column(self, sender, e):
         headername = e.Column.Header.ToString()
@@ -54,9 +55,16 @@ class Gui(WPFWindow):
 
     # noinspection PyUnusedLocal
     def save_click(self, sender, e):
-        """Return listed definitions"""
+        """Save ExternalDefinitions to DefinitionFile"""
         for parameter in self.data_grid_content:
-            return self.data_grid_content
+            parameter.write_to_definition_file()
+
+    # noinspection PyUnusedLocal
+    def delete_click(self, sender, e):
+        """Return listed definitions"""
+        for item in list(self.datagrid.SelectedItems):
+            df_path = revit.app.SharedParametersFilename
+            self.data_grid_content.Remove(item)
 
     # noinspection PyUnusedLocal
     def load_from_file_click(self, sender, e):
@@ -69,7 +77,8 @@ class Gui(WPFWindow):
     # noinspection PyUnusedLocal
     def load_from_definition_file_click(self, sender, e):
         available_groups = SharedParameter.get_definition_file().Groups
-        groups = SelectFromList(available_groups, "Select groups", 200, 200).show_dialog()
+        groups = SelectFromList.show(available_groups, "Select groups", 400, 300)
+        logger.debug("{} result = {}".format(SelectFromList.__name__, groups))
         try:
             for parameter in SharedParameter.read_from_definition_file(definition_groups=groups):
                 self.data_grid_content.Add(parameter)

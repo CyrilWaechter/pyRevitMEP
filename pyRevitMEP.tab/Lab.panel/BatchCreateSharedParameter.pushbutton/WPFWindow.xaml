@@ -23,6 +23,10 @@
                             Style="{StaticResource buttonStyle}">
                         <Image x:Name="save_img" Height="20"/>
                     </Button>
+                    <Button Click="delete_click"
+                            Style="{StaticResource buttonStyle}">
+                        <Image x:Name="delete_img" Height="20"/>
+                    </Button>
                     <Button Click="load_from_file_click"
                             Style="{StaticResource buttonStyle}">
                         <Image x:Name="import_img" Height="20"/>
@@ -42,14 +46,6 @@
                 </StackPanel>
                 <Grid Margin="20">
                     <DataGrid Name="datagrid" AutoGenerateColumns="True" AutoGeneratingColumn="auto_generating_column">
-                        <!--<DataGrid.Columns>-->
-                            <!--<DataGridTextColumn Header="Name" Binding="{Binding name}"/>-->
-                            <!--<DataGridTextColumn Header="Type" Binding="{Binding type}"/>-->
-                            <!--<DataGridTextColumn Header="Group" Binding="{Binding group}"/>-->
-                            <!--<DataGridTextColumn Header="GUID" Binding="{Binding guid}"/>-->
-                            <!--<DataGridCheckBoxColumn Header="UserModifiable" Binding="{Binding modifiable}"/>-->
-                            <!--<DataGridCheckBoxColumn Header="Visible" Binding="{Binding visible}"/>-->
-                        <!--</DataGrid.Columns>-->
                     </DataGrid>
                 </Grid>
             </StackPanel>
