@@ -17,7 +17,7 @@ class CustomizableEvent:
         >>> customizable_event.raise_event(rename_views, views_and_names)
         """
         # Create an handler instance and his associated ExternalEvent
-        custom_handler = CustomHandler()
+        custom_handler = _CustomHandler()
         custom_handler.customizable_event = self
         self.custom_event = UI.ExternalEvent.Create(custom_handler)
 
@@ -26,7 +26,7 @@ class CustomizableEvent:
         self.args = ()
         self.kwargs = {}
 
-    def raised_method(self):
+    def _raised_method(self):
         """ !!! DO NOT USE THIS METHOD IN YOUR SCRIPT !!!
         Method executed by IExternalEventHandler.Execute when ExternalEvent is raised by ExternalEvent.Raise.
         """
@@ -45,7 +45,7 @@ class CustomizableEvent:
         self.custom_event.Raise()
 
 
-class CustomHandler(UI.IExternalEventHandler):
+class _CustomHandler(UI.IExternalEventHandler):
     """ Subclass of IExternalEventHandler intended to be used in CustomizableEvent class
     Input : function or method. Execute input in a IExternalEventHandler"""
     def __init__(self):
@@ -55,7 +55,7 @@ class CustomHandler(UI.IExternalEventHandler):
     # noinspection PyPep8Naming, PyUnusedLocal
     def Execute(self, application):
         try:
-            self.customizable_event.raised_method()
+            self.customizable_event._raised_method()
         except InvalidOperationException:
             # If you don't catch this exeption Revit may crash.
             print "InvalidOperationException catched"
