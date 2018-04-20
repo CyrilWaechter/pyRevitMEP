@@ -10,6 +10,7 @@ from System import Guid
 from pyrevit.forms import WPFWindow, alert
 import csv
 
+
 class SharedParameter:
     """
     Class used to manage Revit shared parameters
@@ -160,13 +161,18 @@ class SharedParameter:
 
         return definition
 
-    def delete_from_definition_file(self, definition_file=None, warning=True):
+    @staticmethod
+    def delete_from_definition_file(shared_parameters, definition_file=None, warning=True):
         # type: (DefinitionFile, bool) -> None
-
-        with open(definition_file, 'w') as df:
-            csv.writer()
-
-
+        with open(definition_file, 'r') as file, open("{}.tmp".format(definition_file.Filename), 'w') as file_tmp:
+            writer = csv.writer(file_tmp, delimiter="\t")
+            for row in csv.reader(file, delimiter="\t"):
+                for definition in shared_parameters:
+                    if row[0] == "PARAM" and row[2] == definition.name and row[5] == definition.group:
+                        break
+                else:
+                    writer.writerow(row)
+        
 
     @staticmethod
     def create_definition_file(path_and_name):
