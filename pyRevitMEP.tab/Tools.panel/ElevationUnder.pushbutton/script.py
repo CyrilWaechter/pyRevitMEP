@@ -66,8 +66,7 @@ def compute_elevation(view3d, parameter_name):
                     element.Id)
                 )
                 continue
-            distance = reference.GlobalPoint.DistanceTo(origin)
-            print("Distance : {}".format(distance, doc.GetElement(reference.ElementId).Name))
+            distance = -reference.GlobalPoint.DistanceTo(origin)
             element.LookupParameter(parameter_name).Set(distance)
 
 
@@ -79,7 +78,7 @@ class Gui(WPFWindow):
         WPFWindow.__init__(self, xaml_file_name)
         self.view3d = get_view3d()
         self.tbk_view3d.Text = self.view3d.Name
-        self.tbx_parameter_name.Text = "ComputedElevation"
+        self.tbx_parameter_name.Text = "py_Elevation"
 
     def compute_selected_click(self, sender, e):
         # compute_elevation(self.view3d, self.tbx_parameter_name.Text)
