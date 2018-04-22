@@ -1,14 +1,15 @@
 # coding: utf8
+
+import os
+import csv
+
 import rpw
-# noinspection PyUnresolvedReferences
+from rpw import revit
 from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroups, DefinitionGroup, UnitType, \
     ExternalDefinition, ExternalDefinitionCreationOptions
-# noinspection PyUnresolvedReferences
-from rpw import revit, DB, UI
-# noinspection PyUnresolvedReferences
+from pyrevit.forms import alert
+
 from System import Guid
-from pyrevit.forms import WPFWindow, alert
-import csv
 
 
 class SharedParameter:
@@ -23,18 +24,24 @@ class SharedParameter:
     :param visible: If false parameter is stored without being visible.
     """
     def __init__(self, name, type, group="pyRevitMEP", guid=None,
-                 description="", modifiable=True, visible=True):
-        # type: (str, ParameterType or str, str, Guid, str, bool, bool) -> None
+                 description="", modifiable=True, visible=True, new=True):
+        # type: (str, ParameterType or str, str, Guid or None, str, bool, bool, bool) -> None
 
         self.name = name
         self.description = description
         self.group = group
 
-        true_tuple = (True, "", None, "True", "Yes", "Oui")
+        true_tuple = (True, "", None, "True", "Yes", "Oui", 1)
+
         if modifiable in true_tuple:
             self.modifiable = True
+        else:
+            self.modifiable = False
+
         if visible in true_tuple:
             self.visible = True
+        else:
+            self.visible = False
 
         # Check if a Guid is given. If not a new one is created
         if not guid:
@@ -55,16 +62,36 @@ class SharedParameter:
                     sort=False)
                 self.type = getattr(ParameterType, selected_type)
 
+        self.initial_values = {}
+        if new is True:
+            self.new = new
+        else:
+            self.new = False
+            self.initial_values_update()
+
+        self.changed = False
+
     def __repr__(self):
         return "<{}> {} {}".format(self.__class__.__name__, self.name, self.guid)
 
-    @staticmethod
-    def get_definition_file():
+    @classmethod
+    def get_definition_file(cls):
         # type: () -> DefinitionFile
         definition_file = revit.app.OpenSharedParameterFile()
         if not definition_file:
-            raise LookupError("No shared parameter file defined")
+            cls.change_definition_file()
         return definition_file
+
+    def get_definitiongroup(self, definition_file=None):
+        # type: (DefinitionFile) -> DefinitionGroup
+        if not definition_file:
+            definition_file = self.get_definition_file()
+        return definition_file.Groups[self.group]
+
+    def initial_values_update(self):
+        self.initial_values = {"name": self.name, "type": self.type, "group": self.group,
+                               "guid": self.guid, "description": self.description, "modifiable": self.modifiable,
+                               "visible": self.visible}
 
     @staticmethod
     def read_from_csv(csv_path=None):
@@ -87,7 +114,7 @@ class SharedParameter:
             file_reader.next()
 
             for row in file_reader:
-                shared_parameter_list.append(SharedParameter(*row))
+                shared_parameter_list.append(SharedParameter(*row, new=False))
 
         return shared_parameter_list
 
@@ -96,10 +123,6 @@ class SharedParameter:
         # type: (list, list, DefinitionFile) -> list
         """
         Retrieve definitions from a definition file
-        :param definition_groups:
-        :param definition_names: 
-        :param definition_file: 
-        :return: 
         """
         if not definition_groups:
             definition_groups = []
@@ -124,7 +147,8 @@ class SharedParameter:
                                                  definition.GUID,
                                                  definition.Description,
                                                  definition.UserModifiable,
-                                                 definition.Visible
+                                                 definition.Visible,
+                                                 False
                                                  )
                                              )
 
@@ -149,41 +173,68 @@ class SharedParameter:
             definition_group = definition_file.Groups.Create(self.group)
 
         if definition_group.Definitions[self.name] and warning:
-            alert("A parameter definition named {} already exist")
+            alert("A parameter definition named {} already exist".format(self.name))
+            return
         else:
             external_definition_create_options = ExternalDefinitionCreationOptions(self.name,
                                                                                    self.type,
                                                                                    GUID=self.guid,
                                                                                    UserModifiable=self.modifiable,
-                                                                                   Description = self.description,
+                                                                                   Description=self.description,
                                                                                    Visible=self.visible)
             definition = definition_group.Definitions.Create(external_definition_create_options)
-
+        self.initial_values_update()
+        self.new = self.changed = False
         return definition
 
     @staticmethod
     def delete_from_definition_file(shared_parameters, definition_file=None, warning=True):
-        # type: (DefinitionFile, bool) -> None
-        with open(definition_file, 'r') as file, open("{}.tmp".format(definition_file.Filename), 'w') as file_tmp:
-            writer = csv.writer(file_tmp, delimiter="\t")
-            for row in csv.reader(file, delimiter="\t"):
-                for definition in shared_parameters:
-                    if row[0] == "PARAM" and row[2] == definition.name and row[5] == definition.group:
-                        break
+        # type: (List[SharedParameter], DefinitionFile, bool) -> None
+        if definition_file is None:
+            definition_file = SharedParameter.get_definition_file()
+        file_path = definition_file.Filename
+        tmp_file_path = "{}.tmp".format(file_path)
+
+        with open(file_path, 'r') as file, open(tmp_file_path, 'wb') as file_tmp:
+            group_dict = {}
+            for line in file:
+                row = line.strip("\n").strip("\x00").strip("\r").decode('utf-16').split("\t")
+                if row[0]=="GROUP":
+                    group_dict[row[1]] = row[2]
+                    file_tmp.write(line)
+                elif row[0]=="PARAM":
+                    for definition in shared_parameters:
+                        if row[2] == definition.name and group_dict[row[5]] == definition.group:
+                            break
+                    else:
+                        file_tmp.write(line)
                 else:
-                    writer.writerow(row)
-        
+                    file_tmp.write(line)
+
+        # Remove temp files and rename modified file to original file name
+        os.remove(file_path)
+        os.rename(tmp_file_path, file_path)
 
     @staticmethod
-    def create_definition_file(path_and_name):
+    def create_definition_file(path_and_name=None):
         """Create a new DefinitionFile to store SharedParameter definitions
         :param path_and_name: file path and name including extension (.txt file)
         :rtype: DefinitionFile
         """
+        if path_and_name is None:
+            path = rpw.ui.forms.select_folder()
+            path_and_name = rpw.ui.forms.TextInput("name", r"{}\pyrevitmep_sharedparameters.txt".format(path), False)
         with open(path_and_name, "w"):
             pass
-        revit.app.SharedParametersFilename = path_and_name
-        return revit.app.OpenSharedParameterFile()
+        rpw.revit.app.SharedParametersFilename = path_and_name
+        return rpw.revit.app.OpenSharedParameterFile()
+
+    @classmethod
+    def change_definition_file(cls):
+        rpw.revit.app.SharedParametersFilename = rpw.ui.forms.select_file()
+        rpw.revit.app.OpenSharedParameterFile()
+        return cls.get_definition_file()
+
 
 
 class ProjectParameter:
@@ -200,7 +251,7 @@ class ProjectParameter:
     @classmethod
     def read_from_revit_doc(cls, doc=revit.doc):
         project_parameter_list = []
-        for parameter in DB.FilteredElementCollector(doc).OfClass(DB.ParameterElement):
+        for parameter in FilteredElementCollector(doc).OfClass(ParameterElement):
             definition = parameter.GetDefinition()
             binding = doc.ParameterBindings[definition]
             if binding:
