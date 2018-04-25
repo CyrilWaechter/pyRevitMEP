@@ -4,7 +4,7 @@ import rpw
 from rpw import revit, DB
 from Autodesk.Revit.DB.Plumbing import PipingSystemType
 from pyrevit.forms import WPFWindow
-from pyRevitMEP.workset import Workset
+from pypevitmep.workset import Workset
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
 

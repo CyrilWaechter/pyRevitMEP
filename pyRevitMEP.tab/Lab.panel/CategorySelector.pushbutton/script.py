@@ -1,7 +1,7 @@
 # coding: utf8
 import rpw
 from Autodesk.Revit.DB import Element, BuiltInCategory, Category
-# from pyRevitMEP.category import Category
+# from pypevitmep.category import Category
 
 __doc__ = "A tool to select BuiltInCategories"
 __title__ = "CategorySelector"

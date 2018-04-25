@@ -6,7 +6,7 @@ from rpw import DB, UI
 from Autodesk.Revit.Exceptions import InvalidOperationException
 from pyrevit.script import get_logger
 from pyrevit.forms import WPFWindow
-from pyRevitMEP.event import CustomizableEvent
+from pypevitmep.event import CustomizableEvent
 
 __doc__ = "Copy legend location in active ViewSheet"
 __title__ = "CopyLegendsLocations"

@@ -3,9 +3,9 @@
 Copyright (c) 2017 Cyril Waechter
 Python scripts for Autodesk Revit
 
-This file is part of pyRevitMEP repository at https://github.com/CyrilWaechter/pyRevitMEP
+This file is part of pypevitmep repository at https://github.com/CyrilWaechter/pypevitmep
 
-pyRevitMEP is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
+pypevitmep is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
 you can redistribute it and/or modify it under the terms of the GNU General Public License
 version 3, as published by the Free Software Foundation.
 
@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 See this link for a copy of the GNU General Public License protecting this package.
-https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
+https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction, Element, BuiltInParameter, FilteredElementCollector, \
@@ -26,8 +26,8 @@ from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCancel
 from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
 # noinspection PyUnresolvedReferences
 from System import Guid
-from pyRevitMEP.parameter import create_shared_parameter_definition, create_project_parameter
-from pyRevitMEP.event import CustomizableEvent
+from pypevitmep.parameter import create_shared_parameter_definition, create_project_parameter
+from pypevitmep.event import CustomizableEvent
 
 import operator
 import re
@@ -307,7 +307,7 @@ class ViewRename(WPFWindow):
             category_set.Insert(category)
             with rpw.db.Transaction("Add pyRevitMEP_viewrename_patterns to project parameters"):
                 definition = create_shared_parameter_definition(revit.app, self.storage_pattern_parameter,
-                                                                "pyRevitMEP", DB.ParameterType.Text)
+                                                                "pypevitmep", DB.ParameterType.Text)
                 create_project_parameter(revit.app, definition, category_set, DB.BuiltInParameterGroup.PG_PATTERN, True)
                 param = project_info_param_set[self.storage_pattern_parameter]
                 pattern_dict = {}

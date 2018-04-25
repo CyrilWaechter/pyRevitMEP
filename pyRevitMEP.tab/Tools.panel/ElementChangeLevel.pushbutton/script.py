@@ -2,9 +2,9 @@
 Copyright (c) 2017 Cyril Waechter
 Python scripts for Autodesk Revit
 
-This file is part of pyRevitMEP repository at https://github.com/CyrilWaechter/pyRevitMEP
+This file is part of pypevitmep repository at https://github.com/CyrilWaechter/pypevitmep
 
-pyRevitMEP is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
+pypevitmep is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
 you can redistribute it and/or modify it under the terms of the GNU General Public License
 version 3, as published by the Free Software Foundation.
 
@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 See this link for a copy of the GNU General Public License protecting this package.
-https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
+https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
 
 # noinspection PyUnresolvedReferences
@@ -23,7 +23,7 @@ from Autodesk.Revit.DB import Transaction, BuiltInParameter, Element, Level, MEP
 from pyrevit.forms import WPFWindow
 import rpw
 from rpw import revit
-from pyRevitMEP.event import CustomizableEvent
+from pypevitmep.event import CustomizableEvent
 
 __doc__ = "Change selected elements level without moving it"
 __title__ = "Change Level"

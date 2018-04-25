@@ -3,9 +3,9 @@
 Copyright (c) 2017 Cyril Waechter
 Python scripts for Autodesk Revit
 
-This file is part of pyRevitMEP repository at https://github.com/CyrilWaechter/pyRevitMEP
+This file is part of pypevitmep repository at https://github.com/CyrilWaechter/pypevitmep
 
-pyRevitMEP is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
+pypevitmep is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
 you can redistribute it and/or modify it under the terms of the GNU General Public License
 version 3, as published by the Free Software Foundation.
 
@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 See this link for a copy of the GNU General Public License protecting this package.
-https://github.com/CyrilWaechter/pyRevitMEP/blob/master/LICENSE
+https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import FilteredElementCollector, Element, Transaction
@@ -23,7 +23,7 @@ from Autodesk.Revit.DB import FilteredElementCollector, Element, Transaction
 from Autodesk.Revit.DB.Plumbing import PipingSystemType, FluidTemperature
 # For future implementation in rpw
 # from rpw.db.plumbing import FluidType
-from pyRevitMEP.plumbing import FluidType
+from pypevitmep.plumbing import FluidType
 
 import rpw
 from pyrevit import script

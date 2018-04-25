@@ -6,7 +6,8 @@ import csv
 import rpw
 from rpw import revit
 from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroups, DefinitionGroup, UnitType, \
-    ExternalDefinition, ExternalDefinitionCreationOptions
+    ExternalDefinition, ExternalDefinitionCreationOptions, FilteredElementCollector, ParameterElement, Definition, \
+    BindingMap, ElementBinding, Category
 from pyrevit.forms import alert
 
 from System import Guid
@@ -23,7 +24,7 @@ class SharedParameter:
     :param user_modifiable: This property indicates whether this parameter can be modified by UI user or not.
     :param visible: If false parameter is stored without being visible.
     """
-    def __init__(self, name, type, group="pyRevitMEP", guid=None,
+    def __init__(self, name, type, group="pypevitmep", guid=None,
                  description="", modifiable=True, visible=True, new=True):
         # type: (str, ParameterType or str, str, Guid or None, str, bool, bool, bool) -> None
 
@@ -166,7 +167,7 @@ class SharedParameter:
             definition_file = self.get_definition_file()
 
         if not self.group:
-            self.group = "pyRevitMEP"
+            self.group = "pypevitmep"
 
         definition_group = definition_file.Groups[self.group]
         if not definition_group:
@@ -236,9 +237,9 @@ class SharedParameter:
         return cls.get_definition_file()
 
 
-
 class ProjectParameter:
     def __init__(self, definition, binding):
+        # type: (Definition, Binding) -> None
         self.definition = definition
         self.binding = binding
         self.category_set = None
@@ -248,15 +249,25 @@ class ProjectParameter:
                                   self.definition.Name,
                                   [category.Name for category in self.binding.Categories])
 
+    @property
+    def name(self):
+        return self.definition.Name
+
+    @property
+    def parameter_type(self):
+        return self.definition.ParameterType
+
+    @property
+    def unit_type(self):
+        return self.definition.UnitType
+
     @classmethod
     def read_from_revit_doc(cls, doc=revit.doc):
-        project_parameter_list = []
         for parameter in FilteredElementCollector(doc).OfClass(ParameterElement):
             definition = parameter.GetDefinition()
-            binding = doc.ParameterBindings[definition]
+            binding = doc.ParameterBindings[definition] # type: ElementBinding
             if binding:
-                project_parameter_list.append(cls(definition, binding))
-        return project_parameter_list
+                yield cls(definition, binding)
 
     @staticmethod
     def all_categories():
@@ -266,9 +277,29 @@ class ProjectParameter:
                 category_set.Insert(category)
         return category_set
 
+    @staticmethod
+    def bound_allowed_category_generator():
+        for category in revit.doc.Settings.Categories:
+            if category.AllowsBoundParameters:
+                yield category
+
     def create(self, category_set=None):
         if category_set is None:
             category_set = self.all_categories()
+
+class BoundAllowedCategory:
+    def __init__(self, category):
+        # type: (Category) -> None
+        self.category = category
+        self.is_bound = False
+
+    @property
+    def name(self):
+        return self.category.Name
+
+    @property
+    def category_type(self):
+        return self.category.CategoryType
 
 
 def create_shared_parameter_definition(revit_app, name, group_name, parameter_type, visible=True):
@@ -288,7 +319,7 @@ def create_shared_parameter_definition(revit_app, name, group_name, parameter_ty
         if definition.Name == name:
             break
     else:
-        external_definition_create_options = DB.ExternalDefinitionCreationOptions(name, parameter_type)
+        external_definition_create_options = ExternalDefinitionCreationOptions(name, parameter_type)
         definition = definition_group.Definitions.Create(external_definition_create_options)
 
     return definition

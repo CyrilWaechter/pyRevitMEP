@@ -8,11 +8,14 @@ from Autodesk.Revit.DB import DefinitionFile
 import rpw
 from pyrevit.script import get_logger
 from pyrevit.forms import WPFWindow, SelectFromList, alert
-from pyRevitMEP.parameter import SharedParameter
+from pypevitmep.parameter import SharedParameter
 
 from System.Collections.ObjectModel import ObservableCollection
 
-__doc__ = "Interface to manage shared parameters"
+__doc__ = """Interface to manage shared parameters
+Features : create, modify, duplicate, save to definition file, delete multiple parameters, 
+open multiple parameter groups in the same datagrid, create a new definition file, create from csv, 
+return selected parameter for another use (e.g. create project parameters, family parameters)"""
 __title__ = "SharedParameters"
 __author__ = "Cyril Waechter"
 

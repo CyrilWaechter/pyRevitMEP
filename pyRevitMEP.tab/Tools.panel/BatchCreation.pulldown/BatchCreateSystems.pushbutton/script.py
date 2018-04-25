@@ -15,7 +15,7 @@ __author__ = "Cyril Waechter"
 
 logger = get_logger()
 
-from pyRevitMEP import excel
+from pypevitmep import excel
 
 xl_app = excel.initialise()
 

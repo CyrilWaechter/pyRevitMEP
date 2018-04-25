@@ -5,7 +5,7 @@ import rpw
 from rpw import revit, DB
 from pyrevit.forms import WPFWindow
 from pyrevit import script
-from pyRevitMEP.workset import Workset
+from pypevitmep.workset import Workset
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
 

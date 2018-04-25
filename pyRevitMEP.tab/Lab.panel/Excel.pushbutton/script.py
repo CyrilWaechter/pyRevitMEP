@@ -8,7 +8,7 @@ from pyrevit.script import get_logger
 import os
 import datetime
 
-from pyRevitMEP import excel
+from pypevitmep import excel
 
 logger = get_logger()
 
