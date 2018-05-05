@@ -3,14 +3,17 @@
 import os
 import csv
 
+from System import Guid
+
+from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroup, InstanceBinding, \
+    ExternalDefinition, ExternalDefinitionCreationOptions, Definition, \
+    ElementBinding, Category, LabelUtils, BuiltInParameterGroup, DefinitionBindingMapIterator, Document
+
 import rpw
 from rpw import revit
-from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroups, DefinitionGroup, UnitType, \
-    ExternalDefinition, ExternalDefinitionCreationOptions, FilteredElementCollector, ParameterElement, Definition, \
-    BindingMap, ElementBinding, Category
 from pyrevit.forms import alert
 
-from System import Guid
+# from manageshared import ManageSharedParameter
 
 
 class SharedParameter:
@@ -24,7 +27,7 @@ class SharedParameter:
     :param user_modifiable: This property indicates whether this parameter can be modified by UI user or not.
     :param visible: If false parameter is stored without being visible.
     """
-    def __init__(self, name, type, group="pypevitmep", guid=None,
+    def __init__(self, name, ptype, group="pypevitmep", guid=None,
                  description="", modifiable=True, visible=True, new=True):
         # type: (str, ParameterType or str, str, Guid or None, str, bool, bool, bool) -> None
 
@@ -50,16 +53,16 @@ class SharedParameter:
         else:
             self.guid = guid
         # Check if given parameter type is valid. If not user is prompted to choose one.
-        if isinstance(type, ParameterType):
-            self.type = type
+        if isinstance(ptype, ParameterType):
+            self.type = ptype
         else:
             try:
-                self.type = getattr(ParameterType, type)
+                self.type = getattr(ParameterType, ptype)
             except AttributeError:
                 selected_type = rpw.ui.forms.SelectFromList(
                     "Select ParameterType",
                     ParameterType.GetNames(ParameterType),
-                    "Parameter {} ParameterType: {} is not valid. Please select a parameter type".format(name, type),
+                    "Parameter {} ParameterType: {} is not valid. Please select a parameter type".format(name, ptype),
                     sort=False)
                 self.type = getattr(ParameterType, selected_type)
 
@@ -88,6 +91,9 @@ class SharedParameter:
         if not definition_file:
             definition_file = self.get_definition_file()
         return definition_file.Groups[self.group]
+
+    def get_definition(self):
+        return self.get_definitiongroup().Definitions[self.name]
 
     def initial_values_update(self):
         self.initial_values = {"name": self.name, "type": self.type, "group": self.group,
@@ -186,7 +192,7 @@ class SharedParameter:
             definition = definition_group.Definitions.Create(external_definition_create_options)
         self.initial_values_update()
         self.new = self.changed = False
-        return definition
+        return
 
     @staticmethod
     def delete_from_definition_file(shared_parameters, definition_file=None, warning=True):
@@ -200,10 +206,10 @@ class SharedParameter:
             group_dict = {}
             for line in file:
                 row = line.strip("\n").strip("\x00").strip("\r").decode('utf-16').split("\t")
-                if row[0]=="GROUP":
+                if row[0] == "GROUP":
                     group_dict[row[1]] = row[2]
                     file_tmp.write(line)
-                elif row[0]=="PARAM":
+                elif row[0] == "PARAM":
                     for definition in shared_parameters:
                         if row[2] == definition.name and group_dict[row[5]] == definition.group:
                             break
@@ -239,15 +245,20 @@ class SharedParameter:
 
 class ProjectParameter:
     def __init__(self, definition, binding):
-        # type: (Definition, Binding) -> None
+        # type: (Definition, ElementBinding) -> None
         self.definition = definition
         self.binding = binding
-        self.category_set = None
+        self.category_set = binding.Categories
+        self.pg_name = LabelUtils.GetLabelFor(definition.ParameterGroup)
+        self.pt_name = LabelUtils.GetLabelFor(definition.ParameterType)
+        self.ut_name = LabelUtils.GetLabelFor(definition.UnitType)
+        if isinstance(binding, InstanceBinding):
+            self.is_instance = True
+        else:
+            self.is_instance = False
 
     def __repr__(self):
-        return "<{}> {}{}".format(self.__class__.__name__,
-                                  self.definition.Name,
-                                  [category.Name for category in self.binding.Categories])
+            return "<{}> {}".format(self.__class__.__name__, self.definition.Name)
 
     @property
     def name(self):
@@ -261,13 +272,42 @@ class ProjectParameter:
     def unit_type(self):
         return self.definition.UnitType
 
+    @staticmethod
+    def bip_group_generator():
+        for builtinparametergroup in BuiltInParameterGroup.GetValues(BuiltInParameterGroup):
+            yield builtinparametergroup  # type: BuiltInParameterGroup
+
+    @classmethod
+    def bip_group_name_generator(cls):
+        for builtinparametergroup in cls.bip_group_generator():
+            yield LabelUtils.GetLabelFor(builtinparametergroup)
+
+    @classmethod
+    def bip_group_by_name(cls, name):
+        # type: (str) -> BuiltInParameterGroup
+        for bip_group in cls.bip_group_generator():
+            if LabelUtils.GetLabelFor(bip_group) == name:
+                return bip_group
+
     @classmethod
     def read_from_revit_doc(cls, doc=revit.doc):
-        for parameter in FilteredElementCollector(doc).OfClass(ParameterElement):
-            definition = parameter.GetDefinition()
-            binding = doc.ParameterBindings[definition] # type: ElementBinding
-            if binding:
-                yield cls(definition, binding)
+        # type: (Document) -> iter
+        """Generator which return all ProjectParameter in document"""
+        iterator = doc.ParameterBindings.ForwardIterator()  # type: DefinitionBindingMapIterator
+        for binding in iterator:  # type: ElementBinding
+            definition = iterator.Key
+            yield cls(definition, binding)
+
+    # @classmethod
+    # def new_from_shared_parameters(cls, instance=True, app=revit.app):
+    #     if instance:
+    #         binding = app.Create.NewInstanceBinding()  # type: ElementBinding
+    #     else:
+    #         binding = app.Create.NewTypeBinding()  # type: ElementBinding
+    #     for category in ProjectParameter.bound_allowed_category_generator():
+    #         binding.Categories.Insert(category)
+    #     for definition in ManageSharedParameter.show_dialog():
+    #         yield cls(definition, binding)
 
     @staticmethod
     def all_categories():
@@ -283,9 +323,6 @@ class ProjectParameter:
             if category.AllowsBoundParameters:
                 yield category
 
-    def create(self, category_set=None):
-        if category_set is None:
-            category_set = self.all_categories()
 
 class BoundAllowedCategory:
     def __init__(self, category):
@@ -300,35 +337,3 @@ class BoundAllowedCategory:
     @property
     def category_type(self):
         return self.category.CategoryType
-
-
-def create_shared_parameter_definition(revit_app, name, group_name, parameter_type, visible=True):
-    # Open shared parameter file
-    definition_file = revit_app.OpenSharedParameterFile()
-    if not definition_file:
-        raise LookupError("No shared parameter file")
-
-    for dg in definition_file.Groups:
-        if dg.Name == group_name:
-            definition_group = dg
-            break
-    else:
-        definition_group = definition_file.Groups.Create(group_name)
-
-    for definition in definition_group.Definitions:
-        if definition.Name == name:
-            break
-    else:
-        external_definition_create_options = ExternalDefinitionCreationOptions(name, parameter_type)
-        definition = definition_group.Definitions.Create(external_definition_create_options)
-
-    return definition
-
-
-def create_project_parameter(revit_app, definition, category_set, built_in_parameter_group, instance):
-    if instance:
-        binding = revit_app.Create.NewInstanceBinding(category_set)
-    else:
-        binding = revit.app.Create.NewTypeBinding(category_set)
-    parameter_bindings = revit.doc.ParameterBindings
-    parameter_bindings.Insert(definition, binding, built_in_parameter_group)

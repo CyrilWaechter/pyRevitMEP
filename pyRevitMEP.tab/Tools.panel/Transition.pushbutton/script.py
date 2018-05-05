@@ -68,15 +68,12 @@ def new_transition():
         rpw.ui.forms.Alert("It looks like one of the objects have no unused connector", header="AttributeError")
         return True
 
-    # Retrieves connectors direction and catch attribute error like when there is no unused connector available
     if not connector1 and not connector2:
         rpw.ui.forms.Alert("It looks like one of the objects have no unused connector", header="AttributeError")
         return True
 
-    # Move and connect
     with rpw.db.Transaction("Create transition"):
-        # If connector direction is same, rotate it
-        doc.Create.NewTransitionFitting(connector1, connector2)
+            doc.Create.NewTransitionFitting(connector1, connector2)
     return True
 
 
