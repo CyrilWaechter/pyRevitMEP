@@ -17,31 +17,30 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
-# noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import Transaction, Element, BuiltInParameter, FilteredElementCollector, \
-    ViewPlan, ViewSection, View3D, StorageType
-# noinspection PyUnresolvedReferences
-from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCanceledException, ArgumentException
-# noinspection PyUnresolvedReferences
-from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
-# noinspection PyUnresolvedReferences
+
 from System import Guid
-from pypevitmep.parameter import create_shared_parameter_definition, create_project_parameter
+
+from Autodesk.Revit.DB import Transaction, Element, BuiltInParameter, FilteredElementCollector, \
+    ViewPlan, ViewSection, View3D, StorageType, InstanceBinding, CategorySet, Document
+from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCanceledException, ArgumentException
+
+from pypevitmep.parameter import SharedParameter, ProjectParameter
 from pypevitmep.event import CustomizableEvent
 
 import operator
 import re
 import collections
-from rpw import doc, uidoc
 from pyrevit.forms import WPFWindow
 from pyrevit import script
 import rpw
-# noinspection PyUnresolvedReferences
 from rpw import revit, DB
 
 __doc__ = "Rename selected views according to a pattern"
 __title__ = "Rename views"
 __author__ = "Cyril Waechter"
+
+doc = revit.doc  # type: Document
+uidoc = revit.uidoc
 
 
 # Create a regular expression to retrieve Guid (including constructor) in a string
@@ -302,15 +301,23 @@ class ViewRename(WPFWindow):
             param = project_info_param_set[self.storage_pattern_parameter]
             pattern_dict = eval(param.value)
         except (rpw.exceptions.RpwParameterNotFound, SyntaxError) as error:
+            # create a project parameter to store patterns
             category_set = revit.app.Create.NewCategorySet()
             category = revit.doc.Settings.Categories.get_Item(DB.BuiltInCategory.OST_ProjectInformation)
             category_set.Insert(category)
-            with rpw.db.Transaction("Add pyRevitMEP_viewrename_patterns to project parameters"):
-                definition = create_shared_parameter_definition(revit.app, self.storage_pattern_parameter,
-                                                                "pypevitmep", DB.ParameterType.Text)
-                create_project_parameter(revit.app, definition, category_set, DB.BuiltInParameterGroup.PG_PATTERN, True)
-                param = project_info_param_set[self.storage_pattern_parameter]
-                pattern_dict = {}
+            # if no parameter with given name exist, create a temporary one
+            definition = SharedParameter.get_definition_by_name(self.storage_pattern_parameter)
+            if not definition:
+                shared_param = SharedParameter(self.storage_pattern_parameter, DB.ParameterType.Text)
+                definition = shared_param.write_to_definition_file()
+                shared_param.delete_from_definition_file()
+            binding = InstanceBinding(category_set)
+            project_param = ProjectParameter(definition, binding)
+            project_param.bip_group.bip_group = DB.BuiltInParameterGroup.PG_PATTERN
+            with rpw.db.Transaction("Add {} to project parameters".format(self.storage_pattern_parameter)):
+                project_param.save_to_revit_doc()
+            param = project_info_param_set[self.storage_pattern_parameter]
+            pattern_dict = {}
 
         for view_class in self.view_class_dict.keys():
             view_class_checkbox = eval('self.cb_{}'.format(view_class))
