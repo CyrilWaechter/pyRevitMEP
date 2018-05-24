@@ -5,6 +5,7 @@ import csv
 
 from System import Guid
 
+from Autodesk.Revit import Exceptions
 from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroup, InstanceBinding, \
     ExternalDefinition, ExternalDefinitionCreationOptions, Definition, \
     ElementBinding, Category, LabelUtils, BuiltInParameterGroup, DefinitionBindingMapIterator, Document
@@ -81,10 +82,10 @@ class SharedParameter:
     @classmethod
     def get_definition_file(cls):
         # type: () -> DefinitionFile
-        definition_file = revit.app.OpenSharedParameterFile()
-        if not definition_file:
-            cls.change_definition_file()
-        return definition_file
+        try:
+            return revit.app.OpenSharedParameterFile()
+        except Exceptions.InternalException:
+            return
 
     def get_definitiongroup(self, definition_file=None):
         # type: (DefinitionFile) -> DefinitionGroup
@@ -245,9 +246,10 @@ class SharedParameter:
 
     @classmethod
     def change_definition_file(cls):
-        rpw.revit.app.SharedParametersFilename = rpw.ui.forms.select_file()
-        rpw.revit.app.OpenSharedParameterFile()
-        return cls.get_definition_file()
+        path = rpw.ui.forms.select_file()
+        if path:
+            rpw.revit.app.SharedParametersFilename = path
+            return cls.get_definition_file()
 
 
 class ProjectParameter:

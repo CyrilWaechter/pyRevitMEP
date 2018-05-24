@@ -4,6 +4,7 @@ import os
 import locale
 from functools import cmp_to_key
 
+from Autodesk.Revit import Exceptions
 from Autodesk.Revit.DB import DefinitionFile
 
 from pyrevit.script import get_logger
@@ -55,6 +56,10 @@ class ManageSharedParameter(WPFWindow):
         self.tbk_file_name.DataContext = value
         self._definition_file = value
 
+    @staticmethod
+    def invalid_definition_file():
+        alert("Invalid definition file. Operation canceled.")
+
     # noinspection PyUnusedLocal
     def auto_generating_column(self, sender, e):
         # Generate only desired columns
@@ -86,21 +91,32 @@ class ManageSharedParameter(WPFWindow):
     # noinspection PyUnusedLocal
     def save_click(self, sender, e):
         """Save ExternalDefinitions to DefinitionFile"""
+        definition_file = self.definition_file
+        if not definition_file:
+            self.invalid_definition_file()
+            return
         tocreate = []
         todelete = []
         for parameter in self.data_grid_content:  # type: SharedParameter
             if parameter.new:
-                parameter.write_to_definition_file()
+                try:
+                    parameter.write_to_definition_file(definition_file)
+                except Exceptions.InvalidOperationException:
+                    logger.info("Failed to write {}".format(parameter.name))
             elif parameter.new is False and parameter.changed is True:
                 todelete.append(SharedParameter(**parameter.initial_values))
                 tocreate.append(parameter)
         SharedParameter.delete_from_definition_file(todelete)
         for parameter in tocreate:
-            parameter.write_to_definition_file()
+            parameter.write_to_definition_file(definition_file)
 
     # noinspection PyUnusedLocal
     def delete_click(self, sender, e):
         """Delete definitions from definition file"""
+        definition_file = self.definition_file
+        if not definition_file:
+            self.invalid_definition_file()
+            return
         confirmed = alert(
             "Are you sur you want to delete followinge parameters : \n{}".format(
                 "\n".join([item.name for item in self.datagrid.SelectedItems])),
@@ -110,7 +126,7 @@ class ManageSharedParameter(WPFWindow):
         if not confirmed:
             return
         for item in list(self.datagrid.SelectedItems):
-            SharedParameter.delete_from_definition_file(self.datagrid.SelectedItems)
+            SharedParameter.delete_from_definition_file(self.datagrid.SelectedItems, definition_file)
             self.data_grid_content.Remove(item)
 
     # noinspection PyUnusedLocal
@@ -123,7 +139,11 @@ class ManageSharedParameter(WPFWindow):
 
     # noinspection PyUnusedLocal
     def load_from_definition_file_click(self, sender, e):
-        definition_file = SharedParameter.get_definition_file()  # type: DefinitionFile
+        definition_file = self.definition_file
+        if not definition_file:
+            self.invalid_definition_file()
+            return
+
         available_groups = sorted([group.Name for group in definition_file.Groups], key=cmp_to_key(locale.strcoll))
         selected_groups = SelectFromList.show(available_groups, "Select groups", 400, 300)
         logger.debug("{} result = {}".format(SelectFromList.__name__, selected_groups))
@@ -139,7 +159,7 @@ class ManageSharedParameter(WPFWindow):
 
     # noinspection PyUnusedLocal
     def add(self, sender, e):
-        self.data_grid_content.Add(SharedParameter("", "", ""))
+        self.data_grid_content.Add(SharedParameter("", ""))
 
     # noinspection PyUnusedLocal
     def remove(self, sender, e):
@@ -165,9 +185,11 @@ class ManageSharedParameter(WPFWindow):
 
     # noinspection PyUnusedLocal
     def open_definition_file_click(self, sender, e):
-        self.definition_file = SharedParameter.change_definition_file()
-        for parameter in self.data_grid_content:  # type: SharedParameter
-            parameter.new = True
+        definition_file = SharedParameter.change_definition_file()
+        if definition_file:
+            self.definition_file = SharedParameter.change_definition_file()
+            for parameter in self.data_grid_content:  # type: SharedParameter
+                parameter.new = True
 
     @classmethod
     def show_dialog(cls):
