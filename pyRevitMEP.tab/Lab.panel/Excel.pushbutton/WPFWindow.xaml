@@ -34,6 +34,7 @@
                         Style="{StaticResource buttonStyle}">
                     Bouton test
                 </Button>
+                <CheckBox x:Name="cb_full_report">Rapport complet</CheckBox>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="Services">
@@ -58,7 +59,7 @@
                                   SelectedValuePath="Name" SelectedValue="{Binding Name, Mode=OneWay}"
                                   Padding="5" Margin="5">
                         </ComboBox>
-                        <TextBlock>Colonne contenant le numéro de feuille</TextBlock>
+                        <TextBlock>Colonne contenant le numéro du local</TextBlock>
                         <TextBox x:Name="tb_space_number_column" Width="Auto" Margin="5"/>
                         <TextBlock>À partir de la ligne</TextBlock>
                         <TextBox x:Name="tb_space_number_starting_row" Width="Auto" Margin="5"/>

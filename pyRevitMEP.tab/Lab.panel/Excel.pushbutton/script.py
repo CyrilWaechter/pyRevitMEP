@@ -1,12 +1,15 @@
 # coding: utf8
+import os
+import datetime
+
+from System.Collections.ObjectModel import ObservableCollection
+
 import rpw
 from rpw import revit
+from Autodesk.Revit import Exceptions
 from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, StorageType, UnitUtils
 from pyrevit.forms import WPFWindow
 from pyrevit.script import get_logger
-
-import os
-import datetime
 
 from pypevitmep import excel
 
@@ -23,6 +26,28 @@ export_sheet = report_workbook.Sheets("Export")
 error_sheet = report_workbook.Sheets("ScriptError")
 
 
+class Space(object):
+    def __init__(self, common_name):
+        # type: (str) -> None
+        self.common_name = str(common_name)
+        self.service = common_name.split()[0]
+        try:
+            self.number = common_name.split()[1]
+        except IndexError:
+            self.number = ""
+        self.id = None
+        self.row = None
+
+    def __eq__(self, other):
+        return self.number == other.number
+
+    def __gt__(self, other):
+        return self.number.split(".")[0] > other.number.split(".")[0]
+
+    def __lt__(self, other):
+        return self.number.split(".")[0] < other.number.split(".")[0]
+
+
 class Gui(WPFWindow):
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
@@ -30,19 +55,19 @@ class Gui(WPFWindow):
         # Default general config
         self.cb_main_workbook.DataContext = xl_app.Workbooks
         self.cb_main_workbook.SelectedItem = xl_app.ActiveWorkBook
-        self.tb_space_number_column.Text = "F"
-        self.tb_space_number_starting_row.Text = "8"
+        self.tb_space_number_column.Text = "G"
+        self.tb_space_number_starting_row.Text = "7"
         self.tb_space_service_column.Text = "C"
 
         # Default import config
         self.tb_imported_parameters.Text = "Surface, Nom"
-        self.tb_imported_column.Text = "M, K"
+        self.tb_imported_column.Text = "J, H"
         self.tb_exported_parameters.Text = "SYS, " \
                                            "Ecoulement de soufflage spécifié, " \
                                            "Ecoulement d'air de retour spécifié, " \
                                            "Charge de chauffage de conception, " \
                                            "Charge de refroidissement de conception"
-        self.tb_exported_column.Text = "T, CU, DH, DS, DY "
+        self.tb_exported_column.Text = "T, CE, CJ, CW, DC"
 
         self.check_row_count = 2
         self.import_row_count = 3
@@ -51,6 +76,7 @@ class Gui(WPFWindow):
         self.service_set = set()
         self.revit_spaces_dict = {}
         self.excel_spaces_dict = {}
+        self.spaces = list()
 
     # noinspection PyUnusedLocal
     @property
@@ -73,7 +99,6 @@ class Gui(WPFWindow):
         worksheet = self.main_worksheet
         row_count = self.starting_row
         number_column = self.number_column
-        service_column = self.service_column
 
         blank_row_count = 0
 
@@ -84,8 +109,7 @@ class Gui(WPFWindow):
                 row_count += 1
                 yield current_row
             else:
-                if not worksheet.Cells(row_count, service_column).MergeArea.Cells(1, 1).Value2:
-                    blank_row_count += 1
+                blank_row_count += 1
                 row_count += 1
 
     # noinspection PyUnusedLocal
@@ -98,22 +122,27 @@ class Gui(WPFWindow):
     def service_list_creation_click(self, sender, e):
         # Inputs
         worksheet = self.main_worksheet
-        service_column = self.service_column
-        number_column = self.service_column
+        number_column = self.number_column
 
         blank_row_count = 0
 
         sheet_rows = self.sheet_loop_generator()
         for row in sheet_rows:
-            space_number = worksheet.Cells(row, number_column).Value2
-            service_number = worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
+            current_cell_value = worksheet.Cells(row, number_column).Value2  # type: str
+            service_number = current_cell_value.split(" ")[0]
 
             self.service_set.add(service_number)
 
-        self.service_selection.ItemsSource = list(self.service_set)
+        self.service_selection.ItemsSource = sorted(self.service_set)
 
     def service_check(self, number):
         return number in self.service_selection.SelectedItems or self.tous_services.IsChecked
+
+    def space_check_error(self, service, number, message):
+        check_sheet.Cells(self.check_row_count, 1).Value2 = service
+        check_sheet.Cells(self.check_row_count, 2).Value2 = number
+        check_sheet.Cells(self.check_row_count, 3).Value2 = message
+        self.check_row_count += 1
 
     # noinspection PyUnusedLocal
     def space_check_click(self, sender, e):
@@ -122,53 +151,66 @@ class Gui(WPFWindow):
         number_column = self.number_column
         service_column = self.service_column
 
-        # Revit space dict creation
-        for space in FilteredElementCollector(revit.doc).OfCategory(BuiltInCategory.OST_MEPSpaces):
-            self.revit_spaces_dict[space.Number] = space.Id
+        self.spaces = list()
 
-        logger.debug(self.revit_spaces_dict)
-
-        # Excel space dict creation
         sheet_rows = self.sheet_loop_generator()
         for row in sheet_rows:
-            current_cell_value = worksheet.Cells(row, number_column).Value2
-            service_number = worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
-            self.excel_spaces_dict["{} {}".format(service_number, current_cell_value)] = row
-        logger.debug(self.excel_spaces_dict)
+            common_name = worksheet.Cells(row, number_column).Value2
+            if not common_name.split():
+                continue
+            space = Space(common_name)
+            if not self.service_check(space.service):
+                continue
 
-        # Add Service number to Revit spaces and check if space are missing in the model
-        # with rpw.db.Transaction("Add Service number to Revit spaces"):
-        for number, row in self.excel_spaces_dict.items():
-            service_number = worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
+            # check if there is already a space with same number
+            for existing_space in self.spaces:
+                if space == existing_space:
+                    self.space_check_error(
+                        space.service,
+                        space.number,
+                        "Le numéro du local ligne {} est identique au numéro du local ligne {} dans le tableur".format(
+                            row, existing_space.row))
+                    break
+            else:
+                space.row = row
+                self.spaces.append(space)
+                logger.debug(common_name)
+
+        for revit_space in FilteredElementCollector(revit.doc).OfCategory(BuiltInCategory.OST_MEPSpaces):
+
+            common_name = revit_space.Number
+            service_number = common_name.split()[0]
+
             if not self.service_check(service_number):
                 continue
-            try:
-                revit_space_id = self.revit_spaces_dict[number]
-                # revit_space = revit.doc.GetElement(revit_space_id)
-                # parameter = revit_space.LookupParameter("AAA_Service")
-                # if service_number:
-                #     parameter.Set(str(service_number))
-            except KeyError:
-                check_sheet.Cells(self.check_row_count, 1).Value2 = service_number
-                check_sheet.Cells(self.check_row_count, 2).Value2 = number
-                check_sheet.Cells(self.check_row_count, 3).Value2 = \
-                    "Le local existe dans le tableur mais pas dans le modèle"
-                self.check_row_count += 1
 
-        # Check if some space in the model are missing in the spreadsheet
-        for number, revit_id in self.revit_spaces_dict.items():
-            revit_space = revit.doc.GetElement(revit_id)
-            service_number = revit_space.LookupParameter("AAA_Service").AsString()
-            if service_number and not self.service_check(service_number):
-                continue
-            try:
-                self.excel_spaces_dict[service_number]
-            except KeyError:
-                check_sheet.Cells(self.check_row_count, 1).Value2 = service_number
-                check_sheet.Cells(self.check_row_count, 2).Value2 = number
-                check_sheet.Cells(self.check_row_count, 3).Value2 = \
-                    "Le local existe dans le modèle mais pas dans le tableur"
-                self.check_row_count += 1
+            id = revit_space.Id
+            for space in self.spaces:  # type: Space
+                if common_name == space.common_name:
+                    if space.id:
+                        self.space_check_error(
+                            space.service,
+                            space.number,
+                            "Plusieurs locaux possèdent le même numéro dans le modèle")
+                    else:
+                        space.id = id
+                        break
+            else:
+                # report space missing in spreadsheet
+                space = Space(common_name)
+                self.space_check_error(
+                    space.service,
+                    space.number,
+                    "Le local existe dans le modèle mais pas dans le tableur")
+
+        # report space missing in model
+        for index, space in enumerate(self.spaces):
+            if not space.id:
+                self.space_check_error(
+                    space.service,
+                    space.number,
+                    "Le local existe dans le tableur à la ligne {} mais pas dans le modèle".format(space.row))
+            self.spaces.pop(index)
 
     # noinspection PyUnusedLocal
     def import_click(self, sender, e):
@@ -192,22 +234,23 @@ class Gui(WPFWindow):
 
         # Import values and append modified values to report
         self.import_row_count = 3
-        for number, row in self.excel_spaces_dict.items():
-            service_number = main_worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
-
+        for space in self.spaces:
             # Check if report row is free (no number written yet)
             if import_sheet.Cells(self.import_row_count, 1).Value2:
                 self.import_row_count += 1
 
             # Check if space is in an analysed service
-            if not self.service_check(service_number):
+            if not self.service_check(space.service) and not self.cb_full_report.IsChecked:
                 continue
 
             # Retrieve Revit space if it exist
-            try:
-                revit_space = revit.doc.GetElement(self.revit_spaces_dict[number])
-            except KeyError:
-                logger.info("L'espace {} n'a pas été trouvé dans le dictionnaire d'espaces Revit".format(number))
+            if space.id:
+                revit_space = revit.doc.GetElement(space.id)
+                logger.debug("IMPORT — Try to retrieve space {}".format(space.common_name))
+                logger.debug(space.id, type(space.id))
+                logger.debug(type(space.id))
+            else:
+                logger.info("L'espace {} n'a pas été trouvé".format(space.common_name))
                 continue
 
             # Retrieve parameter value from revit spaces
@@ -222,14 +265,14 @@ class Gui(WPFWindow):
                     parameter_value = UnitUtils.ConvertFromInternalUnits(parameter.AsDouble(),
                                                                          parameter.DisplayUnitType)
                     parameter_value = round(parameter_value, 1)
-                if main_worksheet.Cells(row, column).Value2 == parameter_value:
+                if main_worksheet.Cells(space.row, column).Value2 == parameter_value and not self.cb_full_report.IsChecked:
                     continue
                 else:
-                    import_sheet.Cells(self.import_row_count, 1).Value2 = number
-                    import_sheet.Cells(self.import_row_count, index*2 + 2).Value2 = main_worksheet.Cells(row,
+                    import_sheet.Cells(self.import_row_count, 1).Value2 = space.service
+                    import_sheet.Cells(self.import_row_count, index*2 + 2).Value2 = main_worksheet.Cells(space.row,
                                                                                                          column).Value2
                     import_sheet.Cells(self.import_row_count, index*2 + 3).Value2 = parameter_value
-                    main_worksheet.Cells(row, column).Value2 = parameter_value
+                    main_worksheet.Cells(space.row, column).Value2 = parameter_value
         # Apply a TableStyle to the report
         data_range = import_sheet.Range(import_sheet.Cells(1, 1),
                                         import_sheet.Cells(self.import_row_count, len(columns_list)*2 + 2))
@@ -257,22 +300,21 @@ class Gui(WPFWindow):
 
         # Export values and append modified values to report
         with rpw.db.Transaction("Export excel values to Revit"):
-            for number, row in self.excel_spaces_dict.items():
-                service_number = main_worksheet.Cells(row, service_column).MergeArea.Cells(1, 1).Value2
+            for space in self.spaces:
 
                 # Check if report row is free (no number written yet)
                 if export_sheet.Cells(self.export_row_count, 1).Value2:
                     self.export_row_count += 1
 
                 # Check if space is in an analysed service
-                if not self.service_check(service_number):
+                if not self.service_check(space.service):
                     continue
 
                 # Retrieve Revit space if it exist
-                try:
-                    revit_space = revit.doc.GetElement(self.revit_spaces_dict[number])
-                except KeyError:
-                    logger.info("L'espace {} n'a pas été trouvé dans le dictionnaire d'espaces Revit".format(number))
+                if space.id:
+                    revit_space = revit.doc.GetElement(space.id)
+                else:
+                    logger.info("L'espace {} n'a pas été trouvé".format(space.common_name))
                     continue
 
                 # Retrieve parameter value from revit spaces
@@ -282,7 +324,7 @@ class Gui(WPFWindow):
                     if not parameter:
                         logger.info("Parameter «{}» was not found".format(parameter_name))
                         continue
-                    cell_value = main_worksheet.Cells(row, column).Value2
+                    cell_value = main_worksheet.Cells(space.row, column).Value2
                     parameter_value = None
                     if parameter.StorageType == StorageType.Integer:
                         if cell_value:
@@ -304,20 +346,23 @@ class Gui(WPFWindow):
                                                                                    parameter.DisplayUnitType)
                         except TypeError:
                             error_sheet.Cells(self.error_row_count, 1).Value2 = \
-                                "TypeError avec la valeur {} ligne {} colonne {}". format(cell_value, row, column)
+                                "TypeError avec la valeur {} ligne {} colonne {}". format(cell_value, space.row, column)
                             self.error_row_count += 1
                             new_parameter_value = 0
 
                     else:
                         continue
-                    if main_worksheet.Cells(row, column).Value2 == parameter_value:
+                    main_sheet_value = main_worksheet.Cells(space.row, column).Value2
+                    if main_sheet_value == parameter_value \
+                            and not self.cb_full_report.IsChecked:
                         continue
                     else:
-                        export_sheet.Cells(self.export_row_count, 1).Value2 = number
+                        export_sheet.Cells(self.export_row_count, 1).Value2 = space.service
                         export_sheet.Cells(self.export_row_count, index * 2 + 2).Value2 = parameter_value
-                        export_sheet.Cells(self.export_row_count, index * 2 + 3).Value2 = \
-                            main_worksheet.Cells(row, column).Value2
-                        parameter.Set(new_parameter_value)
+                        if not parameter.Set(new_parameter_value):
+                            main_sheet_value = "Failed to assign new value to space"
+                        export_sheet.Cells(self.export_row_count, index * 2 + 3).Value2 = main_sheet_value
+
         # Apply a TableStyle to the report
         data_range = export_sheet.Range(export_sheet.Cells(1, 1),
                                         export_sheet.Cells(self.export_row_count, len(columns_list)*2 + 2))
@@ -349,3 +394,4 @@ class Gui(WPFWindow):
 
 gui = Gui("WPFWindow.xaml")
 gui.ShowDialog()
+
