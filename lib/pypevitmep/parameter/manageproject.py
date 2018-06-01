@@ -18,7 +18,7 @@ from pypevitmep.parameter import ProjectParameter, BoundAllowedCategory, BipGrou
 from pypevitmep.parameter.manageshared import ManageSharedParameter
 
 app = rpw.revit.app  # type: Application
-doc = rpw.revit.doc # type: Document
+doc = rpw.revit.doc  # type: Document
 uidoc = rpw.uidoc
 logger = script.get_logger()
 
@@ -54,7 +54,7 @@ class ManageProjectParameter(WPFWindow):
 
         # Read existing project parameters and add it to datagrid
         self.project_parameters_datagrid_content = ObservableCollection[object]()
-        for project_parameter in sorted([pp for pp in ProjectParameter.read_from_revit_doc()], key=lambda o:o.name):
+        for project_parameter in sorted([pp for pp in ProjectParameter.read_from_revit_doc()], key=lambda o: o.name):
             self.project_parameters_datagrid_content.Add(project_parameter)
         self.datagrid.ItemsSource = self.project_parameters_datagrid_content
 
@@ -62,7 +62,7 @@ class ManageProjectParameter(WPFWindow):
         self.category_datagrid_content = ObservableCollection[object]()
         bound_allowed_category_list = sorted(
             [BoundAllowedCategory(cat) for cat in ProjectParameter.bound_allowed_category_generator()],
-            key=lambda o:o.name)
+            key=lambda o: o.name)
         for category in bound_allowed_category_list:
             self.category_datagrid_content.Add(category)
         self.category_datagrid.ItemsSource = [category for category in self.category_datagrid_content]
@@ -109,7 +109,7 @@ class ManageProjectParameter(WPFWindow):
                            "Instance?": 4,
                            "CategoryType": 1,
                            "IsBound?": 2}
-            column.DisplayIndex = headerindex[column.Header.ToString()]
+            column.DisplayIndex = headerindex[str(column.Header)]
 
     @staticmethod
     def sortdatagrid(datagrid, columnindex=0, sortdirection=ListSortDirection.Ascending):
@@ -131,7 +131,7 @@ class ManageProjectParameter(WPFWindow):
     def save_click(self, sender, e):
         with rpw.db.Transaction("Save project parameters"):
             for projectparam in self.project_parameters_datagrid_content:  # type: ProjectParameter
-                bindingmap = doc.ParameterBindings # type: BindingMap
+                bindingmap = doc.ParameterBindings  # type: BindingMap
                 try:
                     projectparam.save_to_revit_doc()
                 except Exceptions.ArgumentException:
@@ -153,11 +153,11 @@ class ManageProjectParameter(WPFWindow):
 
     # noinspection PyUnusedLocal
     def paste_binding_click(self, sender, e):
-        for category in self.category_datagrid_content: # type: BoundAllowedCategory
+        for category in self.category_datagrid_content:  # type: BoundAllowedCategory
             category.is_bound = False
         for bound_category in self.memory_categories:
-            for category in self.category_datagrid_content: # type: BoundAllowedCategory
-                if bound_category.Name == category.name :
+            for category in self.category_datagrid_content:  # type: BoundAllowedCategory
+                if bound_category.Name == category.name:
                     category.is_bound = True
         self.category_datagrid.Items.Refresh()
 
@@ -165,19 +165,19 @@ class ManageProjectParameter(WPFWindow):
     def mouse_down(self, sender, e):
         if sender.SelectedItem is None:
             return
-        for category in self.category_datagrid_content: # type: BoundAllowedCategory
+        for category in self.category_datagrid_content:  # type: BoundAllowedCategory
             category.is_bound = False
         for bound_category in sender.SelectedItem.binding.Categories:
-            for category in self.category_datagrid_content: # type: BoundAllowedCategory
-                if bound_category.Name == category.name :
+            for category in self.category_datagrid_content:  # type: BoundAllowedCategory
+                if bound_category.Name == category.name:
                     category.is_bound = True
         self.category_datagrid.Items.Refresh()
 
     def bind_shared_parameters(self, instance=True):
         if instance:
-            binding = app.Create.NewInstanceBinding() # type: ElementBinding
+            binding = app.Create.NewInstanceBinding()  # type: ElementBinding
         else:
-            binding = app.Create.NewTypeBinding() # type: ElementBinding
+            binding = app.Create.NewTypeBinding()  # type: ElementBinding
         for category in ProjectParameter.bound_allowed_category_generator():
             binding.Categories.Insert(category)
         for definition in ManageSharedParameter.show_dialog():

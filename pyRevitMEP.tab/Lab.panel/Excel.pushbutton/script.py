@@ -48,6 +48,18 @@ class Space(object):
         return self.number.split(".")[0] < other.number.split(".")[0]
 
 
+def is_close(value1, value2):
+    if isinstance(value1, float) and isinstance(value2, float):
+        if abs(value1 - value2) < 0.1:
+            return True
+        else:
+            return False
+    elif value1 == value2:
+        return True
+    else:
+        return False
+
+
 class Gui(WPFWindow):
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
@@ -77,8 +89,10 @@ class Gui(WPFWindow):
         self.revit_spaces_dict = {}
         self.excel_spaces_dict = {}
         self.spaces = list()
+        self.import_data_range = import_sheet.Range(import_sheet.Cells(1, 1), import_sheet.Cells(1,2))
+        self.export_data_range = export_sheet.Range(export_sheet.Cells(1, 1), export_sheet.Cells(1,2))
 
-    # noinspection PyUnusedLocal
+# noinspection PyUnusedLocal
     @property
     def main_worksheet(self):
         return self.cb_main_sheet.SelectedItem
@@ -204,13 +218,13 @@ class Gui(WPFWindow):
                     "Le local existe dans le modèle mais pas dans le tableur")
 
         # report space missing in model
-        for index, space in enumerate(self.spaces):
+        for space in self.spaces:
             if not space.id:
                 self.space_check_error(
                     space.service,
                     space.number,
                     "Le local existe dans le tableur à la ligne {} mais pas dans le modèle".format(space.row))
-            self.spaces.pop(index)
+                self.spaces.remove(space)
 
     # noinspection PyUnusedLocal
     def import_click(self, sender, e):
@@ -228,9 +242,9 @@ class Gui(WPFWindow):
 
         # Create report headers
         for index, parameter_name in enumerate(parameters_list):
-            import_sheet.Cells(1, index * 2 + 2).Value2 = parameter_name
-            import_sheet.Cells(2, index * 2 + 2).Value2 = "Avant"
-            import_sheet.Cells(2, index * 2 + 3).Value2 = "Après"
+            import_sheet.Cells(1, index * 2 + 3).Value2 = parameter_name
+            import_sheet.Cells(2, index * 2 + 3).Value2 = "Avant"
+            import_sheet.Cells(2, index * 2 + 4).Value2 = "Après"
 
         # Import values and append modified values to report
         self.import_row_count = 3
@@ -250,7 +264,9 @@ class Gui(WPFWindow):
                 logger.debug(space.id, type(space.id))
                 logger.debug(type(space.id))
             else:
-                logger.info("L'espace {} n'a pas été trouvé".format(space.common_name))
+                logger.info("IMPORT - L'espace {} est introuvable".format(space.common_name))
+                logger.info(space.row)
+                logger.info(space.id)
                 continue
 
             # Retrieve parameter value from revit spaces
@@ -265,18 +281,23 @@ class Gui(WPFWindow):
                     parameter_value = UnitUtils.ConvertFromInternalUnits(parameter.AsDouble(),
                                                                          parameter.DisplayUnitType)
                     parameter_value = round(parameter_value, 1)
-                if main_worksheet.Cells(space.row, column).Value2 == parameter_value and not self.cb_full_report.IsChecked:
+                main_worksheet_value = main_worksheet.Cells(space.row, column).Value2
+                if main_worksheet_value == parameter_value and not self.cb_full_report.IsChecked:
                     continue
                 else:
                     import_sheet.Cells(self.import_row_count, 1).Value2 = space.service
-                    import_sheet.Cells(self.import_row_count, index*2 + 2).Value2 = main_worksheet.Cells(space.row,
+                    import_sheet.Cells(self.import_row_count, 2).Value2 = space.number
+                    import_sheet.Cells(self.import_row_count, index*2 + 3).Value2 = main_worksheet.Cells(space.row,
                                                                                                          column).Value2
-                    import_sheet.Cells(self.import_row_count, index*2 + 3).Value2 = parameter_value
+                    parameter_value_cell = import_sheet.Cells(self.import_row_count, index*2 + 4)
+                    parameter_value_cell.Value2 = parameter_value
+                    if parameter_value != main_worksheet_value:
+                        parameter_value_cell.Font.Color = -16776961
                     main_worksheet.Cells(space.row, column).Value2 = parameter_value
-        # Apply a TableStyle to the report
-        data_range = import_sheet.Range(import_sheet.Cells(1, 1),
+
+        # Set range for TableStyle
+        self.import_data_range = import_sheet.Range(import_sheet.Cells(1, 1),
                                         import_sheet.Cells(self.import_row_count, len(columns_list)*2 + 2))
-        excel.table_style(import_sheet, data_range)
 
     # noinspection PyUnusedLocal
     def export_click(self, sender, e):
@@ -294,9 +315,9 @@ class Gui(WPFWindow):
 
         # Create report headers
         for index, parameter_name in enumerate(parameters_list):
-            export_sheet.Cells(1, index * 2 + 2).Value2 = parameter_name
-            export_sheet.Cells(2, index * 2 + 2).Value2 = "Avant"
-            export_sheet.Cells(2, index * 2 + 3).Value2 = "Après"
+            export_sheet.Cells(1, index * 2 + 3).Value2 = parameter_name
+            export_sheet.Cells(2, index * 2 + 3).Value2 = "Avant"
+            export_sheet.Cells(2, index * 2 + 4).Value2 = "Après"
 
         # Export values and append modified values to report
         with rpw.db.Transaction("Export excel values to Revit"):
@@ -337,8 +358,9 @@ class Gui(WPFWindow):
                         new_parameter_value = str(cell_value)
                     elif parameter.StorageType == StorageType.Double:
                         if cell_value:
-                            parameter_value = UnitUtils.ConvertFromInternalUnits(parameter.AsDouble(),
-                                                                                 parameter.DisplayUnitType)
+                            parameter_value = UnitUtils.ConvertFromInternalUnits(
+                                parameter.AsDouble(),
+                                parameter.DisplayUnitType)
                         else:
                             cell_value = 0
                         try:
@@ -353,20 +375,29 @@ class Gui(WPFWindow):
                     else:
                         continue
                     main_sheet_value = main_worksheet.Cells(space.row, column).Value2
-                    if main_sheet_value == parameter_value \
+                    if is_close(main_sheet_value, parameter_value) \
                             and not self.cb_full_report.IsChecked:
                         continue
                     else:
                         export_sheet.Cells(self.export_row_count, 1).Value2 = space.service
-                        export_sheet.Cells(self.export_row_count, index * 2 + 2).Value2 = parameter_value
+                        export_sheet.Cells(self.export_row_count, 2).Value2 = space.number
+                        export_sheet.Cells(self.export_row_count, index * 2 + 3).Value2 = parameter_value
                         if not parameter.Set(new_parameter_value):
                             main_sheet_value = "Failed to assign new value to space"
-                        export_sheet.Cells(self.export_row_count, index * 2 + 3).Value2 = main_sheet_value
+                        main_sheet_cell = export_sheet.Cells(self.export_row_count, index * 2 + 4)
+                        main_sheet_cell.Value2 = main_sheet_value
+                        if not is_close(main_sheet_value, parameter_value):
+                            main_sheet_cell.Font.Color = -16776961
+                            logger.debug("EXPORT - space {}".format(space.common_name))
+                            logger.debug(main_sheet_value == parameter_value)
+                            logger.debug(type(main_sheet_value))
+                            logger.debug(main_sheet_value)
+                            logger.debug(type(parameter_value))
+                            logger.debug(parameter_value)
 
-        # Apply a TableStyle to the report
-        data_range = export_sheet.Range(export_sheet.Cells(1, 1),
+        # Set range for TableStyle
+        self.export_data_range = export_sheet.Range(export_sheet.Cells(1, 1),
                                         export_sheet.Cells(self.export_row_count, len(columns_list)*2 + 2))
-        excel.table_style(export_sheet, data_range)
 
     # noinspection PyUnusedLocal
     def main_workbook_changed(self, sender, e):
@@ -377,6 +408,11 @@ class Gui(WPFWindow):
 
     # noinspection PyUnusedLocal
     def window_closed(self, sender, e):
+        # Apply a TableStyle to the report
+        excel.table_style(import_sheet, self.import_data_range)
+        excel.table_style(export_sheet, self.export_data_range)
+
+
         folder = os.path.join(self.cb_main_workbook.SelectedItem.Path, 'reports')
         if not os.path.exists(folder):
             os.makedirs(folder)
