@@ -10,4 +10,3 @@ __author__ = "Cyril Waechter"
 from pypevitmep.parameter.manageshared import ManageSharedParameter
 
 ManageSharedParameter.show_dialog()
-

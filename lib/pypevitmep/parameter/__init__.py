@@ -93,8 +93,8 @@ class SharedParameter:
             definition_file = self.get_definition_file()
         return definition_file.Groups[self.group]
 
-    def get_definition(self):
-        return self.get_definitiongroup().Definitions[self.name]
+    def get_definition(self, definition_file=None):
+        return self.get_definitiongroup(definition_file).Definitions[self.name]
 
     @classmethod
     def get_definition_by_name(cls, name):
@@ -230,8 +230,8 @@ class SharedParameter:
         os.remove(file_path)
         os.rename(tmp_file_path, file_path)
 
-    @staticmethod
-    def create_definition_file(path_and_name=None):
+    @classmethod
+    def create_definition_file(cls, path_and_name=None):
         """Create a new DefinitionFile to store SharedParameter definitions
         :param path_and_name: file path and name including extension (.txt file)
         :rtype: DefinitionFile
@@ -242,7 +242,7 @@ class SharedParameter:
         with open(path_and_name, "w"):
             pass
         rpw.revit.app.SharedParametersFilename = path_and_name
-        return rpw.revit.app.OpenSharedParameterFile()
+        return cls.get_definition_file()
 
     @classmethod
     def change_definition_file(cls):
