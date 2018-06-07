@@ -47,6 +47,8 @@ class ManageSharedParameter(WPFWindow):
                            "visible": "Visible"}
         self.tbk_file_name.DataContext = self.definition_file
 
+        self.bool_return_parameter = False
+
     @property
     def definition_file(self):
         return SharedParameter.get_definition_file()
@@ -86,6 +88,7 @@ class ManageSharedParameter(WPFWindow):
     def ok_click(self, sender, e):
         """Return listed definitions"""
         self.save_click(sender, e)
+        self.bool_return_parameter = True
         self.Close()
 
     # noinspection PyUnusedLocal
@@ -106,7 +109,7 @@ class ManageSharedParameter(WPFWindow):
             elif parameter.new is False and parameter.changed is True:
                 todelete.append(SharedParameter(**parameter.initial_values))
                 tocreate.append(parameter)
-        SharedParameter.delete_from_definition_file(todelete)
+        SharedParameter.delete_from_definition_file(todelete, definition_file)
         for parameter in tocreate:
             parameter.write_to_definition_file(definition_file)
 
@@ -187,7 +190,7 @@ class ManageSharedParameter(WPFWindow):
     def open_definition_file_click(self, sender, e):
         definition_file = SharedParameter.change_definition_file()
         if definition_file:
-            self.definition_file = SharedParameter.change_definition_file()
+            self.definition_file = definition_file
             for parameter in self.data_grid_content:  # type: SharedParameter
                 parameter.new = True
 
@@ -195,7 +198,8 @@ class ManageSharedParameter(WPFWindow):
     def show_dialog(cls):
         gui = cls()
         gui.ShowDialog()
-        return [shared_parameter.get_definition() for shared_parameter in gui.data_grid_content]
+        if gui.bool_return_parameter == True:
+            return [shared_parameter.get_definition() for shared_parameter in gui.data_grid_content]
 
 
 if __name__ == '__main__':
