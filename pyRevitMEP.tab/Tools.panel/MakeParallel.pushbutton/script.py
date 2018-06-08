@@ -1,4 +1,6 @@
 # coding: utf8
+from math import pi, acos
+
 from Autodesk.Revit.DB import ElementTransformUtils, Line, UnitType, UnitUtils, ElementId, ViewSection, XYZ, \
     FilteredElementCollector, Grid, ReferencePlane, FamilyInstance
 from Autodesk.Revit.UI.Selection import ObjectType, ISelectionFilter
@@ -7,27 +9,46 @@ from Autodesk.Revit import Exceptions
 import rpw
 from pyrevit import forms, script
 
+__doc__ = """Make 2 elements parallel. First element selected is reference. Second element selected rotate."""
+__title__ = "Make Parallel (XY)"
+__author__ = "Cyril Waechter"
+
 uidoc = rpw.revit.uidoc
 doc = rpw.revit.doc
 logger = script.get_logger()
 
+
 def element_selection():
     try:
-        with forms.WarningBar(title="Pick element to move and connect"):
-            reference = uidoc.Selection.PickObject(ObjectType.Element, "Pick element to move")
+        with forms.WarningBar(title="Pick reference element"):
+            reference = uidoc.Selection.PickObject(ObjectType.Element, "Pick reference element")
     except Exceptions.OperationCanceledException:
         return False
 
     try:
         element1 = doc.GetElement(reference)
-        with forms.WarningBar(title="Pick reference element"):
+        with forms.WarningBar(title="Pick target element"):
             reference = uidoc.Selection.PickObject(ObjectType.Element, "Pick target element")
         element2 = doc.GetElement(reference)
 
         logger.debug("ELEMENTS \n 1: {} \n 2: {}".format(element1, element2))
 
-        angle = direction(element1).AngleTo(direction(element2))
-        axis = Line.CreateBound(origin(element2), origin(element2) + XYZ.BasisZ)
+        v1 = direction(element1)
+        v2 = direction(element2)
+
+        xy_v1 = XYZ(v1.X, v1.Y, 0)  # type: XYZ
+        xy_v2 = XYZ(v2.X, v2.Y, 0)  # type: XYZ
+
+        angle = xy_v2.AngleTo(xy_v1)
+        if angle > pi/2:
+            angle = angle - pi
+        normal = xy_v2.CrossProduct(xy_v1)
+
+        logger.debug("ANGLE : {}".format(angle))
+        logger.debug("NORMAL : {}".format(normal))
+        logger.debug("DIRECTION \n 1: {} \n 2: {}".format(direction(element1), direction(element2)))
+
+        axis = Line.CreateBound(origin(element2), origin(element2) + normal)
         with rpw.db.Transaction("Make parallel", doc):
             element2.Location.Rotate(axis, angle)
 
