@@ -47,7 +47,7 @@ class ManageSharedParameter(WPFWindow):
                            "visible": "Visible"}
         self.tbk_file_name.DataContext = self.definition_file
 
-        self.bool_return_parameter = False
+        self.bool_return_parameters = False
 
     @property
     def definition_file(self):
@@ -88,7 +88,7 @@ class ManageSharedParameter(WPFWindow):
     def ok_click(self, sender, e):
         """Return listed definitions"""
         self.save_click(sender, e)
-        self.bool_return_parameter = True
+        self.bool_return_parameters = True
         self.Close()
 
     # noinspection PyUnusedLocal
@@ -198,9 +198,8 @@ class ManageSharedParameter(WPFWindow):
     def show_dialog(cls):
         gui = cls()
         gui.ShowDialog()
-        if gui.bool_return_parameter == True:
-            return [shared_parameter.get_definition() for shared_parameter in gui.data_grid_content]
-
+        if gui.bool_return_parameters:
+            return [shared_parameter.get_definition(gui.definition_file) for shared_parameter in gui.data_grid_content]
 
 if __name__ == '__main__':
     definitions = ManageSharedParameter.show_dialog()

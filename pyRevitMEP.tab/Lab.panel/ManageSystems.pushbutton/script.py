@@ -13,7 +13,7 @@ __title__ = "ManageSystems"
 __author__ = "Cyril Waechter"
 
 
-class Gui(WPFWindow):
+class ManageSystems(WPFWindow):
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
         #
@@ -52,5 +52,5 @@ class Gui(WPFWindow):
             self.data_grid_content.Remove(item)
 
 
-gui = Gui("WPFWindow.xaml")
+gui = ManageSystems("ManageSystems.xaml")
 gui.ShowDialog()

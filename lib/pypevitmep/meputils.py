@@ -29,5 +29,3 @@ def get_connector_closest_to(connectors, xyz):
             min_distance = distance
             closest_connector = connector
     return closest_connector
-
-

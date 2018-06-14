@@ -12,7 +12,7 @@ from Autodesk.Revit import Exceptions
 
 import rpw
 from pyrevit import script
-from pyrevit.forms import WPFWindow
+from pyrevit import forms
 
 from pypevitmep.parameter import ProjectParameter, BoundAllowedCategory, BipGroup
 from pypevitmep.parameter.manageshared import ManageSharedParameter
@@ -23,11 +23,11 @@ uidoc = rpw.uidoc
 logger = script.get_logger()
 
 
-class ManageProjectParameter(WPFWindow):
+class ManageProjectParameter(forms.WPFWindow):
     def __init__(self):
         file_dir = os.path.dirname(__file__)
         xaml_source = os.path.join(file_dir, "manageproject.xaml")
-        WPFWindow.__init__(self, xaml_source)
+        forms.WPFWindow.__init__(self, xaml_source)
 
         # Set icons
         image_dict = {"instance_img": "icon_instance_32.png",
@@ -78,7 +78,7 @@ class ManageProjectParameter(WPFWindow):
         if headername in self.headerdict.keys():
             if headername == "bip_group":
                 cb = DataGridComboBoxColumn()
-                cb.ItemsSource = sorted([BipGroup(pp) for pp in BipGroup.bip_group_generator()])
+                cb.ItemsSource = sorted([BipGroup(pp) for pp in BipGroup.enum_generator()])
                 cb.SelectedItemBinding = Binding(headername)
                 cb.SelectedValuePath = "bip_group"
                 e.Column = cb
@@ -209,6 +209,10 @@ class ManageProjectParameter(WPFWindow):
 
     @classmethod
     def show_dialog(cls):
+        if doc.IsFamilyDocument:
+            forms.alert("This tool works with project documents only. Not family documents.")
+            import sys
+            sys.exit()
         gui = cls()
         gui.ShowDialog()
         return

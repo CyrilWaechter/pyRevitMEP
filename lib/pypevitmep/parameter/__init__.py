@@ -3,11 +3,11 @@
 import os
 import csv
 
-from System import Guid
+from System import Guid, Enum
 
 from Autodesk.Revit import Exceptions
 from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroup, InstanceBinding, \
-    ExternalDefinition, ExternalDefinitionCreationOptions, Definition, \
+    ExternalDefinition, ExternalDefinitionCreationOptions, Definition, BuiltInParameter, FamilyManager, \
     ElementBinding, Category, LabelUtils, BuiltInParameterGroup, DefinitionBindingMapIterator, Document
 
 import rpw
@@ -94,7 +94,11 @@ class SharedParameter:
         return definition_file.Groups[self.group]
 
     def get_definition(self, definition_file=None):
-        return self.get_definitiongroup(definition_file).Definitions[self.name]
+        try:
+            return self.get_definitiongroup(definition_file).Definitions[self.name]
+        except AttributeError as e:
+            alert("default error message : {} \n"
+                  "Unable to retrieve definition for parameter named {}".format(e.message ,self.name))
 
     @classmethod
     def get_definition_by_name(cls, name):
@@ -299,17 +303,6 @@ class ProjectParameter:
         else:
             bindingmap.Insert(self.definition, self.binding, self.bip_group.bip_group)
 
-    # @classmethod
-    # def new_from_shared_parameters(cls, instance=True, app=revit.app):
-    #     if instance:
-    #         binding = app.Create.NewInstanceBinding()  # type: ElementBinding
-    #     else:
-    #         binding = app.Create.NewTypeBinding()  # type: ElementBinding
-    #     for category in ProjectParameter.bound_allowed_category_generator():
-    #         binding.Categories.Insert(category)
-    #     for definition in ManageSharedParameter.show_dialog():
-    #         yield cls(definition, binding)
-
     @staticmethod
     def all_categories():
         category_set = revit.app.Create.NewCategorySet()
@@ -323,6 +316,58 @@ class ProjectParameter:
         for category in revit.doc.Settings.Categories:
             if category.AllowsBoundParameters:
                 yield category
+
+
+class FamilyParameter:
+    def __init__(self, name, is_instance=False, is_shared=False, definition=None):
+        # type: (str, BuiltInParameterGroup, bool, bool, Definition) -> None
+        self.name = name
+        self.is_instance = is_instance
+        self.is_shared = is_shared
+        self.definition = definition
+        self.modified = False
+        self.new = False
+        if not definition:
+            self.type = PType(ParameterType.Length)
+            self.group = BipGroup(BuiltInParameterGroup.PG_LENGTH)
+            self.initial_values = dict()
+        else:
+            self.type = PType(definition.ParameterType)
+            self.group = BipGroup(definition.ParameterGroup)
+            self.initial_values_update()
+
+    @classmethod
+    def read_from_revit_doc(cls, doc=revit.doc):
+        """Generator which return all FamilyParameter in document"""
+        # type: (Document) -> iter
+        iterator = doc.FamilyManager.Parameters.ForwardIterator()  # type: DefinitionBindingMapIterator
+        for parameter in iterator:
+            if parameter.Definition.BuiltInParameter == BuiltInParameter.INVALID:
+                yield cls(parameter.Definition.Name,
+                          parameter.IsInstance,
+                          parameter.IsShared,
+                          parameter.Definition)
+
+    def save_to_revit(self, doc=revit.doc):
+        """Save current family parameter to Revit doc.
+        Need to be used in an open Transaction. """
+        if self.new and self.is_shared:
+            return doc.FamilyManager.AddParameter(self.definition, self.group, self.is_instance)
+        elif self.new:
+            return doc.FamilyManager.AddParameter(self.name, self.group, self.type, self.is_instance)
+        elif self.modified and self.initial_values["is_shared"]:
+            fp = FamilyManager.get_Parameter(self.definition)
+            if self.is_shared:
+                attr2 = self.definition
+            else:
+                attr2 = self.name
+            doc.FamilyManager.ReplaceParameter(fp, attr2, self.group, self.is_instance)
+        # TODO
+        return
+
+    def initial_values_update(self):
+        self.initial_values = {"name": self.name, "type": self.type, "group": self.group,
+                               "is_instance":self.is_instance, "is_shared":self.is_shared}
 
 
 class BoundAllowedCategory:
@@ -339,18 +384,19 @@ class BoundAllowedCategory:
     def category_type(self):
         return self.category.CategoryType
 
-class BipGroup:
-    def __init__(self, bip_group):
-        # type: (BuiltInParameterGroup) -> None
-        """BuiltInParameterGroup wrapper"""
-        self.bip_group = bip_group
+
+class RevitEnum:
+    def __init__(self, enum_member):
+        # type: (Enum) -> None
+        """Enum wrapper"""
+        self.enum_member = enum_member
 
     def __repr__(self):
         return self.name
 
     def __eq__(self, other):
         try:
-            return self.bip_group == other.bip_group
+            return self.enum_member == other.enum_member
         except AttributeError:
             return False
 
@@ -362,21 +408,40 @@ class BipGroup:
 
     @property
     def name(self):
-        return LabelUtils.GetLabelFor(self.bip_group)
+        try:
+            return "{}{}({})".format(LabelUtils.GetLabelFor(self.enum_member), 4*" ", self.enum_member)
+        except Exceptions.InvalidOperationException:
+            return "Invalid"
 
     @staticmethod
-    def bip_group_generator():
-        for builtinparametergroup in BuiltInParameterGroup.GetValues(BuiltInParameterGroup):
-            yield builtinparametergroup  # type: BuiltInParameterGroup
+    def enum_generator():
+        for enum_member in Enum.GetValues(Enum):
+            yield enum_member  # type: Enum
 
     @classmethod
-    def bip_group_name_generator(cls):
-        for builtinparametergroup in cls.bip_group_generator():
-            yield LabelUtils.GetLabelFor(builtinparametergroup)
+    def enum_name_generator(cls):
+        for enum_member in cls.enum_generator():
+            yield LabelUtils.GetLabelFor(enum_member)
 
     @classmethod
-    def bip_group_by_name(cls, name):
-        # type: (str) -> BuiltInParameterGroup
-        for bip_group in cls.bip_group_generator():
-            if LabelUtils.GetLabelFor(bip_group) == name:
-                return bip_group
+    def enum_member_by_name(cls, name):
+        # type: (str) -> Enum
+        for enum_member in cls.enum_generator():
+            if LabelUtils.GetLabelFor(enum_member) == name:
+                return enum_member
+
+
+class BipGroup(RevitEnum):
+    @staticmethod
+    def enum_generator():
+        for bip_group in BuiltInParameterGroup.GetValues(BuiltInParameterGroup):
+            yield bip_group  # type: ParameterType
+
+
+class PType(RevitEnum):
+    @staticmethod
+    def enum_generator():
+        for paramater_type in ParameterType.GetValues(ParameterType):
+            yield paramater_type  # type: ParameterType
+
+
