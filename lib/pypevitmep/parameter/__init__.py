@@ -102,8 +102,9 @@ class SharedParameter:
 
     @classmethod
     def get_definition_by_name(cls, name):
+        # type: (str) -> ExternalDefinition
         for group in cls.get_definition_file().Groups:  # type: DefinitionGroup
-            for definition in group.Definitions:  # type: Definition
+            for definition in group.Definitions:  # type: ExternalDefinition
                 if definition.Name == name:
                     return definition
 
@@ -319,22 +320,33 @@ class ProjectParameter:
 
 
 class FamilyParameter:
-    def __init__(self, name, is_instance=False, is_shared=False, definition=None):
-        # type: (str, BuiltInParameterGroup, bool, bool, Definition) -> None
-        self.name = name
-        self.is_instance = is_instance
-        self.is_shared = is_shared
-        self.definition = definition
-        self.modified = False
-        self.new = False
-        if not definition:
+    def __init__(self, name, **kwargs):
+        # type: (str) -> None
+
+        # Default values
+        self.name = name  # type: str
+        self.is_instance = False  # type: bool
+        self.is_shared = False  # type: bool
+        self.definition = None  # type: ExternalDefinition
+        self.modified = False  # type: bool
+        self.is_new = False  # type: bool
+
+        # Given values if provided
+        for key, value in kwargs.iteritems():
+            setattr(self, key, value)
+
+        if not self.definition:
             self.type = PType(ParameterType.Length)
-            self.group = BipGroup(BuiltInParameterGroup.PG_LENGTH)
+            self.group = BipGroup(BuiltInParameterGroup.PG_TEXT)
             self.initial_values = dict()
         else:
-            self.type = PType(definition.ParameterType)
-            self.group = BipGroup(definition.ParameterGroup)
+            self.type = PType(self.definition.ParameterType)
+            self.group = BipGroup(self.definition.ParameterGroup)
             self.initial_values_update()
+
+    def initial_values_update(self):
+        self.initial_values = {"name": self.name, "type": self.type, "group": self.group,
+                               "is_instance":self.is_instance, "is_shared":self.is_shared}
 
     @classmethod
     def read_from_revit_doc(cls, doc=revit.doc):
@@ -344,30 +356,57 @@ class FamilyParameter:
         for parameter in iterator:
             if parameter.Definition.BuiltInParameter == BuiltInParameter.INVALID:
                 yield cls(parameter.Definition.Name,
-                          parameter.IsInstance,
-                          parameter.IsShared,
-                          parameter.Definition)
+                          is_instance=parameter.IsInstance,
+                          is_shared=parameter.IsShared,
+                          definition=parameter.Definition)
+
+    @classmethod
+    def new_from_shared(cls, definition):
+        # type: (ExternalDefinition) -> FamilyParameter
+        return cls(definition.Name, is_shared=True, definition=definition, is_new=True)
 
     def save_to_revit(self, doc=revit.doc):
+        # type: (Document) -> Autodesk.Revit.DB.FamilyParameter
         """Save current family parameter to Revit doc.
         Need to be used in an open Transaction. """
-        if self.new and self.is_shared:
-            return doc.FamilyManager.AddParameter(self.definition, self.group, self.is_instance)
-        elif self.new:
-            return doc.FamilyManager.AddParameter(self.name, self.group, self.type, self.is_instance)
-        elif self.modified and self.initial_values["is_shared"]:
-            fp = FamilyManager.get_Parameter(self.definition)
-            if self.is_shared:
-                attr2 = self.definition
-            else:
-                attr2 = self.name
-            doc.FamilyManager.ReplaceParameter(fp, attr2, self.group, self.is_instance)
-        # TODO
-        return
+        if self.is_new and self.is_shared:
+            return doc.FamilyManager.AddParameter(self.definition, self.group.enum_member, self.is_instance)
+        elif self.is_new:
+            return doc.FamilyManager.AddParameter(
+                self.name, self.group.enum_member, self.type.enum_member, self.is_instance)
+        elif self.modified:
+            fp = doc.FamilyManager.get_Parameter(self.initial_values["name"])
 
-    def initial_values_update(self):
-        self.initial_values = {"name": self.name, "type": self.type, "group": self.group,
-                               "is_instance":self.is_instance, "is_shared":self.is_shared}
+            # Get the string or ExternalDefinition necessary
+            if self.is_shared:
+                # In case only Instance/Type has been switched
+                for key in ("type", "group", "is_shared"):
+                    if getattr(self, key) != self.initial_values[key]:
+                        break
+                else:
+                    if self.is_instance:
+                        return doc.FamilyManager.MakeInstance(fp)
+                    else:
+                        return doc.FamilyManager.MakeType(fp)
+                var_attr = SharedParameter.get_definition_by_name(self.name)
+            else:
+                var_attr = self.name
+
+            if self.type == self.initial_values["type"]:
+                return doc.FamilyManager.ReplaceParameter(fp, var_attr, self.group.enum_member, self.is_instance)
+            else:
+                doc.FamilyManager.RemoveParameter(fp)
+                if self.is_shared:
+                    return doc.FamilyManager.AddParameter(var_attr, self.group.enum_member, self.is_instance)
+                else:
+                    return doc.FamilyManager.AddParameter(
+                        self.name, self.group.enum_member, self.type.enum_member, self.is_instance)
+
+    def delete_from_revit(self, doc):
+        # type: (Document) -> None
+        """Delete current family parameter from current Revit doc.
+        Need to be used in an open Transaction. """
+        doc.FamilyManager.RemoveParameter(doc.FamilyManager.get_Parameter(self.name))
 
 
 class BoundAllowedCategory:

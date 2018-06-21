@@ -1,5 +1,6 @@
 # coding: utf8
 import os
+from string import digits
 
 from System.Windows.Controls import DataGridComboBoxColumn
 from System.Windows.Data import Binding
@@ -31,9 +32,12 @@ class ManageFamilyParameter(forms.WPFWindow):
 
         # Set icons
         image_dict = {"ok_img": "icons8-checkmark-32.png",
-                      "save_img": "icons8-save-32.png",
-                      "delete_img": "icons8-trash-32.png",
-                      "copy_img": "icons8-copy-32.png"}
+                      "add_img": "icons8-plus-32.png",
+                      "minus_img": "icons8-minus-32.png",
+                      "copy_img": "icons8-copy-32.png",
+                      "revit_family_img": "revit_family.png",
+                      "shared_parameter_img": "shared_parameter.png"
+                      }
         for k, v in image_dict.items():
             self.set_image_source(k, os.path.join(file_dir, v))
 
@@ -48,11 +52,18 @@ class ManageFamilyParameter(forms.WPFWindow):
                                    "is_bound": "IsBound?"}
 
         # Read existing project parameters and add it to datagrid
-        self.project_parameters_datagrid_content = ObservableCollection[object]()
+        self.family_parameters = ObservableCollection[object]()
         for project_parameter in sorted([fp for fp in FamilyParameter.read_from_revit_doc()], key=lambda o: o.name):
-            self.project_parameters_datagrid_content.Add(project_parameter)
-        self.datagrid.ItemsSource = self.project_parameters_datagrid_content
+            self.family_parameters.Add(project_parameter)
+        self.datagrid.ItemsSource = self.family_parameters
 
+        self._new_key_number = 0
+        self.to_delete = set()
+
+    @property
+    def new_key_number(self):
+        self._new_key_number += 1
+        return  self._new_key_number
 
     # noinspection PyUnusedLocal
     def auto_generating_column(self, sender, e):
@@ -102,32 +113,62 @@ class ManageFamilyParameter(forms.WPFWindow):
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
-        self.save_click(sender, e)
+        with rpw.db.Transaction("Modify family parameters"):
+            for parameter in self.family_parameters:  # type: FamilyParameter
+                try:
+                    parameter.save_to_revit(doc)
+                except Exceptions.ArgumentException:
+                    logger.info("FAILED to save {}".format(parameter.name))
+                    logger.debug(type(parameter.group.enum_member))
+
+            for parameter in self.to_delete:
+                parameter.delete_from_revit(doc)
         self.Close()
 
     # noinspection PyUnusedLocal
-    def save_click(self, sender, e):
-        with rpw.db.Transaction("Save project parameters"):
-            for projectparam in self.project_parameters_datagrid_content:  # type: ProjectParameter
-                bindingmap = doc.ParameterBindings  # type: BindingMap
-                try:
-                    projectparam.save_to_revit_doc()
-                except Exceptions.ArgumentException:
-                    logger.info("Saving {} failed. At least 1 category must be selected.".format(projectparam))
+    def add_click(self, sender, e):
+        self.family_parameters.Add(FamilyParameter("New {}".format(self.new_key_number), is_new=True))
 
     # noinspection PyUnusedLocal
-    def delete_click(self, sender, e):
-        with rpw.db.Transaction("Delete project parameters"):
-            for projectparam in list(self.datagrid.SelectedItems):  # type: ProjectParameter
-                doc.ParameterBindings.Remove(projectparam.definition)
-                self.project_parameters_datagrid_content.Remove(projectparam)
+    def minus_click(self, sender, e):
+        for family_parameter in list(self.datagrid.SelectedItems):  # type: FamilyParameter
+            if not family_parameter.is_new:
+                self.to_delete.add(family_parameter)
+            self.family_parameters.Remove(family_parameter)
 
     # noinspection PyUnusedLocal
     def copy_click(self, sender, e):
-        self.memory_categories = CategorySet()
-        for category in self.category_datagrid_content:  # type: BoundAllowedCategory
-            if category.is_bound:
-                self.memory_categories.Insert(category.category)
+        for family_parameter in self.datagrid.SelectedItems:  # type: FamilyParameter
+            new_name = "{}{}".format(family_parameter.name.translate(None, digits), self.new_key_number)
+            new_family_parameter = FamilyParameter(new_name, is_new=True, type=family_parameter.type,
+                                                   group=family_parameter.group)
+            self.family_parameters.Add(new_family_parameter)
+
+    # noinspection PyUnusedLocal
+    def import_from_family_click(self, sender, e):
+        family_doc = rpw.ui.forms.SelectFromList("Select source family",
+                                                 {doc.Title: doc for doc in rpw.revit.docs if doc.IsFamilyDocument},
+                                                 exit_on_close=False)
+        if not family_doc:
+            return
+        for family_parameter in FamilyParameter.read_from_revit_doc(family_doc):
+            if family_parameter not in self.family_parameters:
+                family_parameter.is_new = True
+                self.family_parameters.Add(family_parameter)
+
+    # noinspection PyUnusedLocal
+    def import_from_shared_click(self, sender, e):
+        try:
+            for definition in ManageSharedParameter.show_dialog():  # type: ExternalDefinition
+                family_parameter = FamilyParameter.new_from_shared(definition)
+                if family_parameter not in self.family_parameters:
+                    self.family_parameters.Add(family_parameter)
+        except TypeError:
+            return
+
+    # noinspection PyUnusedLocal
+    def target_updated(self, sender, e):
+        e.Row.Item.modified = True
 
     @classmethod
     def show_dialog(cls):
