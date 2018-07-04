@@ -18,8 +18,8 @@ doc = revit.doc # type: Document
 xl_app = excel.initialise()
 
 # Create a workbook with designated file as template
-res_path = os.path.join(__commandpath__, r"A03_Correction des reservations.xlsx")
-res_workbook = xl_app.Workbooks("A03_Correction des reservations.xlsx")
+res_path = os.path.join(__commandpath__, r"A05_Correction des reservations.xlsx")
+res_workbook = xl_app.Workbooks("A05_Correction des reservations.xlsx")
 res_sheet = res_workbook.Sheets("Feuil1")
 
 row = 2

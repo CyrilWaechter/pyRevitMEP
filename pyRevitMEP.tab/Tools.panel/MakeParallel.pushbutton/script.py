@@ -1,9 +1,8 @@
 # coding: utf8
 from math import pi, acos
 
-from Autodesk.Revit.DB import ElementTransformUtils, Line, UnitType, UnitUtils, ElementId, ViewSection, XYZ, \
-    FilteredElementCollector, Grid, ReferencePlane, FamilyInstance
-from Autodesk.Revit.UI.Selection import ObjectType, ISelectionFilter
+from Autodesk.Revit.DB import Line, ViewSection, XYZ, FilteredElementCollector, Grid, ReferencePlane, FamilyInstance
+from Autodesk.Revit.UI.Selection import ObjectType
 from Autodesk.Revit import Exceptions
 
 import rpw
