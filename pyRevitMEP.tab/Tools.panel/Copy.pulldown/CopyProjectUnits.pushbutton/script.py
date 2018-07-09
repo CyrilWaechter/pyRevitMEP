@@ -1,12 +1,16 @@
 # coding: utf8
+from Autodesk.Revit.DB import Document
 
 import rpw
 from pyrevit import script
 
+__doc__ = """Copy project units from another document. 
+Display a form to select source and target document."""
+__title__ = "Project Units"
+__author__ = "Cyril Waechter"
+
 logger = script.get_logger()
-doc = rpw.revit.doc
-opened_docs = rpw.revit.docs
-Transaction = rpw.DB.Transaction
+doc = rpw.revit.doc  # type: Document
 
 opened_docs = {d.Title:d for d in rpw.revit.docs}
 modifiable_docs = {d.Title:d for d in rpw.revit.docs if not d.IsLinked}
@@ -24,20 +28,12 @@ components = [Label("Pick source document"),
 form = rpw.ui.forms.FlexForm("Documents selection", components)
 form.ShowDialog()
 
-
 try:
-    source_doc = form.values["source"]
-    target_doc = form.values["target"]
-
-    source_units = source_doc.GetUnits()
-    target_units = target_doc.GetUnits()
-
-    source_units_list = source_units.GetModifiableUnitTypes()
+    source_doc = form.values["source"]  # type: Document
+    target_doc = form.values["target"]  # type: Document
 
     with rpw.db.Transaction(doc=target_doc, name="Copy view types"):
-        for unit in source_units_list:
-            format_options = source_units.GetFormatOptions(unit)
-            target_units.SetFormatOptions(unit, format_options)
+        target_doc.SetUnits(source_doc.GetUnits())
 
 except KeyError:
     logger.debug('No input or incorrect inputs')
