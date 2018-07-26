@@ -1,0 +1,21 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select reference level:" SizeToContent="WidthAndHeight" ShowInTaskbar="False" Topmost="True"
+        WindowStartupLocation="CenterScreen" HorizontalContentAlignment="Center">
+    <StackPanel Margin="10">
+        <TextBlock>Name prefix</TextBlock>
+        <TextBox x:Name="tbox_prefix"></TextBox>
+        <Image x:Name="diagram_img" Width="150"/>
+        <TextBlock>Depth offset <Bold>d</Bold></TextBlock>
+        <TextBox x:Name="tbox_depth_offset"></TextBox>
+        <TextBlock>Height offset <Bold>h</Bold></TextBlock>
+        <TextBox x:Name="tbox_height_offset"></TextBox>
+        <TextBlock>Width offset <Bold>w</Bold></TextBlock>
+        <TextBox x:Name="tbox_width_offset"></TextBox>
+        <TextBlock x:Name="tblock_units"></TextBlock>
+        <StackPanel Orientation="Horizontal">
+            <Button Click="save_options">Save</Button>
+            <Button Click="reset_options">Reset</Button>
+        </StackPanel>
+    </StackPanel>
+</Window>
