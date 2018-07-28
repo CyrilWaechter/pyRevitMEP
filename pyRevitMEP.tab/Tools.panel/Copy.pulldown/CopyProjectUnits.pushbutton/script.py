@@ -32,7 +32,7 @@ try:
     source_doc = form.values["source"]  # type: Document
     target_doc = form.values["target"]  # type: Document
 
-    with rpw.db.Transaction(doc=target_doc, name="Copy view types"):
+    with rpw.db.Transaction(doc=target_doc, name="Copy project units"):
         target_doc.SetUnits(source_doc.GetUnits())
 
 except KeyError:
