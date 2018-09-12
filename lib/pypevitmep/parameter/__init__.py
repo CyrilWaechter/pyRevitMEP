@@ -7,7 +7,7 @@ from System import Guid, Enum
 
 from Autodesk.Revit import Exceptions
 from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroup, InstanceBinding, \
-    ExternalDefinition, ExternalDefinitionCreationOptions, Definition, BuiltInParameter, FamilyManager, \
+    ExternalDefinition, ExternalDefinitionCreationOptions, Definition, BuiltInParameter, Parameter, \
     ElementBinding, Category, LabelUtils, BuiltInParameterGroup, DefinitionBindingMapIterator, Document
 
 import rpw
@@ -15,6 +15,15 @@ from rpw import revit
 from pyrevit.forms import alert
 
 # from manageshared import ManageSharedParameter
+
+
+class WParameter(rpw.db.Parameter):
+    def __repr__(self):
+        try:
+            guid = self.GUID
+        except Exceptions.InvalidOperationException:
+            guid = ""
+        return "{} <{}> <{}>".format(self.name, self.builtin, guid)
 
 
 class SharedParameter:

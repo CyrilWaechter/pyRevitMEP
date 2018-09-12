@@ -1,6 +1,6 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Select reference level:" SizeToContent="WidthAndHeight" ShowInTaskbar="False" Topmost="True"
+        Title="CreateSection Options" SizeToContent="WidthAndHeight" ShowInTaskbar="False" Topmost="True"
         WindowStartupLocation="CenterScreen" HorizontalContentAlignment="Center">
     <StackPanel Margin="10">
         <TextBlock>Name prefix</TextBlock>

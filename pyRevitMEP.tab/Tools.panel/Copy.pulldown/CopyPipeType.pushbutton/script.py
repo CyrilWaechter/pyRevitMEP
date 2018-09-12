@@ -29,7 +29,7 @@ from rpw import doc
 from pyrevit.forms import WPFWindow
 
 __doc__ = "Copy pipe types from a selected opened document to active document"
-__title__ = "CopyPipeType"
+__title__ = "PipeType"
 __author__ = "Cyril Waechter"
 
 

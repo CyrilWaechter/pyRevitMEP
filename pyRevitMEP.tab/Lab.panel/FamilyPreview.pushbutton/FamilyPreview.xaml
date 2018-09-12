@@ -1,0 +1,9 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="FamilyPreview" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" Topmost="True"
+        SizeToContent="WidthAndHeight"
+        >
+    <StackPanel>
+        <Image x:Name="preview_img" Width="96"/>
+    </StackPanel>
+</Window>

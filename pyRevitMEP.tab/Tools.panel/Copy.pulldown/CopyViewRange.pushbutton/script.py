@@ -7,7 +7,7 @@ import rpw
 
 __doc__ = """Copy view range from source views to target views.
 If only 1 source view is selected same view range is applied to all views"""
-__title__ = "CopyRange"
+__title__ = "ViewRange"
 __author__ = "Cyril Waechter"
 
 doc = rpw.revit.doc  # type:Document
