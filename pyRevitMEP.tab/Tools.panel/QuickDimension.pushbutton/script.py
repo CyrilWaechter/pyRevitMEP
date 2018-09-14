@@ -9,7 +9,11 @@ from pyrevit import script, forms
 import rpw
 from rpw import revit
 
-__doc__ = "Quick dimension selected elements"
+__doc__ = """"
+Quick dimension selected elements
+Warning : Full support for line base elements only (eg. pipes, walls, lines, grids). 
+Don't currently fully work with family instance.
+"""
 __title__ = "QuickDimension"
 __author__ = "Cyril Waechter"
 
