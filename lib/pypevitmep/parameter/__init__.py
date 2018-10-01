@@ -309,9 +309,9 @@ class ProjectParameter:
         Need to be used in an open Transaction. """
         bindingmap = doc.ParameterBindings # type: BindingMap
         if bindingmap[self.definition]:
-            bindingmap.ReInsert(self.definition, self.binding, self.bip_group.bip_group)
+            bindingmap.ReInsert(self.definition, self.binding, self.bip_group.enum_member)
         else:
-            bindingmap.Insert(self.definition, self.binding, self.bip_group.bip_group)
+            bindingmap.Insert(self.definition, self.binding, self.bip_group.enum_member)
 
     @staticmethod
     def all_categories():
