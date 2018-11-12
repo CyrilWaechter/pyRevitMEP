@@ -31,10 +31,13 @@ target_doc = form.values["target"]  # type: Document
 overwrite = form.values["overwrite"]
 
 class CustomFamilyLoadOptions(IFamilyLoadOptions):
-    def OnFamilyFound(self, familyInUse, overwriteParameterValues=overwrite):
+    def OnFamilyFound(self, familyInUse, overwriteParameterValues):
+        overwriteParameterValues.Value = overwrite
         return True
 
-    def OnSharedFamilyFound(self, sharedFamily, familyInUse, source=FamilySource.Family, overwriteParameterValues=overwrite):
+    def OnSharedFamilyFound(self, sharedFamily, familyInUse, source, overwriteParameterValues):
+        source = FamilySource.Family
+        overwriteParameterValues.Value = overwrite
         return True
 
 customfamilyloadoptions = CustomFamilyLoadOptions()
@@ -45,7 +48,7 @@ for el_id in uidoc.Selection.GetElementIds():
         continue
     familydoc = doc.EditFamily(element.Symbol.Family)
     familydoc.LoadFamily(target_doc, customfamilyloadoptions)
-    familydoc.Close()
+    familydoc.Close(False)
 
 # logger.debug(familydocs)
 #
