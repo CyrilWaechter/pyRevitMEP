@@ -9,7 +9,7 @@ from pypevitmep.workset import Workset
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
 
-__doc__ = "Batch create worksets from a text file or on the fly by creating a list"
+__doc__ = "Batch create dependent views corresponding to existing Scope Boxes for selected views"
 __title__ = "DependentViews"
 __author__ = "Cyril Waechter"
 __context__ = "selection"
@@ -59,8 +59,5 @@ class Gui(WPFWindow):
             self.data_grid_content.Remove(item)
 
 
-if not revit.doc.IsWorkshared:
-    rpw.ui.forms.Alert("Current document is not workshared. You cannot create worksets.")
-else:
-    gui = Gui("WPFWindow.xaml")
-    gui.ShowDialog()
+gui = Gui("WPFWindow.xaml")
+gui.ShowDialog()
