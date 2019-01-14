@@ -17,10 +17,16 @@ class Gui(WPFWindow):
         WPFWindow.__init__(self, xaml_file_name)
         self.data_grid_content = ObservableCollection[object]()
         self.datagrid.ItemsSource = self.data_grid_content
-        self.set_image_source("plus_img", "icons8-plus-32.png")
-        self.set_image_source("minus_img", "icons8-minus-32.png")
-        self.set_image_source("import_img", "icons8-import-32.png")
-        self.set_image_source("ok_img","icons8-checkmark-32.png")
+
+        image_dict = {
+            "plus_img": "icons8-plus-32.png",
+            "minus_img": "icons8-minus-32.png",
+            "import_img": "icons8-import-32.png",
+            "ok_img": "icons8-checkmark-32.png"
+        }
+
+        for k, v in image_dict.items():
+            self.set_image_source(getattr(self, k), v)
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):

@@ -39,7 +39,7 @@ class ManageFamilyParameter(forms.WPFWindow):
                       "shared_parameter_img": "shared_parameter.png"
                       }
         for k, v in image_dict.items():
-            self.set_image_source(k, os.path.join(file_dir, v))
+            self.set_image_source(getattr(self, k), os.path.join(file_dir, v))
 
         self.headerdict = {"name": "Name",
                            "type": "Type",
