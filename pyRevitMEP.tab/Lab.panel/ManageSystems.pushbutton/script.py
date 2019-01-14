@@ -22,10 +22,15 @@ class ManageSystems(WPFWindow):
         self.datagrid.ItemsSource = self.data_grid_content
 
         # Set icons
-        self.set_image_source("plus_img", "icons8-plus-32.png")
-        self.set_image_source("minus_img", "icons8-minus-32.png")
-        self.set_image_source("import_img", "icons8-import-32.png")
-        self.set_image_source("ok_img","icons8-checkmark-32.png")
+        image_dict = {
+            "plus_img": "icons8-plus-32.png",
+            "minus_img": "icons8-minus-32.png",
+            "import_img": "icons8-import-32.png",
+            "ok_img": "icons8-checkmark-32.png"
+        }
+
+        for k, v in image_dict.items():
+            self.set_image_source(getattr(self, k), v)
 
     # Set empty external system list source
         self.data_grid_imported_content = ObservableCollection[PipingSystemType]()

@@ -160,8 +160,8 @@ class FluidSelection(WPFWindow):
 
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
-        self.set_image_source("freeze_img", "icons8-Snowflake-32.png")
-        self.set_image_source("evaporate_img", "icons8-Air-32.png")
+        self.set_image_source(self.freeze_img, "icons8-Snowflake-32.png")
+        self.set_image_source(self.evaporate_img, "icons8-Air-32.png")
         self.cb_fluid_category.ItemsSource = fluids_dict.keys()
         self.cb_fluid_name.ItemsSource = fluids_dict[self.cb_fluid_category.SelectedItem]
 
