@@ -111,8 +111,8 @@ class RotateOptions(WPFWindow):
 
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
-        self.set_image_source("xyz_img", "XYZ.png")
-        self.set_image_source("plusminus_img", "PlusMinusRotation.png")
+        self.set_image_source(self.xyz_img, "XYZ.png")
+        self.set_image_source(self.plusminus_img, "PlusMinusRotation.png")
 
     # noinspection PyUnusedLocal
     def around_itself_click(self, sender, e):

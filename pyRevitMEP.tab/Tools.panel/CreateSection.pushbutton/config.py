@@ -31,7 +31,7 @@ def export_config_length(lenght):
 class CreateSectionOptions(forms.WPFWindow):
     def __init__(self):
         forms.WPFWindow.__init__(self, "CreateSectionOptions.xaml")
-        self.set_image_source("diagram_img", "diagram.png")
+        self.set_image_source(self.diagram_img, "diagram.png")
 
         self.tblock_units.Text = "All length in {}".format(symbol)
 
