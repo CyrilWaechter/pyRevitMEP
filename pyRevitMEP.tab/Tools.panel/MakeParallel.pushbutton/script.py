@@ -1,7 +1,8 @@
 # coding: utf8
 from math import pi, acos
 
-from Autodesk.Revit.DB import Line, ViewSection, XYZ, FilteredElementCollector, Grid, ReferencePlane, FamilyInstance
+from Autodesk.Revit.DB import Line, ViewSection, XYZ, FilteredElementCollector, Grid, ReferencePlane, FamilyInstance, \
+    BuiltInParameter, ElevationMarker, ViewType
 from Autodesk.Revit.UI.Selection import ObjectType
 from Autodesk.Revit import Exceptions
 
@@ -48,6 +49,14 @@ def element_selection():
         logger.debug("DIRECTION \n 1: {} \n 2: {}".format(direction(element1), direction(element2)))
 
         axis = Line.CreateBound(origin(element2), origin(element2) + normal)
+
+        # Need to rotate elevation marker if it is an elevation
+        try:
+            if get_view_from(element2).ViewType == ViewType.Elevation:
+                element2 = get_elevation_marker(element2)
+        except AttributeError:
+            pass
+
         with rpw.db.Transaction("Make parallel", doc):
             element2.Location.Rotate(axis, angle)
 
@@ -56,13 +65,26 @@ def element_selection():
         return True
 
 
+def get_view_from(element):
+    # type: (Element) -> ViewSection
+    sketch_parameter = element.get_Parameter(BuiltInParameter.VIEW_FIXED_SKETCH_PLANE)  # type: SketchPlane
+    return doc.GetElement(doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId)
+
+def get_elevation_marker(element):
+    # type: (Element) -> ElevationMarker
+    view = get_view_from(element)
+    for elevation_marker in FilteredElementCollector(doc).OfClass(ElevationMarker):  # type: ElevationMarker
+        for i in range(4):
+            id = elevation_marker.GetViewId(i)
+            if view.Id == id:
+                return elevation_marker
+
+
 def section_direction(element):
-    # type: (ViewSection) -> XYZ
-    for view in FilteredElementCollector(doc).OfClass(ViewSection):  # type: ViewSection
-        if view.Name == element.Name:
-            return view.RightDirection
-    else:
-        raise AttributeError
+    # type: (Element) -> XYZ
+    sketch_parameter = element.get_Parameter(BuiltInParameter.VIEW_FIXED_SKETCH_PLANE)  # type: SketchPlane
+    view = doc.GetElement(doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId)  # type: ViewSection
+    return view.RightDirection
 
 
 def grid_direction(element):
@@ -97,13 +119,10 @@ def direction(element):
 
 
 def section_origin(element):
-    # type: (ViewSection) -> XYZ
-    for view in FilteredElementCollector(doc).OfClass(ViewSection):  # type: ViewSection
-        if view.Name == element.Name:
-            return view.Origin
-    else:
-        raise AttributeError
-
+    # type: (Element) -> XYZ
+    sketch_parameter = element.get_Parameter(BuiltInParameter.VIEW_FIXED_SKETCH_PLANE)  # type: SketchPlane
+    view = doc.GetElement(doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId)  # type: ViewSection
+    return view.Origin
 
 def grid_origin(element):
     # type: (Grid) -> XYZ
