@@ -2,8 +2,13 @@
 import rpw
 from rpw import revit
 from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, Transaction
+import System
 from pyrevit.forms import WPFWindow
-from pyrevit import script
+from pyrevit import script, forms
+
+__title__ = "RoomToSpace"
+__author__ = "Cyril Waechter"
+__doc__ = "Copy parameters from linked or other project rooms to current project spaces"
 
 logger = script.get_logger()
 
@@ -26,7 +31,12 @@ class Gui(WPFWindow):
         self.room_parameters_set = set()
         self.space_parameters_set = set()
 
-        self.room_initialise(revit.docs[1])
+        try:
+            self.room_initialise(revit.docs[1])
+        except System.IndexOutOfRangeException:
+            forms.alert("Error : You need to have at least 1 link or 1 other document opened.")
+            import sys
+            sys.exit()
         self.space_initialise(revit.docs[0])
 
     def room_initialise(self, doc):

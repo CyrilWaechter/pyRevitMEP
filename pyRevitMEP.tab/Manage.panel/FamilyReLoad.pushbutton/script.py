@@ -8,7 +8,7 @@ from pyrevit import script
 import rpw
 
 __doc__ = "Load or Reload selected families into chosen document"
-__title__ = "Load/Reload families"
+__title__ = "Load/Reload \n families"
 __author__ = "Cyril Waechter"
 __context__ = "selection"
 
