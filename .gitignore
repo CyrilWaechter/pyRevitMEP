@@ -178,3 +178,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# pyCharm settings
+_windows
+
+# dbnavigator settings
+dbnavigator.xml
