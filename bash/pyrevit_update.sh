@@ -4,7 +4,9 @@
 echo "Start updating pyRevit"
 cd $APPDATA/pyRevit_git
 git checkout -f
+git pull
 
 echo "Start updating pyRevitMEP"
 cd extensions/pyRevitMEP.extension
 git checkout -f
+git pull
