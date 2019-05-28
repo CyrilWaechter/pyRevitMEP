@@ -36,7 +36,7 @@ class ManageSharedParameter(WPFWindow):
                       "open_file_img": "icons8-open-32.png",
                       "duplicate_img": "icons8-copy-32.png"}
         for k, v in image_dict.items():
-            self.set_image_source(k, os.path.join(file_dir, v))
+            self.set_image_source(getattr(self, k), os.path.join(file_dir, v))
 
         self.headerdict = {"name": "Name",
                            "type": "Type",

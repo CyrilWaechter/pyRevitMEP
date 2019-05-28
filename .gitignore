@@ -183,4 +183,13 @@ venv.bak/
 _windows
 
 # dbnavigator settings
+<<<<<<< HEAD
 dbnavigator.xml
+=======
+dbnavigator.xml
+filetypes.xml
+
+PySide2*/
+shiboken2*/
+Avalonia*/
+>>>>>>> b07318d... Fixed Parameter Manager #11

@@ -40,7 +40,7 @@ class ManageProjectParameter(forms.WPFWindow):
                       "check_img": "icons8-checked-checkbox-32.png",
                       "uncheck_img": "icons8-unchecked-checkbox-32.png"}
         for k, v in image_dict.items():
-            self.set_image_source(k, os.path.join(file_dir, v))
+            self.set_image_source(getattr(self, k), os.path.join(file_dir, v))
 
         self.headerdict = {"name": "Name",
                            "pt_name": "ParameterType",

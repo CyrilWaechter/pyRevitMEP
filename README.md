@@ -9,7 +9,7 @@ PyRevitMEP - MEP Extensions for PyRevit
 * Use pyRevit Package Manager (pyRevit > Extensions > Enable pyRevitMEP)
 ### Manual (no admin rights required)
 #### Command lines (Cmder)
-* Download [cmder](https://cmder.net/) unzip it anywhere you like
+* Download [Cmder](https://github.com/cmderdev/cmder/releases/latest/download/cmder.zip) unzip it anywhere you like
 * Clone [pyRevit](https://github.com/eirannejad/pyRevit/) repository using git (skip this step if pyRevit is already installed)
     * Destination folder : replace %APPDATA%\pyRevit_git with another destination folder if you like
     * --depth=1 allow to only clone last version without full git history
