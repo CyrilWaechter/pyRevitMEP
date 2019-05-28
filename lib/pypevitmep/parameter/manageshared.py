@@ -147,15 +147,15 @@ class ManageSharedParameter(WPFWindow):
             self.invalid_definition_file()
             return
 
-        available_groups = sorted([group.Name for group in definition_file.Groups], key=cmp_to_key(locale.strcoll))
-        selected_groups = SelectFromList.show(available_groups, "Select groups", 400, 300)
+        available_groups = sorted(definition_file.Groups, key=lambda x:locale.strxfrm(x.Name))
+        selected_groups = SelectFromList.show(
+            available_groups, "Select groups", 400, 300, name_attr="Name", multiselect=True)
         logger.debug("{} result = {}".format(SelectFromList.__name__, selected_groups))
         if selected_groups is None:
             return
-        else:
-            groups = [definition_file.Groups[group] for group in selected_groups]
+
         try:
-            for parameter in SharedParameter.read_from_definition_file(definition_groups=groups):
+            for parameter in SharedParameter.read_from_definition_file(definition_groups=selected_groups):
                 self.data_grid_content.Add(parameter)
         except LookupError as e:
             logger.info(e)
