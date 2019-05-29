@@ -2,6 +2,7 @@
 
 import os
 import csv
+import tempfile
 
 from System import Guid, Enum
 
@@ -34,7 +35,7 @@ class SharedParameter:
     :param type : Parameter type like Text, PipingFlow etc…
     :param guid: Parameter globally unique identifier
     :param description: Parameter description hint
-    :param user_modifiable: This property indicates whether this parameter can be modified by UI user or not.
+    :param modifiable: This property indicates whether this parameter can be modified by UI user or not.
     :param visible: If false parameter is stored without being visible.
     """
     def __init__(self, name, ptype, group="pypevitmep", guid=None,
@@ -115,6 +116,14 @@ class SharedParameter:
         for group in cls.get_definition_file().Groups:  # type: DefinitionGroup
             for definition in group.Definitions:  # type: ExternalDefinition
                 if definition.Name == name:
+                    return definition
+
+    @classmethod
+    def get_definition_by_guid(cls, guid):
+        # type: (Guid) -> ExternalDefinition
+        for group in cls.get_definition_file().Groups:  # type: DefinitionGroup
+            for definition in group.Definitions:  # type: ExternalDefinition
+                if definition.GUID == guid:
                     return definition
 
     def initial_values_update(self):
@@ -214,7 +223,7 @@ class SharedParameter:
             definition = definition_group.Definitions.Create(external_definition_create_options)
         self.initial_values_update()
         self.new = self.changed = False
-        return
+        return definition
 
     @staticmethod
     def delete_from_definition_file(shared_parameters, definition_file=None, warning=True):
@@ -362,12 +371,26 @@ class FamilyParameter:
         """Generator which return all FamilyParameter in document"""
         # type: (Document) -> iter
         iterator = doc.FamilyManager.Parameters.ForwardIterator()  # type: DefinitionBindingMapIterator
-        for parameter in iterator:
+        for parameter in iterator:  # type: Autodesk.Revit.DB.FamilyParameter
+            # Exclude built in parameters as they cannot be copied
             if parameter.Definition.BuiltInParameter == BuiltInParameter.INVALID:
+                # Fetch shared parameter external definition if exist else create a temporary one
+                if parameter.IsShared:
+                    definition = SharedParameter.get_definition_by_guid(parameter.GUID)
+                    if not definition:
+                        temp_sp_file = os.path.join(tempfile.gettempdir(), 'pyrevit_temp_sparam.txt')
+                        SharedParameter.create_definition_file(temp_sp_file)
+                        shared_param = SharedParameter(parameter.Definition.Name,
+                                                       parameter.Definition.ParameterType,
+                                                       guid=parameter.GUID)
+                        definition = shared_param.write_to_definition_file()
+                        os.remove(temp_sp_file)
+                else:  # For non shared family parameters
+                    definition = parameter.Definition
                 yield cls(parameter.Definition.Name,
                           is_instance=parameter.IsInstance,
                           is_shared=parameter.IsShared,
-                          definition=parameter.Definition)
+                          definition=definition)
 
     @classmethod
     def new_from_shared(cls, definition):
