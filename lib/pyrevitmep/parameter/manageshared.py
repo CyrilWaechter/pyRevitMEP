@@ -3,6 +3,7 @@
 import os
 import locale
 import re
+import inspect
 
 from Autodesk.Revit import Exceptions
 from Autodesk.Revit.DB import ParameterType
@@ -93,14 +94,15 @@ class ManageSharedParameter(WPFWindow):
                 try:
                     parameter.write_to_definition_file(definition_file)
                 except Exceptions.InvalidOperationException:
-                    logger.info("Failed to write {}".format(parameter.name))
+                    logger.info("[{}] Failed to write {}".format(inspect.stack()[1][3], parameter.name))
             elif parameter.new is False and parameter.changed is True:
-                logger.info(parameter.initial_values)
+                logger.debug(parameter.initial_values)
                 todelete.append(SharedParameter(**parameter.initial_values))
                 tocreate.append(parameter)
         SharedParameter.delete_from_definition_file(todelete, definition_file)
         for parameter in tocreate:
             parameter.write_to_definition_file()  # do not specify definition file to force reopening it after deletions
+        self.datagrid.Items.Refresh()
 
     # noinspection PyUnusedLocal
     def delete_click(self, sender, e):

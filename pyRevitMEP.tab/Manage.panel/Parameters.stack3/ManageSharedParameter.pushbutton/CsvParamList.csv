@@ -1,0 +1,10 @@
+Name (Mandatory),ParameterType (optionnal),Group (optionnal),Guid (optionnal),Description (optionnal),Modifiable (optionnal),Visible (optionnal)
+CsvLenght1,Length,,,,,
+CsvAirflow2,HVACAirflow,HVAC,,Airflow is life,,
+CsvTypo,HVACAirFlow,,,,,
+CsvNumber3,Number,,b92a3caf-4ea4-4182-a8c6-a1cfc3d5e4d6,,,
+CsvText4,Text,,,,,
+CsvArea5,Area,,,,,
+CsvDontTouch,Text,Info,,,0,1
+CsvSecret,Text,Secret,,,0,0
+CsvNoType,,,,,,

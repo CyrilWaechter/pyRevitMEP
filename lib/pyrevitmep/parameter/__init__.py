@@ -13,9 +13,7 @@ from Autodesk.Revit.DB import ParameterType, DefinitionFile, DefinitionGroup, In
 
 import rpw
 from rpw import revit
-from pyrevit.forms import alert
-
-# from manageshared import ManageSharedParameter
+from pyrevit.forms import alert, SelectFromList
 
 
 class WParameter(rpw.db.Parameter):
@@ -38,15 +36,18 @@ class SharedParameter:
     :param modifiable: This property indicates whether this parameter can be modified by UI user or not.
     :param visible: If false parameter is stored without being visible.
     """
-    def __init__(self, name, ptype, group="pyrevitmep", guid=None,
+    def __init__(self, name, ptype, group=None, guid=None,
                  description="", modifiable=True, visible=True, new=True):
         # type: (str, ParameterType or str, str, Guid or None, str, bool, bool, bool) -> None
 
         self.name = name
         self.description = description
-        self.group = group
+        if group:
+            self.group = group
+        else:
+            self.group = "pyrevitmep"
 
-        true_tuple = (True, "", None, "True", "Yes", "Oui", 1)
+        true_tuple = (True, "", None, "True", "Yes", "Oui", 1, "1")
 
         if modifiable in true_tuple:
             self.modifiable = True
@@ -61,8 +62,14 @@ class SharedParameter:
         # Check if a Guid is given. If not a new one is created
         if not guid:
             self.guid = Guid.NewGuid()
+        elif not isinstance(guid, Guid):
+            try:
+                self.guid = Guid(guid)
+            except SystemError:
+                self.guid = Guid.NewGuid()
         else:
             self.guid = guid
+
         # Check if given parameter type is valid. If not user is prompted to choose one.
         if isinstance(ptype, ParameterType):
             self.type = ptype
@@ -70,12 +77,11 @@ class SharedParameter:
             try:
                 self.type = getattr(ParameterType, ptype)
             except AttributeError:
-                selected_type = rpw.ui.forms.SelectFromList(
-                    "Select ParameterType",
-                    ParameterType.GetNames(ParameterType),
-                    "Parameter {} ParameterType: {} is not valid. Please select a parameter type".format(name, ptype),
-                    sort=False)
-                self.type = getattr(ParameterType, selected_type)
+                self.type = ptype
+                while not isinstance(self.type, ParameterType):
+                    self.type = SelectFromList.show(
+                        PType.enum_generator(),
+                        "Parameter {} ParameterType: {} not valid. Please select a parameter type".format(name, ptype))
 
         self.initial_values = {}
         if new is True:
@@ -108,7 +114,7 @@ class SharedParameter:
             return self.get_definitiongroup(definition_file).Definitions[self.name]
         except AttributeError as e:
             alert("default error message : {} \n"
-                  "Unable to retrieve definition for parameter named {}".format(e.message ,self.name))
+                  "Unable to retrieve definition for parameter named {}".format(e.message, self.name))
 
     @classmethod
     def get_definition_by_name(cls, name):
@@ -152,7 +158,7 @@ class SharedParameter:
             file_reader.next()
 
             for row in file_reader:
-                shared_parameter_list.append(SharedParameter(*row, new=False))
+                shared_parameter_list.append(SharedParameter(*row, new=True))
 
         return shared_parameter_list
 
@@ -220,7 +226,11 @@ class SharedParameter:
                                                                                    UserModifiable=self.modifiable,
                                                                                    Description=self.description,
                                                                                    Visible=self.visible)
-            definition = definition_group.Definitions.Create(external_definition_create_options)
+            try:
+                definition = definition_group.Definitions.Create(external_definition_create_options)
+            except Exceptions.ArgumentException:
+                alert("A parameter with same Guid already exist. Parameter: {} will be ignored".format(self.name))
+                return
         self.initial_values_update()
         self.new = self.changed = False
         return definition
@@ -512,7 +522,7 @@ class BipGroup(RevitEnum):
 class PType(RevitEnum):
     @staticmethod
     def enum_generator():
-        for paramater_type in ParameterType.GetValues(ParameterType):
-            yield paramater_type  # type: ParameterType
+        for parameter_type in ParameterType.GetValues(ParameterType):
+            yield parameter_type  # type: ParameterType
 
 
