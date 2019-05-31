@@ -14,8 +14,8 @@ import rpw
 from pyrevit import script
 from pyrevit import forms
 
-from pypevitmep.parameter import ProjectParameter, BoundAllowedCategory, BipGroup
-from pypevitmep.parameter.manageshared import ManageSharedParameter
+from pyrevitmep.parameter import ProjectParameter, BoundAllowedCategory, BipGroup
+from pyrevitmep.parameter.manageshared import ManageSharedParameter
 
 app = rpw.revit.app  # type: Application
 doc = rpw.revit.doc  # type: Document
@@ -70,6 +70,11 @@ class ManageProjectParameter(forms.WPFWindow):
         self.memory_categories = CategorySet()
         for category in self.category_datagrid_content:  # type: BoundAllowedCategory
             self.memory_categories.Insert(category.category)
+
+    def setup_icon(self):
+        """Setup custom icon."""
+        iconpath = os.path.join(os.path.dirname(__file__), 'project_parameter.png')
+        self.Icon = forms.utils.bitmap_from_file(iconpath)
 
     # noinspection PyUnusedLocal
     def auto_generating_column(self, sender, e):

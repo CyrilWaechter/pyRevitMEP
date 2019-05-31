@@ -9,7 +9,7 @@ from pyrevit.script import get_logger
 from pyrevit.forms import select_views, WPFWindow
 import rpw
 
-from pypevitmep.event import CustomizableEvent
+from pyrevitmep.event import CustomizableEvent
 
 __doc__ = """Compute distance of selected elements (origin or middle of the curve) to closest floor/roof above.
 Result is stored in designated parameter"""

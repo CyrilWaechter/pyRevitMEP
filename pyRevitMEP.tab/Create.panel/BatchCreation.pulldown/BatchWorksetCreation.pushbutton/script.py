@@ -3,7 +3,7 @@
 import rpw
 from rpw import revit
 from pyrevit.forms import WPFWindow
-from pypevitmep.workset import Workset
+from pyrevitmep.workset import Workset
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
 

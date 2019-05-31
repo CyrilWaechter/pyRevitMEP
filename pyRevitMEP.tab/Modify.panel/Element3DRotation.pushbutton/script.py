@@ -20,7 +20,7 @@ https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 import rpw
 from rpw import revit
 from pyrevit.forms import WPFWindow
-from pypevitmep.event import CustomizableEvent
+from pyrevitmep.event import CustomizableEvent
 
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction, ElementTransformUtils, Line, XYZ, Location, UnitType, UnitUtils, ElementId

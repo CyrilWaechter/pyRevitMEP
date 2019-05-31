@@ -12,10 +12,11 @@ __doc__ = "Batch create MEPSystemTypes from a sheet file"
 __title__ = "MEPSystemTypes"
 __author__ = "Cyril Waechter"
 
+doc = __revit__.ActiveUIDocument.Document  # type: Document
 
 logger = get_logger()
 
-from pypevitmep import excel
+from pyrevitmep import excel
 
 xl_app = excel.initialise()
 
@@ -61,7 +62,7 @@ class Gui(WPFWindow):
     # noinspection PyUnusedLocal
     def export_click(self, sender, e):
         row_count = 2
-        for mep_system_type in FilteredElementCollector(revit.doc).OfClass(MEPSystemType):
+        for mep_system_type in FilteredElementCollector(doc).OfClass(MEPSystemType):
             name = Element.Name.__get__(mep_system_type)
             abv = mep_system_type.get_Parameter(BuiltInParameter.RBS_SYSTEM_ABBREVIATION_PARAM).AsString()
             system_classification = mep_system_type.SystemClassification.ToString()
@@ -90,7 +91,7 @@ class Gui(WPFWindow):
                 base_system_type_name = import_sheet.Cells(row, 3).Value2
 
                 # Duplicate existing type with desired new name and optional abbreviation
-                new_type = revit.doc.GetElement(self.mep_system_type_dict[base_system_type_name]).Duplicate(name)
+                new_type = doc.GetElement(self.mep_system_type_dict[base_system_type_name]).Duplicate(name)
                 if abv:
                     abv_param = new_type.get_Parameter(BuiltInParameter.RBS_SYSTEM_ABBREVIATION_PARAM)
                     abv_param.Set(abv)

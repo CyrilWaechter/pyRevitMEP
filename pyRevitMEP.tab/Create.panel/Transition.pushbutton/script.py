@@ -6,7 +6,7 @@ from Autodesk.Revit.UI.Selection import ISelectionFilter, ObjectType
 
 import rpw
 from pyrevit import script, forms
-from pypevitmep.meputils import get_connector_closest_to, get_connector_manager
+from pyrevitmep.meputils import get_connector_closest_to, get_connector_manager
 
 __doc__ = """Create a MEP transition between 2 open ends.
 Select first object (pick a location close to the desired connector)

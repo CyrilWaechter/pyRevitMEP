@@ -31,14 +31,14 @@ class SharedParameter:
     """
     Class used to manage Revit shared parameters
     :param name: Displayed shared parameter name
+    :param ptype : Parameter type like Text, PipingFlow etc…
     :param group: Group used in parameter definition file (shared parameter file)
-    :param type : Parameter type like Text, PipingFlow etc…
     :param guid: Parameter globally unique identifier
     :param description: Parameter description hint
     :param modifiable: This property indicates whether this parameter can be modified by UI user or not.
     :param visible: If false parameter is stored without being visible.
     """
-    def __init__(self, name, ptype, group="pypevitmep", guid=None,
+    def __init__(self, name, ptype, group="pyrevitmep", guid=None,
                  description="", modifiable=True, visible=True, new=True):
         # type: (str, ParameterType or str, str, Guid or None, str, bool, bool, bool) -> None
 
@@ -127,7 +127,7 @@ class SharedParameter:
                     return definition
 
     def initial_values_update(self):
-        self.initial_values = {"name": self.name, "type": self.type, "group": self.group,
+        self.initial_values = {"name": self.name, "ptype": self.type, "group": self.group,
                                "guid": self.guid, "description": self.description, "modifiable": self.modifiable,
                                "visible": self.visible}
 
@@ -204,7 +204,7 @@ class SharedParameter:
             definition_file = self.get_definition_file()
 
         if not self.group:
-            self.group = "pypevitmep"
+            self.group = "pyrevitmep"
 
         definition_group = definition_file.Groups[self.group]
         if not definition_group:
@@ -227,7 +227,7 @@ class SharedParameter:
 
     @staticmethod
     def delete_from_definition_file(shared_parameters, definition_file=None, warning=True):
-        # type: (List[SharedParameter], DefinitionFile, bool) -> None
+        # type: (iter, DefinitionFile, bool) -> None
         if definition_file is None:
             definition_file = SharedParameter.get_definition_file()
         file_path = definition_file.Filename

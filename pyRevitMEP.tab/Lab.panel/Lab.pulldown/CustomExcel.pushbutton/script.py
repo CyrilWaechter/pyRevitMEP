@@ -10,7 +10,7 @@ from pyrevit.script import get_logger
 import os
 import datetime
 
-from pypevitmep import excel
+from pyrevitmep import excel
 
 logger = get_logger()
 doc = revit.doc # type: Document

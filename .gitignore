@@ -192,4 +192,10 @@ filetypes.xml
 PySide2*/
 shiboken2*/
 Avalonia*/
+<<<<<<< HEAD
 >>>>>>> b07318d... Fixed Parameter Manager #11
+=======
+.vs/
+*.sln
+*.pyproj
+>>>>>>> 76cae94... # Enhance and fix manage shared

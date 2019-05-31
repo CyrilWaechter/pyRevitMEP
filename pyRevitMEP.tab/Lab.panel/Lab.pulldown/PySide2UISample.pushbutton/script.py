@@ -1,7 +1,10 @@
+#! python3
 import sys
+sys.path.append(r"C:\FichiersLocauxRevit\pyRevit\pyRevitMEP.extension\pylib")
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QApplication
 from PySide2.QtCore import QFile
+
 
 if __name__=='__main__':
     app = QApplication(sys.argv)

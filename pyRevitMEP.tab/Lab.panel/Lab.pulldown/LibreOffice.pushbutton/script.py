@@ -1,13 +1,13 @@
+#! python3.7
 # coding: utf8
 import sys
-import clr
 import os
-sys.path.append(r"C:\Program Files\LibreOffice\sdk\cli")
-clr.AddReference("cli_basetypes")
-clr.AddReference("cli_cppuhelper")
-clr.AddReference("cli_oootypes")
-clr.AddReference("cli_ure")
-clr.AddReference("cli_uretypes")
+sys.path.append(r"C:\Program Files\LibreOffice\program")
+# clr.AddReference("cli_basetypes")
+# clr.AddReference("cli_cppuhelper")
+# clr.AddReference("cli_oootypes")
+# clr.AddReference("cli_ure")
+# clr.AddReference("cli_uretypes")
 
 # from unoidl.com.sun.star.lang import *
 # from unoidl.com.sun.star.uno import *
@@ -15,7 +15,7 @@ clr.AddReference("cli_uretypes")
 # from unoidl.com.sun.star.frame import *
 #
 # from unoidl.com.sun.star.lang import XMultiServiceFactory
-from unoidl.com.sun.star.uno import XComponentContext
+# from unoidl.com.sun.star.uno import XComponentContext
 # from unoidl.com.sun.star.registry import ImplementationRegistration
 # from unoidl.com.sun.star.bridge import UnoUrlResolver
 #
@@ -24,9 +24,9 @@ from unoidl.com.sun.star.uno import XComponentContext
 
 # You need to add LibreOffice to environment variable "PATH".
 # Else it throw an `System.Runtime.InteropServices.SEHException`
-lo_path = r"C:\Program Files\LibreOffice\program"
-if lo_path not in os.environ["PATH"]:
-    os.environ["PATH"] = "{}{};".format(os.environ["PATH"],lo_path)
+# lo_path = r"C:\Program Files\LibreOffice\program"
+# if lo_path not in os.environ["PATH"]:
+#     os.environ["PATH"] = "{}{};".format(os.environ["PATH"],lo_path)
 
 
 print(os.environ["PATH"])

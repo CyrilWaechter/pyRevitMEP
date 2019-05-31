@@ -2,22 +2,25 @@
 
 import os
 import locale
-from functools import cmp_to_key
+import re
 
 from Autodesk.Revit import Exceptions
-from Autodesk.Revit.DB import DefinitionFile
+from Autodesk.Revit.DB import ParameterType
 
 from pyrevit.script import get_logger
-from pyrevit.forms import WPFWindow, SelectFromList, alert
+from pyrevit.forms import WPFWindow, SelectFromList, alert, utils
 
-from pypevitmep.parameter import SharedParameter
+from pyrevitmep.parameter import SharedParameter
 
 from System.Collections.ObjectModel import ObservableCollection
+from System.Windows.Controls import DataGrid
+from System.ComponentModel import ListSortDirection, SortDescription
 
 logger = get_logger()
 
 
 class ManageSharedParameter(WPFWindow):
+    parameter_types = ParameterType.GetValues(ParameterType)
     def __init__(self):
         file_dir = os.path.dirname(__file__)
         xaml_source = os.path.join(file_dir, "manageshared.xaml")
@@ -49,6 +52,13 @@ class ManageSharedParameter(WPFWindow):
 
         self.bool_return_parameters = False
 
+        self.sort_datagrid(self.datagrid, 1, ListSortDirection.Ascending)
+
+    def setup_icon(self):
+        """Setup custom icon."""
+        iconpath = os.path.join(os.path.dirname(__file__), 'shared_parameter.png')
+        self.Icon = utils.bitmap_from_file(iconpath)
+
     @property
     def definition_file(self):
         return SharedParameter.get_definition_file()
@@ -61,28 +71,6 @@ class ManageSharedParameter(WPFWindow):
     @staticmethod
     def invalid_definition_file():
         alert("Invalid definition file. Operation canceled.")
-
-    # noinspection PyUnusedLocal
-    def auto_generating_column(self, sender, e):
-        # Generate only desired columns
-        headername = e.Column.Header.ToString()
-        if headername in self.headerdict.keys():
-            e.Column.Header = self.headerdict[headername]
-        else:
-            e.Cancel = True
-
-    # noinspection PyUnusedLocal
-    def auto_generated_columns(self, sender, e):
-        # Sort column in desired way
-        for column in self.datagrid.Columns:
-            headerindex = {"Name": 0,
-                           "Type": 1,
-                           "Group": 2,
-                           "Guid": 3,
-                           "Description": 4,
-                           "UserModifiable": 5,
-                           "Visible": 6}
-            column.DisplayIndex = headerindex[column.Header.ToString()]
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
@@ -107,11 +95,12 @@ class ManageSharedParameter(WPFWindow):
                 except Exceptions.InvalidOperationException:
                     logger.info("Failed to write {}".format(parameter.name))
             elif parameter.new is False and parameter.changed is True:
+                logger.info(parameter.initial_values)
                 todelete.append(SharedParameter(**parameter.initial_values))
                 tocreate.append(parameter)
         SharedParameter.delete_from_definition_file(todelete, definition_file)
         for parameter in tocreate:
-            parameter.write_to_definition_file(definition_file)
+            parameter.write_to_definition_file()  # do not specify definition file to force reopening it after deletions
 
     # noinspection PyUnusedLocal
     def delete_click(self, sender, e):
@@ -147,7 +136,7 @@ class ManageSharedParameter(WPFWindow):
             self.invalid_definition_file()
             return
 
-        available_groups = sorted(definition_file.Groups, key=lambda x:locale.strxfrm(x.Name))
+        available_groups = sorted(definition_file.Groups, key=lambda x: locale.strxfrm(x.Name))
         selected_groups = SelectFromList.show(
             available_groups, "Select groups", 400, 300, name_attr="Name", multiselect=True)
         logger.debug("{} result = {}".format(SelectFromList.__name__, selected_groups))
@@ -171,14 +160,53 @@ class ManageSharedParameter(WPFWindow):
 
     # noinspection PyUnusedLocal
     def duplicate(self, sender, e):
+        """Duplicate selected shared parameters"""
         for item in list(self.datagrid.SelectedItems):  # type: SharedParameter
-            args = ("{}1".format(item.name), item.type, item.group, None,
+            # Iterate an index at the end if parameter name already exist
+            try:
+                base_name = re.match('(.*?)([0-9]+)$', item.name).group(1)
+                index = int(re.match('(.*?)([0-9]+)$', item.name).group(2)) + 1
+            except AttributeError:
+                base_name = item.name
+                index = 1
+            new_name = "{}{}".format(base_name, index)
+            while new_name in [item.name for item in list(self.datagrid.Items)]:
+                index += 1
+                new_name = "{}{}".format(base_name, index)
+            # Add parameter to the DataGrid
+            args = (new_name, item.type, item.group, None,
                     item.description, item.modifiable, item.visible, True)
             self.data_grid_content.Add(SharedParameter(*args))
 
     # noinspection PyUnusedLocal
     def target_updated(self, sender, e):
-        e.Row.Item.changed = True
+        attribute = self.datagrid.CurrentColumn.SortMemberPath
+        current_value = getattr(self.datagrid.CurrentItem, attribute)
+        for item in self.datagrid.SelectedItems:
+            setattr(item, attribute, current_value)
+            item.changed = True
+        self.datagrid.Items.Refresh()
+
+    @staticmethod
+    def sort_datagrid(datagrid, column_index, list_sort_direction):
+        # type: (DataGrid, int, ListSortDirection) -> None
+        """Method use to set actual initial sort.
+        cf. https://stackoverflow.com/questions/16956251/sort-a-wpf-datagrid-programmatically"""
+        column = datagrid.Columns[column_index]
+
+        # Clear current sort descriptions
+        datagrid.Items.SortDescriptions.Clear()
+
+        # Add the new sort description
+        datagrid.Items.SortDescriptions.Add(SortDescription(column.SortMemberPath, list_sort_direction))
+
+        # Apply sort
+        for col in datagrid.Columns:
+            col.SortDirection = None
+        column.SortDirection = list_sort_direction
+
+        # Refresh items to display sort
+        datagrid.Items.Refresh()
 
     # noinspection PyUnusedLocal
     def new_definition_file_click(self, sender, e):

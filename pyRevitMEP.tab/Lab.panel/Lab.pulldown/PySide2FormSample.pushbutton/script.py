@@ -1,4 +1,6 @@
+#! python3
 import sys
+sys.path.append(r"C:\FichiersLocauxRevit\pyRevit\pyRevitMEP.extension\pylib")
 from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QVBoxLayout
 
 class Form(QDialog):

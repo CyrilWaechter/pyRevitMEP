@@ -24,8 +24,8 @@ from Autodesk.Revit.DB import Transaction, Element, BuiltInParameter, FilteredEl
     ViewPlan, ViewSection, View3D, StorageType, InstanceBinding, CategorySet, Document
 from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCanceledException, ArgumentException
 
-from pypevitmep.parameter import SharedParameter, ProjectParameter
-from pypevitmep.event import CustomizableEvent
+from pyrevitmep.parameter import SharedParameter, ProjectParameter
+from pyrevitmep.event import CustomizableEvent
 
 import operator
 import re
@@ -36,7 +36,7 @@ import rpw
 from rpw import revit, DB
 
 __doc__ = "Rename selected views according to a pattern"
-__title__ = "Rename"
+__title__ = "Rename\nViews"
 __author__ = "Cyril Waechter"
 
 doc = revit.doc  # type: Document

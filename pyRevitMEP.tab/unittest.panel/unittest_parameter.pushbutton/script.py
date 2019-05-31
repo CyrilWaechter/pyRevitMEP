@@ -5,7 +5,7 @@ from System import Guid
 
 from Autodesk.Revit.DB import ParameterType
 
-from pypevitmep.parameter import SharedParameter
+from pyrevitmep.parameter import SharedParameter
 
 
 class TestSharedParameter(unittest.TestCase):

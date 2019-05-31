@@ -23,7 +23,7 @@ from Autodesk.Revit.DB import Transaction, BuiltInParameter, Element, Level, MEP
 from pyrevit.forms import WPFWindow
 import rpw
 from rpw import revit
-from pypevitmep.event import CustomizableEvent
+from pyrevitmep.event import CustomizableEvent
 
 __doc__ = "Change selected elements level without moving it"
 __title__ = "Change Level"

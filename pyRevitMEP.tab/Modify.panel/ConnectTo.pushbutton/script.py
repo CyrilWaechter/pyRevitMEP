@@ -8,7 +8,7 @@ from Autodesk.Revit import Exceptions
 from pyrevit import script
 from pyrevit import forms
 import rpw
-from pypevitmep.meputils import get_connector_manager, get_connector_closest_to
+from pyrevitmep.meputils import get_connector_manager, get_connector_closest_to
 
 __doc__ = """Connect an object to an other.
 Select first object to connect (pick a location close to the desired connector)

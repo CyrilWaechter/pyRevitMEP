@@ -23,7 +23,7 @@ from Autodesk.Revit.DB import FilteredElementCollector, Element, Transaction
 from Autodesk.Revit.DB.Plumbing import PipingSystemType, FluidTemperature
 # For future implementation in rpw
 # from rpw.db.plumbing import FluidType
-from pypevitmep.plumbing import FluidType
+from pyrevitmep.plumbing import FluidType
 
 import rpw
 from pyrevit import script

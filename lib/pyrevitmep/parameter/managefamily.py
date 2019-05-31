@@ -15,8 +15,8 @@ import rpw
 from pyrevit import script
 from pyrevit import forms
 
-from pypevitmep.parameter import FamilyParameter, BoundAllowedCategory, BipGroup, PType
-from pypevitmep.parameter.manageshared import ManageSharedParameter
+from pyrevitmep.parameter import FamilyParameter, BoundAllowedCategory, BipGroup, PType
+from pyrevitmep.parameter.manageshared import ManageSharedParameter
 
 app = rpw.revit.app  # type: Application
 doc = rpw.revit.doc  # type: Document
@@ -59,6 +59,11 @@ class ManageFamilyParameter(forms.WPFWindow):
 
         self._new_key_number = 0
         self.to_delete = set()
+
+    def setup_icon(self):
+        """Setup custom icon."""
+        iconpath = os.path.join(os.path.dirname(__file__), 'family_parameter.png')
+        self.Icon = forms.utils.bitmap_from_file(iconpath)
 
     @property
     def new_key_number(self):

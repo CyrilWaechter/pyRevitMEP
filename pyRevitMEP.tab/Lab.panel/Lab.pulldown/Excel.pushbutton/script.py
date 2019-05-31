@@ -11,7 +11,7 @@ from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, Storage
 from pyrevit.forms import WPFWindow
 from pyrevit.script import get_logger
 
-from pypevitmep import excel
+from pyrevitmep import excel
 
 logger = get_logger()
 

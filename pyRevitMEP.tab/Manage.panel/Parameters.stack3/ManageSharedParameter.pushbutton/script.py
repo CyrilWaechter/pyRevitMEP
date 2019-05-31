@@ -7,6 +7,6 @@ return selected parameter for another use (e.g. create project parameters, famil
 __title__ = "SharedParameters"
 __author__ = "Cyril Waechter"
 
-from pypevitmep.parameter.manageshared import ManageSharedParameter
+from pyrevitmep.parameter.manageshared import ManageSharedParameter
 
 ManageSharedParameter.show_dialog()
