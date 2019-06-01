@@ -42,18 +42,11 @@ class ManageSharedParameter(WPFWindow):
         for k, v in image_dict.items():
             self.set_image_source(getattr(self, k), os.path.join(file_dir, v))
 
-        self.headerdict = {"name": "Name",
-                           "type": "Type",
-                           "group": "Group",
-                           "guid": "Guid",
-                           "description": "Description",
-                           "modifiable": "UserModifiable",
-                           "visible": "Visible"}
         self.tbk_file_name.DataContext = self.definition_file
 
         self.bool_return_parameters = False
 
-        self.sort_datagrid(self.datagrid, 1, ListSortDirection.Ascending)
+        self.sort_datagrid(self.datagrid, 1)
 
     def setup_icon(self):
         """Setup custom icon."""
@@ -190,7 +183,7 @@ class ManageSharedParameter(WPFWindow):
         self.datagrid.Items.Refresh()
 
     @staticmethod
-    def sort_datagrid(datagrid, column_index, list_sort_direction):
+    def sort_datagrid(datagrid, column_index=0, list_sort_direction=ListSortDirection.Ascending):
         # type: (DataGrid, int, ListSortDirection) -> None
         """Method use to set actual initial sort.
         cf. https://stackoverflow.com/questions/16956251/sort-a-wpf-datagrid-programmatically"""
@@ -226,6 +219,7 @@ class ManageSharedParameter(WPFWindow):
 
     @classmethod
     def show_dialog(cls):
+        # type: () -> List[Definition]
         gui = cls()
         gui.ShowDialog()
         if gui.bool_return_parameters:

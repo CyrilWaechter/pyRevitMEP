@@ -1,21 +1,20 @@
 # coding: utf8
 import os
-from string import digits
+import re
+import tempfile
 
-from System.Windows.Controls import DataGridComboBoxColumn
-from System.Windows.Data import Binding
 from System.ComponentModel import ListSortDirection, SortDescription
 from System.Collections.ObjectModel import ObservableCollection
 
 from Autodesk.Revit.ApplicationServices import Application
-from Autodesk.Revit.DB import Document, BindingMap, ElementBinding, CategorySet
+from Autodesk.Revit.DB import Document
 from Autodesk.Revit import Exceptions
 
 import rpw
 from pyrevit import script
 from pyrevit import forms
 
-from pyrevitmep.parameter import FamilyParameter, BoundAllowedCategory, BipGroup, PType
+from pyrevitmep.parameter import FamilyParameter, SharedParameter, BipGroup, PType
 from pyrevitmep.parameter.manageshared import ManageSharedParameter
 
 app = rpw.revit.app  # type: Application
@@ -34,31 +33,25 @@ class ManageFamilyParameter(forms.WPFWindow):
         image_dict = {"ok_img": "icons8-checkmark-32.png",
                       "add_img": "icons8-plus-32.png",
                       "minus_img": "icons8-minus-32.png",
-                      "copy_img": "icons8-copy-32.png",
+                      "duplicate_img": "icons8-copy-32.png",
                       "revit_family_img": "revit_family.png",
                       "shared_parameter_img": "shared_parameter.png"
                       }
         for k, v in image_dict.items():
             self.set_image_source(getattr(self, k), os.path.join(file_dir, v))
 
-        self.headerdict = {"name": "Name",
-                           "type": "Type",
-                           "group": "Group",
-                           "is_shared": "IsShared?",
-                           "is_instance": "Instance?"}
-
-        self.binding_headerdict = {"name": "Name",
-                                   "category_type": "CategoryType",
-                                   "is_bound": "IsBound?"}
-
         # Read existing project parameters and add it to datagrid
         self.family_parameters = ObservableCollection[object]()
-        for project_parameter in sorted([fp for fp in FamilyParameter.read_from_revit_doc()], key=lambda o: o.name):
-            self.family_parameters.Add(project_parameter)
+        for family_parameter in FamilyParameter.read_from_revit_doc():
+            self.family_parameters.Add(family_parameter)
         self.datagrid.ItemsSource = self.family_parameters
+        self.parameter_types = sorted([PType(ptype) for ptype in PType.enum_generator()])
+        self.parameter_groups = sorted([BipGroup(bip_group) for bip_group in BipGroup.enum_generator()])
 
         self._new_key_number = 0
         self.to_delete = set()
+
+        self.sort_datagrid(self.datagrid)
 
     def setup_icon(self):
         """Setup custom icon."""
@@ -70,50 +63,25 @@ class ManageFamilyParameter(forms.WPFWindow):
         self._new_key_number += 1
         return  self._new_key_number
 
-    # noinspection PyUnusedLocal
-    def auto_generating_column(self, sender, e):
-        # Generate only desired columns
-        headername = e.Column.Header.ToString()
-        if headername in self.headerdict.keys():
-            if headername == "group":
-                cb = DataGridComboBoxColumn()
-                cb.ItemsSource = sorted([BipGroup(fp) for fp in BipGroup.enum_generator()])
-                cb.SelectedItemBinding = Binding(headername)
-                cb.SelectedValuePath = "group"
-                e.Column = cb
-            elif headername == "type":
-                cb = DataGridComboBoxColumn()
-                cb.ItemsSource = sorted([PType(fp) for fp in PType.enum_generator()])
-                cb.SelectedItemBinding = Binding(headername)
-                cb.SelectedValuePath = "type"
-                e.Column = cb
-            else:
-                # e.Column.IsReadOnly = True
-                pass
-            e.Column.Header = self.headerdict[headername]
-        else:
-            e.Cancel = True
-
-    # noinspection PyUnusedLocal
-    def auto_generated_columns(self, sender, e):
-        # Sort column in desired way
-        for column in sender.Columns:
-            headerindex = {"Name": 0,
-                           "Type": 1,
-                           "Group": 2,
-                           "Instance?": 3,
-                           "IsShared?": 3}
-            column.DisplayIndex = headerindex[str(column.Header)]
-
     @staticmethod
-    def sortdatagrid(datagrid, columnindex=0, sortdirection=ListSortDirection.Ascending):
-        """Sort a datagrid. Cf. https://stackoverflow.com/questions/16956251/sort-a-wpf-datagrid-programmatically"""
-        column = datagrid.Columns(columnindex)
-        datagrid.Items.SortDescription.Clear()
-        datagrid.Items.SortDescription.Add(SortDescription(column.SortMemberPath, sortdirection))
+    def sort_datagrid(datagrid, column_index=0, list_sort_direction=ListSortDirection.Ascending):
+        # type: (DataGrid, int, ListSortDirection) -> None
+        """Method use to set actual initial sort.
+        cf. https://stackoverflow.com/questions/16956251/sort-a-wpf-datagrid-programmatically"""
+        column = datagrid.Columns[column_index]
+
+        # Clear current sort descriptions
+        datagrid.Items.SortDescriptions.Clear()
+
+        # Add the new sort description
+        datagrid.Items.SortDescriptions.Add(SortDescription(column.SortMemberPath, list_sort_direction))
+
+        # Apply sort
         for col in datagrid.Columns:
             col.SortDirection = None
-        column.SortDirection = sortdirection
+        column.SortDirection = list_sort_direction
+
+        # Refresh items to display sort
         datagrid.Items.Refresh()
 
     # noinspection PyUnusedLocal
@@ -128,11 +96,21 @@ class ManageFamilyParameter(forms.WPFWindow):
 
             for parameter in self.to_delete:
                 parameter.delete_from_revit(doc)
+
+        # TODO: Clean definition file from temporary created external definitions
         self.Close()
 
     # noinspection PyUnusedLocal
     def add_click(self, sender, e):
-        self.family_parameters.Add(FamilyParameter("New {}".format(self.new_key_number), is_new=True))
+        # Iterate an index at the end if parameter name already exist
+        base_name = "New"
+        index = 1
+        new_name = "{}{}".format(base_name, index)
+        while new_name in [item.name for item in list(self.datagrid.Items)]:
+            index += 1
+            new_name = "{}{}".format(base_name, index)
+        # Add parameter to the DataGrid
+        self.family_parameters.Add(FamilyParameter(name=new_name, is_new=True))
 
     # noinspection PyUnusedLocal
     def minus_click(self, sender, e):
@@ -142,12 +120,24 @@ class ManageFamilyParameter(forms.WPFWindow):
             self.family_parameters.Remove(family_parameter)
 
     # noinspection PyUnusedLocal
-    def copy_click(self, sender, e):
-        for family_parameter in self.datagrid.SelectedItems:  # type: FamilyParameter
-            new_name = "{}{}".format(family_parameter.name.translate(None, digits), self.new_key_number)
-            new_family_parameter = FamilyParameter(new_name, is_new=True, type=family_parameter.type,
-                                                   group=family_parameter.group)
-            self.family_parameters.Add(new_family_parameter)
+    def duplicate_click(self, sender, e):
+        for item in self.datagrid.SelectedItems:  # type: FamilyParameter
+            # Iterate an index at the end if parameter name already exist
+            try:
+                base_name = re.match('(.*?)([0-9]+)$', item.name).group(1)
+                index = int(re.match('(.*?)([0-9]+)$', item.name).group(2)) + 1
+            except AttributeError:
+                base_name = item.name
+                index = 1
+            new_name = "{}{}".format(base_name, index)
+            while new_name in [item.name for item in list(self.datagrid.Items)]:
+                index += 1
+                new_name = "{}{}".format(base_name, index)
+
+            # Add parameter to the DataGrid
+            logger.info(item.group)
+            self.family_parameters.Add(
+                FamilyParameter(new_name, type=item.type, group=item.group, is_instance=item.is_instance, is_new=True))
 
     # noinspection PyUnusedLocal
     def import_from_family_click(self, sender, e):
@@ -173,7 +163,12 @@ class ManageFamilyParameter(forms.WPFWindow):
 
     # noinspection PyUnusedLocal
     def target_updated(self, sender, e):
-        e.Row.Item.modified = True
+        attribute = self.datagrid.CurrentColumn.SortMemberPath
+        current_value = getattr(self.datagrid.CurrentItem, attribute)
+        for item in self.datagrid.SelectedItems:  # type: FamilyParameter
+            setattr(item, attribute, current_value)
+            item.modified = True
+        self.datagrid.Items.Refresh()
 
     @classmethod
     def show_dialog(cls):

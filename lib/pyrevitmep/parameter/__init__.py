@@ -3,6 +3,7 @@
 import os
 import csv
 import tempfile
+import locale
 
 from System import Guid, Enum
 
@@ -126,11 +127,14 @@ class SharedParameter:
 
     @classmethod
     def get_definition_by_guid(cls, guid):
-        # type: (Guid) -> ExternalDefinition
-        for group in cls.get_definition_file().Groups:  # type: DefinitionGroup
-            for definition in group.Definitions:  # type: ExternalDefinition
-                if definition.GUID == guid:
-                    return definition
+        # type: (Guid) -> ExternalDefinition or None
+        try:
+            for group in cls.get_definition_file().Groups:  # type: DefinitionGroup
+                for definition in group.Definitions:  # type: ExternalDefinition
+                    if definition.GUID == guid:
+                        return definition
+        except AttributeError:
+            return
 
     def initial_values_update(self):
         self.initial_values = {"name": self.name, "ptype": self.type, "group": self.group,
@@ -348,14 +352,17 @@ class ProjectParameter:
 
 
 class FamilyParameter:
+    """class handle family parameters creation, copy and imports"""
     def __init__(self, name, **kwargs):
-        # type: (str) -> None
+        # type: (str, **Any) -> None
 
         # Default values
         self.name = name  # type: str
+        self.type = None  # type: PType or ParameterType or None
+        self.group = None # type: BipGroup or BuiltInParameterGroup or None
         self.is_instance = False  # type: bool
         self.is_shared = False  # type: bool
-        self.definition = None  # type: ExternalDefinition
+        self.definition = None  # type: ExternalDefinition or None
         self.modified = False  # type: bool
         self.is_new = False  # type: bool
 
@@ -364,8 +371,8 @@ class FamilyParameter:
             setattr(self, key, value)
 
         if not self.definition:
-            self.type = PType(ParameterType.Length)
-            self.group = BipGroup(BuiltInParameterGroup.PG_TEXT)
+            self.type = self.type if isinstance(self.type, PType) else PType(ParameterType.Length)
+            self.group = self.group if isinstance(self.group, BipGroup) else BipGroup(BuiltInParameterGroup.PG_TEXT)
             self.initial_values = dict()
         else:
             self.type = PType(self.definition.ParameterType)
@@ -384,20 +391,17 @@ class FamilyParameter:
         for parameter in iterator:  # type: Autodesk.Revit.DB.FamilyParameter
             # Exclude built in parameters as they cannot be copied
             if parameter.Definition.BuiltInParameter == BuiltInParameter.INVALID:
-                # Fetch shared parameter external definition if exist else create a temporary one
                 if parameter.IsShared:
                     definition = SharedParameter.get_definition_by_guid(parameter.GUID)
                     if not definition:
-                        temp_sp_file = os.path.join(tempfile.gettempdir(), 'pyrevit_temp_sparam.txt')
-                        SharedParameter.create_definition_file(temp_sp_file)
-                        shared_param = SharedParameter(parameter.Definition.Name,
-                                                       parameter.Definition.ParameterType,
-                                                       guid=parameter.GUID)
-                        definition = shared_param.write_to_definition_file()
-                        os.remove(temp_sp_file)
-                else:  # For non shared family parameters
+                        temp_shared_param = SharedParameter(parameter.Definition.Name,
+                                                            parameter.Definition.ParameterType,
+                                                            "pyFamilyManager",
+                                                            parameter.GUID)
+                        definition = temp_shared_param.write_to_definition_file()
+                else:
                     definition = parameter.Definition
-                yield cls(parameter.Definition.Name,
+                yield cls(definition.Name,
                           is_instance=parameter.IsInstance,
                           is_shared=parameter.IsShared,
                           definition=definition)
@@ -411,6 +415,7 @@ class FamilyParameter:
         # type: (Document) -> Autodesk.Revit.DB.FamilyParameter
         """Save current family parameter to Revit doc.
         Need to be used in an open Transaction. """
+
         if self.is_new and self.is_shared:
             return doc.FamilyManager.AddParameter(self.definition, self.group.enum_member, self.is_instance)
         elif self.is_new:
@@ -482,10 +487,10 @@ class RevitEnum:
             return False
 
     def __gt__(self, other):
-        return self.name > other.name
+        return locale.strxfrm(self.name) > locale.strxfrm(other.name)
 
     def __lt__(self, other):
-        return self.name < other.name
+        return locale.strxfrm(self.name) < locale.strxfrm(other.name)
 
     @property
     def name(self):
