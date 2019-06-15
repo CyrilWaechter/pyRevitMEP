@@ -416,38 +416,57 @@ class FamilyParameter:
         """Save current family parameter to Revit doc.
         Need to be used in an open Transaction. """
 
+        # Create any new shared family parameter
         if self.is_new and self.is_shared:
             return doc.FamilyManager.AddParameter(self.definition, self.group.enum_member, self.is_instance)
+        # Create any new non shared family parameter
         elif self.is_new:
             return doc.FamilyManager.AddParameter(
                 self.name, self.group.enum_member, self.type.enum_member, self.is_instance)
+
+        # Handle all modification cases
         elif self.modified:
+            # Get family parameter to modify
             fp = doc.FamilyManager.get_Parameter(self.initial_values["name"])
 
-            # Get the string or ExternalDefinition necessary
-            if self.is_shared:
-                # In case only Instance/Type has been switched
-                for key in ("type", "group", "is_shared"):
-                    if getattr(self, key) != self.initial_values[key]:
-                        break
-                else:
+            # Case 1 : only Name and/or BuiltInParameterGroup and/or Instance/Type has been changed
+            for key in ("type", "is_shared"):
+                if getattr(self, key) != self.initial_values[key]:
+                    break
+            else:
+                # Case 1a : rename non shared parameters
+                if self.name != fp.Definition.Name and not self.is_shared:
+                    doc.FamilyManager.Rename(fp, self.name)
+                # Case 1b : change BuiltInParameterGroup
+                if self.group != self.initial_values["group"]:
+                    fp.Definition.ParameterGroup = self.group.enum_member
+                # Case 1c : switch Instance/Type
+                if self.is_instance != fp.IsInstance:
                     if self.is_instance:
-                        return doc.FamilyManager.MakeInstance(fp)
+                        doc.FamilyManager.MakeInstance(fp)
+                        return fp
                     else:
-                        return doc.FamilyManager.MakeType(fp)
-                var_attr = SharedParameter.get_definition_by_name(self.name)
-            else:
-                var_attr = self.name
-
-            if self.type == self.initial_values["type"]:
-                return doc.FamilyManager.ReplaceParameter(fp, var_attr, self.group.enum_member, self.is_instance)
-            else:
-                doc.FamilyManager.RemoveParameter(fp)
-                if self.is_shared:
-                    return doc.FamilyManager.AddParameter(var_attr, self.group.enum_member, self.is_instance)
+                        doc.FamilyManager.MakeType(fp)
+                        return fp
                 else:
-                    return doc.FamilyManager.AddParameter(
-                        self.name, self.group.enum_member, self.type.enum_member, self.is_instance)
+                    return fp
+
+            # Case 2 : shared/non shared switched but no type change
+            if self.is_shared != fp.IsShared and self.type == fp.Definition.ParameterType:
+                if self.is_shared:
+                    var_attr = SharedParameter.get_definition_by_name(self.name)
+                else:
+                    var_attr = self.name
+                return doc.FamilyManager.ReplaceParameter(fp, var_attr, self.group.enum_member, self.is_instance)
+
+            # Case 3 : any ParameterType changed and/or shared parameter has been renamed
+            doc.FamilyManager.RemoveParameter(fp)
+            if self.is_shared:
+                external_definition = SharedParameter.get_definition_by_name(self.name)
+                return doc.FamilyManager.AddParameter(external_definition, self.group.enum_member, self.is_instance)
+            else:
+                return doc.FamilyManager.AddParameter(
+                    self.name, self.group.enum_member, self.type.enum_member, self.is_instance)
 
     def delete_from_revit(self, doc):
         # type: (Document) -> None

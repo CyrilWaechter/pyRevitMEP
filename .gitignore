@@ -188,6 +188,7 @@ dbnavigator.xml
 =======
 dbnavigator.xml
 filetypes.xml
+find.xml
 
 PySide2*/
 shiboken2*/

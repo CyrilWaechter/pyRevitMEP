@@ -53,8 +53,8 @@ def new_line_style(name="NewLine", pattern_id=plain_line_pattern_id, color=None,
     return line
 
 
-with rpw.db.Transaction("Create line style"):
-    for system in FilteredElementCollector(doc).OfClass(PipingSystemType):  # type: PipingSystemType
+def create_system_type_lines(system_type):
+    for system in FilteredElementCollector(doc).OfClass(system_type):  # type: PipingSystemType
         color = system.LineColor
         pattern_id = system.LinePatternId
         abbreviation = system.Abbreviation
@@ -71,3 +71,10 @@ with rpw.db.Transaction("Create line style"):
             existing_cat.LineColor = color
             existing_cat.SetLinePatternId(ElementId)
             existing_cat.SetLineWeight(weight)
+
+
+with rpw.db.Transaction("Create line style for each piping system type"):
+    create_system_type_lines(PipingSystemType)
+
+with rpw.db.Transaction("Create line style for each ventilation system type"):
+    create_system_type_lines(MechanicalSystemType)

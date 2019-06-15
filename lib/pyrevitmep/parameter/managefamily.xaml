@@ -49,8 +49,7 @@
                     </GroupBox>
                 </StackPanel>
                 <DockPanel LastChildFill="True">
-                    <DataGrid x:Name="datagrid"
-                              RowEditEnding="target_updated" AutoGenerateColumns="False">
+                    <DataGrid x:Name="datagrid" AutoGenerateColumns="False">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn ClipboardContentBinding="{Binding name}" Header="Name" SortDirection="Ascending" SortMemberPath="name">
                                 <DataGridTemplateColumn.CellTemplate>

@@ -61,7 +61,7 @@ class ManageFamilyParameter(forms.WPFWindow):
     @property
     def new_key_number(self):
         self._new_key_number += 1
-        return  self._new_key_number
+        return self._new_key_number
 
     @staticmethod
     def sort_datagrid(datagrid, column_index=0, list_sort_direction=ListSortDirection.Ascending):
@@ -135,7 +135,6 @@ class ManageFamilyParameter(forms.WPFWindow):
                 new_name = "{}{}".format(base_name, index)
 
             # Add parameter to the DataGrid
-            logger.info(item.group)
             self.family_parameters.Add(
                 FamilyParameter(new_name, type=item.type, group=item.group, is_instance=item.is_instance, is_new=True))
 
