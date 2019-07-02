@@ -66,6 +66,10 @@ def connect_to():
     except AttributeError:
         rpw.ui.forms.Alert("It looks like one of the objects have no unused connector", header="AttributeError")
         return True
+    except Exceptions.InvalidObjectException:
+        with forms.WarningBar(title="Oops, it looks like you chose an invalid object"):
+            import time
+            time.sleep(2)
 
     # Retrieves connectors direction and catch attribute error like when there is no unused connector available
     try:
