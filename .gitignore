@@ -183,9 +183,6 @@ venv.bak/
 _windows
 
 # dbnavigator settings
-<<<<<<< HEAD
-dbnavigator.xml
-=======
 dbnavigator.xml
 filetypes.xml
 find.xml
@@ -193,10 +190,6 @@ find.xml
 PySide2*/
 shiboken2*/
 Avalonia*/
-<<<<<<< HEAD
->>>>>>> b07318d... Fixed Parameter Manager #11
-=======
 .vs/
 *.sln
 *.pyproj
->>>>>>> 76cae94... # Enhance and fix manage shared
