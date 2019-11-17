@@ -1,0 +1,9 @@
+title:
+  en_us: Manage
+  fr_fr: Gérer
+layout:
+  - ViewRename
+  - Copy
+  - FamilyReLoad
+  - Parameters
+  - Fluid

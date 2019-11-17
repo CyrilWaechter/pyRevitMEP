@@ -1,0 +1,4 @@
+layout:
+  - FamilyDelete
+  - FamilyTypeDelete
+  - SystemDelete

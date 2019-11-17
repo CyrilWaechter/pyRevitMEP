@@ -15,6 +15,7 @@ __doc__ = """Compute distance of selected elements (origin or middle of the curv
 Result is stored in designated parameter"""
 __title__ = "ElevationUnder"
 __author__ = "Cyril Waechter"
+__persistentengine__ = True
 
 doc = rpw.revit.doc # type: Document
 uidoc = rpw.revit.uidoc # type: UIDocument

@@ -53,6 +53,10 @@ def connect_to():
         target_point = reference.GlobalPoint
     except Exceptions.OperationCanceledException:
         return True
+    except Exceptions.InvalidObjectException:
+        with forms.WarningBar(title="Oops, it looks like you chose an invalid object"):
+            import time
+            time.sleep(2)
 
     # Get associated unused connectors
     moved_connector = get_connector_closest_to(get_connector_manager(moved_element).UnusedConnectors,
@@ -66,10 +70,6 @@ def connect_to():
     except AttributeError:
         rpw.ui.forms.Alert("It looks like one of the objects have no unused connector", header="AttributeError")
         return True
-    except Exceptions.InvalidObjectException:
-        with forms.WarningBar(title="Oops, it looks like you chose an invalid object"):
-            import time
-            time.sleep(2)
 
     # Retrieves connectors direction and catch attribute error like when there is no unused connector available
     try:

@@ -35,6 +35,7 @@ from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCancel
 __doc__ = "Rotate object in any direction"
 __title__ = "3D Rotate"
 __author__ = "Cyril Waechter"
+__persistentengine__ = True
 
 doc = revit.doc
 uidoc = revit.uidoc

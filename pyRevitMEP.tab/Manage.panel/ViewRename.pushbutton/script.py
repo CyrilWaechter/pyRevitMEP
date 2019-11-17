@@ -38,6 +38,7 @@ from rpw import revit, DB
 __doc__ = "Rename selected views according to a pattern"
 __title__ = "Rename\nViews"
 __author__ = "Cyril Waechter"
+__persistentengine__ = True
 
 doc = revit.doc  # type: Document
 uidoc = revit.uidoc

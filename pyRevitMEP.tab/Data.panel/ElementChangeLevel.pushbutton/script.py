@@ -29,6 +29,7 @@ from pyrevitmep.event import CustomizableEvent
 __doc__ = "Change selected elements level without moving it"
 __title__ = "Change Level"
 __author__ = "Cyril Waechter"
+__persistentengine__ = True
 
 doc = revit.doc
 uidoc = revit.uidoc

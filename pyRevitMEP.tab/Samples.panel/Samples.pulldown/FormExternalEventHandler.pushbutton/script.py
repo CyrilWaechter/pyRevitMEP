@@ -30,6 +30,7 @@ uidoc = rpw.revit.uidoc
 __doc__ = "A simple modeless form sample"
 __title__ = "Modeless Form"
 __author__ = "Cyril Waechter"
+__persistentengine__ = True
 
 # Simple function we want to run
 def delete_elements():

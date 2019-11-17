@@ -11,6 +11,7 @@ from pyrevitmep.event import CustomizableEvent
 __doc__ = "Copy legend location in active ViewSheet"
 __title__ = "CopyLegendsLocations"
 __author__ = "Cyril Waechter"
+__persistentengine__ = True
 
 logger = get_logger()
 doc = rpw.revit.doc

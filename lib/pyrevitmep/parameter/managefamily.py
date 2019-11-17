@@ -13,6 +13,7 @@ from Autodesk.Revit import Exceptions
 import rpw
 from pyrevit import script
 from pyrevit import forms
+import rsparam
 
 from pyrevitmep.parameter import FamilyParameter, SharedParameter, BipGroup, PType
 from pyrevitmep.parameter.manageshared import ManageSharedParameter
@@ -97,7 +98,20 @@ class ManageFamilyParameter(forms.WPFWindow):
             for parameter in self.to_delete:
                 parameter.delete_from_revit(doc)
 
-        # TODO: Clean definition file from temporary created external definitions
+        # Clean definition file from temporary created external definitions
+        src_file = SharedParameter.get_definition_file().Filename
+        if script.coreutils.check_revittxt_encoding(src_file):
+            encoding = "utf_16_le"
+        else:
+            encoding = "utf_8"
+        entries = rsparam.read_entries(src_file, encoding)
+        for group in entries.groups:
+            if group.name == "pyFamilyManager":
+                for parameter in entries.params:
+                    if parameter.group == group:
+                        entries.params.remove(parameter)
+                entries.groups.remove(group)
+                rsparam.write_entries(entries, src_file, encoding)
         self.Close()
 
     # noinspection PyUnusedLocal

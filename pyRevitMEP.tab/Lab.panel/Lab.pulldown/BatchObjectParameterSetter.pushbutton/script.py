@@ -11,6 +11,7 @@ import re
 __doc__ = "Batch parameter setter"
 __title__ = "BatchParamSetter"
 __author__ = "Cyril Waechter"
+__persistentengine__ = True
 
 logger = get_logger()
 doc = rpw.revit.doc

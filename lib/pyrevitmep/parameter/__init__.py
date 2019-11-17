@@ -418,7 +418,18 @@ class FamilyParameter:
 
         # Create any new shared family parameter
         if self.is_new and self.is_shared:
-            return doc.FamilyManager.AddParameter(self.definition, self.group.enum_member, self.is_instance)
+            try:
+                return doc.FamilyManager.AddParameter(self.definition, self.group.enum_member, self.is_instance)
+            except Exceptions.InvalidObjectException:
+                new_shared_param = SharedParameter(
+                    self.name,
+                    self.definition.ParameterType,
+                    group="pyFamilyManager",
+                    guid=self.GUID
+                )
+                new_shared_param.write_to_definition_file()
+                return doc.FamilyManager.AddParameter(self.definition, self.group.enum_member, self.is_instance)
+
         # Create any new non shared family parameter
         elif self.is_new:
             return doc.FamilyManager.AddParameter(
