@@ -16,11 +16,8 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
-# noinspection PyUnresolvedReferences
 from Autodesk.Revit.UI import IExternalEventHandler, ExternalEvent
-# noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction
-# noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException
 import rpw
 from pyrevit.forms import WPFWindow
@@ -36,7 +33,6 @@ __persistentengine__ = True
 def delete_elements():
     with rpw.db.Transaction("Delete selection"):
         for elid in uidoc.Selection.GetElementIds():
-            print elid
             doc.Delete(elid)
 
 # Create a subclass of IExternalEventHandler

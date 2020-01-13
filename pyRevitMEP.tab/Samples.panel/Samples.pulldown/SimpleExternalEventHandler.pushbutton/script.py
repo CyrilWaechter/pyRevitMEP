@@ -20,12 +20,10 @@ https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 __doc__ = "simple external event which just delete selection"
 __title__ = "ExEvent Delete"
 __author__ = "Cyril Waechter"
+__persistentengine__ = True
 
-# noinspection PyUnresolvedReferences
 from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
-# noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction
-# noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException
 import rpw
 doc = rpw.revit.doc
@@ -47,5 +45,3 @@ handler_event = ExternalEventMy()
 exEvent = ExternalEvent.Create(handler_event)
 
 exEvent.Raise()
-
-ExternalEventMy.Execute(handler_event, uidoc)
