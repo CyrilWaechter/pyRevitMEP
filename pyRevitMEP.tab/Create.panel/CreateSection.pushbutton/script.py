@@ -95,12 +95,18 @@ for element_id in uidoc.Selection.GetElementIds():
     z_max = el_bounding_box.Max.Z
     el_height = z_max - z_min
 
+   # Get Wall Offset Params if Element is Wall
+    try:
+        base_offset = element.Parameter[BuiltInParameter.WALL_BASE_OFFSET].AsDouble()
+    except AttributeError:
+        base_offset = 0    
+
     # Set BoundingBoxXYZ's boundaries
     section_box.Min = XYZ(-el_width / 2 - width_offset,
-                          -height_offset,
+                          -height_offset + base_offset,
                           -el_depth / 2 - depth_offset)
     section_box.Max = XYZ(el_width / 2 + width_offset,
-                          el_height + height_offset,
+                          el_height + height_offset + base_offset,
                           el_depth / 2 + depth_offset)
 
     # Append necessary parameters to create sections in a list
