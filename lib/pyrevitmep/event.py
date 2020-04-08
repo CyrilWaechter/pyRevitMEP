@@ -58,7 +58,7 @@ class _CustomHandler(UI.IExternalEventHandler):
             self.customizable_event._raised_method()
         except InvalidOperationException:
             # If you don't catch this exeption Revit may crash.
-            print "InvalidOperationException catched"
+            print("InvalidOperationException catched")
 
     # noinspection PyMethodMayBeStatic, PyPep8Naming
     def GetName(self):
