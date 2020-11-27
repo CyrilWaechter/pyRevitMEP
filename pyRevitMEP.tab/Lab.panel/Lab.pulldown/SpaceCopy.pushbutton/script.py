@@ -6,6 +6,7 @@ from Autodesk.Revit.DB import (
     Element,
     UV,
     BuiltInParameter,
+    StorageType,
 )
 
 from pyrevit import script, forms, revit
@@ -75,10 +76,11 @@ class SpaceSync:
             return self.tgt_doc.Create.NewSpace(level, uv)
 
     def sync_data(self, src_space, tgt_space):
-        synced_attr = ["UpperLimit", "Number", "Name"]
+        synced_attr = ["UpperLimit", "Number", "Name", "ConditionType"]
         synced_bip = [
             BuiltInParameter.ROOM_UPPER_OFFSET,
             BuiltInParameter.ROOM_LOWER_OFFSET,
+            BuiltInParameter.SPACE_IS_OCCUPIABLE,
         ]
         synced_param = [
             "ZoneDescription",
@@ -98,10 +100,26 @@ class SpaceSync:
                     value = self.tgt_levels[level_name]
                 setattr(tgt_space, attr_name, value)
         for bip in synced_bip:
-            tgt_space.get_Parameter(bip).Set(src_space.get_Parameter(bip).AsDouble())
+            param = src_space.get_Parameter(bip)
+            if param.StorageType == StorageType.Double:
+                value = param.AsDouble()
+            elif param.StorageType == StorageType.Integer:
+                value = param.AsInteger()
+            elif param.StorageType == StorageType.String:
+                value = param.AsString()
+            elif param.StorageType == StorageType.ElementId:
+                value = param.ElementId()
+            else:
+                print("Unknown storage type for {}".format(param.Definition.Name))
+            tgt_space.get_Parameter(bip).Set(value)
         for param_name in synced_param:
             value = src_space.LookupParameter(param_name).AsString()
             tgt_space.LookupParameter(param_name).Set(value)
+
+    def sync_location(self, src_space, tgt_space):
+        translation = src_space.Location.Point - tgt_space.Location.Point
+        if not translation.IsZeroLength():
+            tgt_space.Location.Move(translation)
 
     def process(self):
         with revit.Transaction(
@@ -111,6 +129,7 @@ class SpaceSync:
             self.remove_unused_space()
             for space_uuid, src_space in self.src_spaces.items():
                 tgt_space = self.get_tgt_space(space_uuid, src_space)
+                self.sync_location(src_space, tgt_space)
                 self.sync_data(src_space, tgt_space)
 
 
