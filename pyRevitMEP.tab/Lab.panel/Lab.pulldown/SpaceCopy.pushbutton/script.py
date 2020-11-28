@@ -8,8 +8,12 @@ from Autodesk.Revit.DB import (
     BuiltInParameter,
     StorageType,
 )
+from Autodesk.Revit import Exceptions
 
 from pyrevit import script, forms, revit
+
+output = script.get_output()
+logger = script.get_logger()
 
 
 def get_src_doc(name):
@@ -19,13 +23,16 @@ def get_src_doc(name):
 
 
 class SpaceSync:
-    def __init__(self):
-        print("Initialise")
+    def __init__(self, src_name):
+        output.log_info("Initialise")
         self.tgt_doc = (
             __revit__.ActiveUIDocument.Document
         )  # type: Autodesk.Revit.Document
-        self.src_doc = get_src_doc("0014_Vernier112D_CVS_ModèleCVS_R21")
-        print("Doc found : {}".format(bool(self.src_doc)))
+        self.src_doc = get_src_doc(src_name)
+        if self.src_doc:
+            output.log_info("Document «{}» found".format(src_name))
+        else:
+            output.log_error("Document «{}» not found".format(src_name))
         self.src_levels = {
             level.Id: Element.Name.__get__(level)
             for level in FilteredElementCollector(self.tgt_doc).OfCategory(
@@ -60,11 +67,16 @@ class SpaceSync:
         ]
         for space in to_delete:
             doc.Delete(space.Id)
-        extra_spaces = set(self.tgt_spaces.keys()).difference_update(
+        logger.debug(self.src_spaces.keys())
+        logger.debug(self.tgt_spaces.keys())
+        extra_spaces = set(self.tgt_spaces.keys()).difference(
             set(self.src_spaces.keys())
         )
+        logger.debug(extra_spaces)
+        if extra_spaces:
+            output.log_info("Remove {} unused spaces".format(len(extra_spaces)))
         for space_uuid in extra_spaces or ():
-            doc.Delete(tgt_spaces[space_uuid].Id)
+            doc.Delete(self.tgt_spaces[space_uuid].Id)
             self.tgt_spaces.pop(space_uuid)
 
     def get_tgt_space(self, space_uuid, src_space):
@@ -76,6 +88,7 @@ class SpaceSync:
             return self.tgt_doc.Create.NewSpace(level, uv)
 
     def sync_data(self, src_space, tgt_space):
+        output.log_info("Sync spaces datas")
         synced_attr = ["UpperLimit", "Number", "Name", "ConditionType"]
         synced_bip = [
             BuiltInParameter.ROOM_UPPER_OFFSET,
@@ -110,13 +123,30 @@ class SpaceSync:
             elif param.StorageType == StorageType.ElementId:
                 value = param.ElementId()
             else:
-                print("Unknown storage type for {}".format(param.Definition.Name))
-            tgt_space.get_Parameter(bip).Set(value)
+                output.log_warning(
+                    "Unknown storage type for {}".format(param.Definition.Name)
+                )
+            try:
+                tgt_space.get_Parameter(bip).Set(value)
+            except TypeError:
+                output.log_error(
+                    "Fail to set value {} to parameter {}".format(
+                        value, param.Definition.Name
+                    )
+                )
         for param_name in synced_param:
             value = src_space.LookupParameter(param_name).AsString()
-            tgt_space.LookupParameter(param_name).Set(value)
+            try:
+                tgt_space.LookupParameter(param_name).Set(value)
+            except TypeError:
+                output.log_error(
+                    "Fail to set value {} to parameter {}".format(
+                        value, param.Definition.Name
+                    )
+                )
 
     def sync_location(self, src_space, tgt_space):
+        output.log_info("Sync spaces location")
         translation = src_space.Location.Point - tgt_space.Location.Point
         if not translation.IsZeroLength():
             tgt_space.Location.Move(translation)
@@ -133,4 +163,4 @@ class SpaceSync:
                 self.sync_data(src_space, tgt_space)
 
 
-SpaceSync().process()
+SpaceSync("0014_Vernier112D_CVS_ModèleCVS_R21").process()
