@@ -89,8 +89,9 @@ class SpaceSync:
 
     def sync_data(self, src_space, tgt_space):
         output.log_info("Sync spaces datas")
-        synced_attr = ["UpperLimit", "Number", "Name", "ConditionType"]
+        synced_attr = ["UpperLimit", "Number", "ConditionType"]
         synced_bip = [
+            BuiltInParameter.ROOM_NAME,
             BuiltInParameter.ROOM_UPPER_OFFSET,
             BuiltInParameter.ROOM_LOWER_OFFSET,
             BuiltInParameter.SPACE_IS_OCCUPIABLE,
