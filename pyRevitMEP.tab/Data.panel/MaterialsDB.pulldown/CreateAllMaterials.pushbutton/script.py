@@ -34,7 +34,22 @@ class CustomTransaction:
 
 
 def get_valid_name(name):
-    return str(name).split("\n")[0]
+    """In Revit API following characters are not allowed for material names: \:{}[]|<>?`~"""
+    return (
+        str(name)
+        .split("\n")[0]
+        .replace(":", "_")
+        .replace("{", "(")
+        .replace("}", ")")
+        .replace("[", "(")
+        .replace("]", ")")
+        .replace("|", "_")
+        .replace("<", "(")
+        .replace(">", "]")
+        .replace("?", "")
+        .replace("`", "’")
+        .replace("~", "")
+    )
 
 
 def create_materials(source, lang, country):
@@ -65,22 +80,27 @@ def create_materials(source, lang, country):
             structural_asset = StructuralAsset(layer_name, StructuralAssetClass.Basic)
             thermal = utils.get_by_country(layer.thermal, country)
             physical = utils.get_by_country(layer.physical, country)
-            density = UnitUtils.ConvertToInternalUnits(
-                getattr(physical, "density", 0),
-                DisplayUnitType.DUT_KILOGRAMS_PER_CUBIC_METER,
-            )
-            thermal_asset.Density = structural_asset.Density = density
-            thermal_asset.Porosity = getattr(physical, "Porosity") or 0
-            specific_heat_capacity = UnitUtils.ConvertToInternalUnits(
-                (getattr(thermal, "therm_capa") or 0) * 3600,
-                DisplayUnitType.DUT_JOULES_PER_KILOGRAM_CELSIUS,
-            )
-            thermal_asset.SpecificHeat = specific_heat_capacity
-            thermal_conductivity = UnitUtils.ConvertToInternalUnits(
-                getattr(thermal, "lambda_value") or 0,
-                DisplayUnitType.DUT_WATTS_PER_METER_KELVIN,
-            )
-            thermal_asset.ThermalConductivity = thermal_conductivity
+            density = getattr(physical, "density", 0)
+            if density:
+                thermal_asset.Density = (
+                    structural_asset.Density
+                ) = UnitUtils.ConvertToInternalUnits(
+                    density,
+                    DisplayUnitType.DUT_KILOGRAMS_PER_CUBIC_METER,
+                )
+            thermal_asset.Porosity = getattr(physical, "Porosity", 0)
+            specific_heat_capacity = (getattr(thermal, "therm_capa", 0) or 0) * 3600
+            if specific_heat_capacity:
+                thermal_asset.SpecificHeat = UnitUtils.ConvertToInternalUnits(
+                    specific_heat_capacity,
+                    DisplayUnitType.DUT_JOULES_PER_KILOGRAM_CELSIUS,
+                )
+            thermal_conductivity = getattr(thermal, "lambda_value", 0)
+            if thermal_conductivity:
+                thermal_asset.ThermalConductivity = UnitUtils.ConvertToInternalUnits(
+                    thermal_conductivity,
+                    DisplayUnitType.DUT_WATTS_PER_METER_KELVIN,
+                )
             thermal_property_set = PropertySetElement.Create(doc, thermal_asset)
             structural_property_set = PropertySetElement.Create(doc, structural_asset)
             thermal_property_set.get_Parameter(
@@ -103,8 +123,6 @@ def create_materials(source, lang, country):
             ).Set("materialsdb.org")
             revit_material.ThermalAssetId = structural_property_set.Id
             revit_material.StructuralAssetId = thermal_property_set.Id
-            break
-        break
 
 
 with CustomTransaction("Create materials", doc):
