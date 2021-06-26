@@ -1,0 +1,820 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.materialsDB.org" xmlns="http://www.materialsDB.org" elementFormDefault="qualified" version="1.02">
+<!--
+   An XML XSD for Open Materials database (OMaterialsDB 1.02)
+      DOCTYPE materials
+      SYSTEM http://www.materialsdb.org/schemas/materialsdb102.xsd
+   See the documentation and examples at http://www.materialsdb.org/
+   (c) 2007-2013 E4tech Software SA, Edouard Westphal
+   released under the GNU Public License (GPL)
+-->
+<!--
+  1.02b01 : 2013.04.17 first version imported from DTD and revised
+-->
+  <xs:simpleType name="T2Lowercase">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-z][a-z]"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="groupkind">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value='Others'/>
+      <xs:enumeration value='Water_Proof'/>
+      <xs:enumeration value='Vapour_Proof'/>
+      <xs:enumeration value='Concrete'/>
+      <xs:enumeration value='Wood_Timberproducts'/>
+      <xs:enumeration value='Insulation'/>
+      <xs:enumeration value='Masonry'/>
+      <xs:enumeration value='Metal'/>
+      <xs:enumeration value='Mortar'/>
+      <xs:enumeration value='Plastics'/>
+      <xs:enumeration value='Stone'/>
+      <xs:enumeration value='Composite'/>
+      <xs:enumeration value='Films'/>
+      <xs:enumeration value='Render'/>
+      <xs:enumeration value='Covering'/>
+      <xs:enumeration value='Glas'/>
+      <xs:enumeration value='Soil'/>
+      <xs:enumeration value='air'/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="materialtype">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value='simple'/>
+      <xs:enumeration value='btk'/>
+      <xs:enumeration value='construction'/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="THexHash">
+    <xs:simpleContent>
+      <xs:extension base="xs:hexBinary">
+        <xs:attribute name="ver" type="xs:unsignedInt" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:simpleType>
+  <xs:complexType name='TLocalizedString' >
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name='lang' use='optional' type="ISO639_1"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name='TCountryLocalizedString'>
+    <xs:simpleContent>
+      <xs:extension base="TLocalizedString">
+        <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name='TNamedString'>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" use="required" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="T2Uppercase">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Z][A-Z]"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="TDateTime">
+    <xs:annotation>
+      <xs:documentation>
+  The integral part of a TDateTime value is the number of days that have passed since 12/30/1899.
+  The fractional part of the TDateTime value is fraction of a 24 hour day that has elapsed.
+  </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:float"/>
+  </xs:simpleType>
+  <xs:simpleType name="guid">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="Brackguid">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\{[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}\}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="boolean">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:pattern value="[0-1]"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="mimetype">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <!--    The current XML-recommendation doesn't yet support the
+        three-letter short names for languages (ISO 693-2). So
+        the following section will be using the two-letter
+        (ISO 639-1) encoding for the languages.
+
+	en : English,	de : German,	fr : French,
+	la : Latin, 	it : Italian, 	nl : Dutch,
+	ru : Russian,	pl : Polish,	es : Spanish,
+	tr : Turkish,	zh : Chinese,	ja : Japanese,
+	ko : Korean     ...                     -->
+  <xs:simpleType name="ISO639_1">
+    <xs:restriction base='T2Lowercase'>
+      <xs:enumeration value='aa'/>
+      <xs:enumeration value='ab'/>
+      <xs:enumeration value='af'/>
+      <xs:enumeration value='am'/>
+      <xs:enumeration value='ar'/>
+      <xs:enumeration value='as'/>
+      <xs:enumeration value='ay'/>
+      <xs:enumeration value='az'/>
+      <xs:enumeration value='ba'/>
+      <xs:enumeration value='be'/>
+      <xs:enumeration value='bg'/>
+      <xs:enumeration value='bh'/>
+      <xs:enumeration value='bi'/>
+      <xs:enumeration value='bn'/>
+      <xs:enumeration value='bo'/>
+      <xs:enumeration value='br'/>
+      <xs:enumeration value='ca'/>
+      <xs:enumeration value='co'/>
+      <xs:enumeration value='cs'/>
+      <xs:enumeration value='cy'/>
+      <xs:enumeration value='da'/>
+      <xs:enumeration value='de'/>
+      <xs:enumeration value='dz'/>
+      <xs:enumeration value='el'/>
+      <xs:enumeration value='en'/>
+      <xs:enumeration value='eo'/>
+      <xs:enumeration value='es'/>
+      <xs:enumeration value='et'/>
+      <xs:enumeration value='eu'/>
+      <xs:enumeration value='fa'/>
+      <xs:enumeration value='fi'/>
+      <xs:enumeration value='fj'/>
+      <xs:enumeration value='fo'/>
+      <xs:enumeration value='fr'/>
+      <xs:enumeration value='fy'/>
+      <xs:enumeration value='ga'/>
+      <xs:enumeration value='gd'/>
+      <xs:enumeration value='gl'/>
+      <xs:enumeration value='gn'/>
+      <xs:enumeration value='gu'/>
+      <xs:enumeration value='ha'/>
+      <xs:enumeration value='he'/>
+      <xs:enumeration value='hi'/>
+      <xs:enumeration value='hr'/>
+      <xs:enumeration value='hu'/>
+      <xs:enumeration value='hy'/>
+      <xs:enumeration value='ia'/>
+      <xs:enumeration value='ie'/>
+      <xs:enumeration value='ik'/>
+      <xs:enumeration value='id'/>
+      <xs:enumeration value='is'/>
+      <xs:enumeration value='it'/>
+      <xs:enumeration value='iu'/>
+      <xs:enumeration value='ja'/>
+      <xs:enumeration value='jv'/>
+      <xs:enumeration value='ka'/>
+      <xs:enumeration value='kk'/>
+      <xs:enumeration value='kl'/>
+      <xs:enumeration value='km'/>
+      <xs:enumeration value='kn'/>
+      <xs:enumeration value='ko'/>
+      <xs:enumeration value='ks'/>
+      <xs:enumeration value='ku'/>
+      <xs:enumeration value='ky'/>
+      <xs:enumeration value='la'/>
+      <xs:enumeration value='ln'/>
+      <xs:enumeration value='lo'/>
+      <xs:enumeration value='lt'/>
+      <xs:enumeration value='lv'/>
+      <xs:enumeration value='mg'/>
+      <xs:enumeration value='mi'/>
+      <xs:enumeration value='mk'/>
+      <xs:enumeration value='ml'/>
+      <xs:enumeration value='mn'/>
+      <xs:enumeration value='mo'/>
+      <xs:enumeration value='mr'/>
+      <xs:enumeration value='ms'/>
+      <xs:enumeration value='mt'/>
+      <xs:enumeration value='my'/>
+      <xs:enumeration value='na'/>
+      <xs:enumeration value='ne'/>
+      <xs:enumeration value='nl'/>
+      <xs:enumeration value='no'/>
+      <xs:enumeration value='oc'/>
+      <xs:enumeration value='om'/>
+      <xs:enumeration value='or'/>
+      <xs:enumeration value='pa'/>
+      <xs:enumeration value='pl'/>
+      <xs:enumeration value='ps'/>
+      <xs:enumeration value='pt'/>
+      <xs:enumeration value='qu'/>
+      <xs:enumeration value='rm'/>
+      <xs:enumeration value='rn'/>
+      <xs:enumeration value='ro'/>
+      <xs:enumeration value='ru'/>
+      <xs:enumeration value='rw'/>
+      <xs:enumeration value='sa'/>
+      <xs:enumeration value='sd'/>
+      <xs:enumeration value='sg'/>
+      <xs:enumeration value='sh'/>
+      <xs:enumeration value='si'/>
+      <xs:enumeration value='sk'/>
+      <xs:enumeration value='sl'/>
+      <xs:enumeration value='sm'/>
+      <xs:enumeration value='sn'/>
+      <xs:enumeration value='so'/>
+      <xs:enumeration value='sq'/>
+      <xs:enumeration value='sr'/>
+      <xs:enumeration value='ss'/>
+      <xs:enumeration value='st'/>
+      <xs:enumeration value='su'/>
+      <xs:enumeration value='sv'/>
+      <xs:enumeration value='sw'/>
+      <xs:enumeration value='ta'/>
+      <xs:enumeration value='te'/>
+      <xs:enumeration value='tg'/>
+      <xs:enumeration value='th'/>
+      <xs:enumeration value='ti'/>
+      <xs:enumeration value='tk'/>
+      <xs:enumeration value='tl'/>
+      <xs:enumeration value='tn'/>
+      <xs:enumeration value='to'/>
+      <xs:enumeration value='tr'/>
+      <xs:enumeration value='ts'/>
+      <xs:enumeration value='tt'/>
+      <xs:enumeration value='tw'/>
+      <xs:enumeration value='ug'/>
+      <xs:enumeration value='uk'/>
+      <xs:enumeration value='ur'/>
+      <xs:enumeration value='uz'/>
+      <xs:enumeration value='vi'/>
+      <xs:enumeration value='vo'/>
+      <xs:enumeration value='wo'/>
+      <xs:enumeration value='xh'/>
+      <xs:enumeration value='yi'/>
+      <xs:enumeration value='yo'/>
+      <xs:enumeration value='za'/>
+      <xs:enumeration value='zh'/>
+      <xs:enumeration value='zu'/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ISO_3166_1_alpha_2">
+    <xs:restriction base='T2Uppercase'>
+      <xs:enumeration value='AD'/>
+      <xs:enumeration value='AE'/>
+      <xs:enumeration value='AF'/>
+      <xs:enumeration value='AG'/>
+      <xs:enumeration value='AI'/>
+      <xs:enumeration value='AL'/>
+      <xs:enumeration value='AM'/>
+      <xs:enumeration value='AN'/>
+      <xs:enumeration value='AO'/>
+      <xs:enumeration value='AQ'/>
+      <xs:enumeration value='AR'/>
+      <xs:enumeration value='AS'/>
+      <xs:enumeration value='AT'/>
+      <xs:enumeration value='AU'/>
+      <xs:enumeration value='AW'/>
+      <xs:enumeration value='AZ'/>
+      <xs:enumeration value='BA'/>
+      <xs:enumeration value='BB'/>
+      <xs:enumeration value='BD'/>
+      <xs:enumeration value='BE'/>
+      <xs:enumeration value='BF'/>
+      <xs:enumeration value='BG'/>
+      <xs:enumeration value='BH'/>
+      <xs:enumeration value='BI'/>
+      <xs:enumeration value='BJ'/>
+      <xs:enumeration value='BM'/>
+      <xs:enumeration value='BN'/>
+      <xs:enumeration value='BO'/>
+      <xs:enumeration value='BR'/>
+      <xs:enumeration value='BS'/>
+      <xs:enumeration value='BT'/>
+      <xs:enumeration value='BV'/>
+      <xs:enumeration value='BW'/>
+      <xs:enumeration value='BY'/>
+      <xs:enumeration value='BZ'/>
+      <xs:enumeration value='CA'/>
+      <xs:enumeration value='CC'/>
+      <xs:enumeration value='CD'/>
+      <xs:enumeration value='CF'/>
+      <xs:enumeration value='CG'/>
+      <xs:enumeration value='CH'/>
+      <xs:enumeration value='CI'/>
+      <xs:enumeration value='CK'/>
+      <xs:enumeration value='CL'/>
+      <xs:enumeration value='CM'/>
+      <xs:enumeration value='CN'/>
+      <xs:enumeration value='CO'/>
+      <xs:enumeration value='CR'/>
+      <xs:enumeration value='CS'/>
+      <xs:enumeration value='CU'/>
+      <xs:enumeration value='CV'/>
+      <xs:enumeration value='CX'/>
+      <xs:enumeration value='CY'/>
+      <xs:enumeration value='CZ'/>
+      <xs:enumeration value='DE'/>
+      <xs:enumeration value='DJ'/>
+      <xs:enumeration value='DK'/>
+      <xs:enumeration value='DM'/>
+      <xs:enumeration value='DO'/>
+      <xs:enumeration value='DZ'/>
+      <xs:enumeration value='EC'/>
+      <xs:enumeration value='EE'/>
+      <xs:enumeration value='EG'/>
+      <xs:enumeration value='EH'/>
+      <xs:enumeration value='ER'/>
+      <xs:enumeration value='ES'/>
+      <xs:enumeration value='ET'/>
+      <xs:enumeration value='FI'/>
+      <xs:enumeration value='FJ'/>
+      <xs:enumeration value='FK'/>
+      <xs:enumeration value='FM'/>
+      <xs:enumeration value='FO'/>
+      <xs:enumeration value='FR'/>
+      <xs:enumeration value='GA'/>
+      <xs:enumeration value='GB'/>
+      <xs:enumeration value='GD'/>
+      <xs:enumeration value='GE'/>
+      <xs:enumeration value='GF'/>
+      <xs:enumeration value='GH'/>
+      <xs:enumeration value='GI'/>
+      <xs:enumeration value='GL'/>
+      <xs:enumeration value='GM'/>
+      <xs:enumeration value='GN'/>
+      <xs:enumeration value='GP'/>
+      <xs:enumeration value='GQ'/>
+      <xs:enumeration value='GR'/>
+      <xs:enumeration value='GS'/>
+      <xs:enumeration value='GT'/>
+      <xs:enumeration value='GU'/>
+      <xs:enumeration value='GW'/>
+      <xs:enumeration value='GY'/>
+      <xs:enumeration value='HK'/>
+      <xs:enumeration value='HM'/>
+      <xs:enumeration value='HN'/>
+      <xs:enumeration value='HR'/>
+      <xs:enumeration value='HT'/>
+      <xs:enumeration value='HU'/>
+      <xs:enumeration value='ID'/>
+      <xs:enumeration value='IE'/>
+      <xs:enumeration value='IL'/>
+      <xs:enumeration value='IN'/>
+      <xs:enumeration value='IO'/>
+      <xs:enumeration value='IQ'/>
+      <xs:enumeration value='IR'/>
+      <xs:enumeration value='IS'/>
+      <xs:enumeration value='IT'/>
+      <xs:enumeration value='JM'/>
+      <xs:enumeration value='JO'/>
+      <xs:enumeration value='JP'/>
+      <xs:enumeration value='KE'/>
+      <xs:enumeration value='KG'/>
+      <xs:enumeration value='KH'/>
+      <xs:enumeration value='KI'/>
+      <xs:enumeration value='KM'/>
+      <xs:enumeration value='KN'/>
+      <xs:enumeration value='KP'/>
+      <xs:enumeration value='KR'/>
+      <xs:enumeration value='KW'/>
+      <xs:enumeration value='KY'/>
+      <xs:enumeration value='KZ'/>
+      <xs:enumeration value='LA'/>
+      <xs:enumeration value='LB'/>
+      <xs:enumeration value='LC'/>
+      <xs:enumeration value='LI'/>
+      <xs:enumeration value='LK'/>
+      <xs:enumeration value='LR'/>
+      <xs:enumeration value='LS'/>
+      <xs:enumeration value='LT'/>
+      <xs:enumeration value='LU'/>
+      <xs:enumeration value='LV'/>
+      <xs:enumeration value='LY'/>
+      <xs:enumeration value='MA'/>
+      <xs:enumeration value='MC'/>
+      <xs:enumeration value='MD'/>
+      <xs:enumeration value='MG'/>
+      <xs:enumeration value='MH'/>
+      <xs:enumeration value='MK'/>
+      <xs:enumeration value='ML'/>
+      <xs:enumeration value='MM'/>
+      <xs:enumeration value='MN'/>
+      <xs:enumeration value='MO'/>
+      <xs:enumeration value='MP'/>
+      <xs:enumeration value='MQ'/>
+      <xs:enumeration value='MR'/>
+      <xs:enumeration value='MS'/>
+      <xs:enumeration value='MT'/>
+      <xs:enumeration value='MU'/>
+      <xs:enumeration value='MV'/>
+      <xs:enumeration value='MW'/>
+      <xs:enumeration value='MX'/>
+      <xs:enumeration value='MY'/>
+      <xs:enumeration value='MZ'/>
+      <xs:enumeration value='NA'/>
+      <xs:enumeration value='NC'/>
+      <xs:enumeration value='NE'/>
+      <xs:enumeration value='NF'/>
+      <xs:enumeration value='NG'/>
+      <xs:enumeration value='NI'/>
+      <xs:enumeration value='NL'/>
+      <xs:enumeration value='NO'/>
+      <xs:enumeration value='NP'/>
+      <xs:enumeration value='NR'/>
+      <xs:enumeration value='NU'/>
+      <xs:enumeration value='NZ'/>
+      <xs:enumeration value='OM'/>
+      <xs:enumeration value='PA'/>
+      <xs:enumeration value='PE'/>
+      <xs:enumeration value='PF'/>
+      <xs:enumeration value='PG'/>
+      <xs:enumeration value='PH'/>
+      <xs:enumeration value='PK'/>
+      <xs:enumeration value='PL'/>
+      <xs:enumeration value='PM'/>
+      <xs:enumeration value='PN'/>
+      <xs:enumeration value='PR'/>
+      <xs:enumeration value='PS'/>
+      <xs:enumeration value='PT'/>
+      <xs:enumeration value='PW'/>
+      <xs:enumeration value='PY'/>
+      <xs:enumeration value='QA'/>
+      <xs:enumeration value='RE'/>
+      <xs:enumeration value='RO'/>
+      <xs:enumeration value='RU'/>
+      <xs:enumeration value='RW'/>
+      <xs:enumeration value='SA'/>
+      <xs:enumeration value='SB'/>
+      <xs:enumeration value='SC'/>
+      <xs:enumeration value='SD'/>
+      <xs:enumeration value='SE'/>
+      <xs:enumeration value='SG'/>
+      <xs:enumeration value='SH'/>
+      <xs:enumeration value='SI'/>
+      <xs:enumeration value='SJ'/>
+      <xs:enumeration value='SK'/>
+      <xs:enumeration value='SL'/>
+      <xs:enumeration value='SM'/>
+      <xs:enumeration value='SN'/>
+      <xs:enumeration value='SO'/>
+      <xs:enumeration value='SR'/>
+      <xs:enumeration value='ST'/>
+      <xs:enumeration value='SV'/>
+      <xs:enumeration value='SY'/>
+      <xs:enumeration value='SZ'/>
+      <xs:enumeration value='TC'/>
+      <xs:enumeration value='TD'/>
+      <xs:enumeration value='TF'/>
+      <xs:enumeration value='TG'/>
+      <xs:enumeration value='TH'/>
+      <xs:enumeration value='TJ'/>
+      <xs:enumeration value='TK'/>
+      <xs:enumeration value='TL'/>
+      <xs:enumeration value='TM'/>
+      <xs:enumeration value='TN'/>
+      <xs:enumeration value='TO'/>
+      <xs:enumeration value='TR'/>
+      <xs:enumeration value='TT'/>
+      <xs:enumeration value='TV'/>
+      <xs:enumeration value='TW'/>
+      <xs:enumeration value='TZ'/>
+      <xs:enumeration value='UA'/>
+      <xs:enumeration value='UG'/>
+      <xs:enumeration value='UM'/>
+      <xs:enumeration value='US'/>
+      <xs:enumeration value='UY'/>
+      <xs:enumeration value='UZ'/>
+      <xs:enumeration value='VA'/>
+      <xs:enumeration value='VC'/>
+      <xs:enumeration value='VE'/>
+      <xs:enumeration value='VG'/>
+      <xs:enumeration value='VI'/>
+      <xs:enumeration value='VN'/>
+      <xs:enumeration value='VU'/>
+      <xs:enumeration value='WF'/>
+      <xs:enumeration value='WS'/>
+      <xs:enumeration value='YE'/>
+      <xs:enumeration value='YT'/>
+      <xs:enumeration value='ZA'/>
+      <xs:enumeration value='ZM'/>
+      <xs:enumeration value='ZW'/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name='materials'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="material" maxOccurs="unbounded"/>
+        <xs:element name="sig" type="THexHash"/>
+        <xs:element name="publickey" type="THexHash"/>
+      </xs:sequence>
+      <xs:attribute name='company' type="xs:string" use='required'/>
+      <xs:attribute name="companyid" type="guid" use="required"/>
+      <xs:attribute name="ver" type="xs:unsignedInt" use="required"/>
+      <xs:attribute name="crd" type="TDateTime" use="required"/>
+      <xs:attribute name="verXML" type="xs:unsignedInt" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="material">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref='information'/>
+        <xs:choice>
+          <xs:element ref='layers'/>
+          <xs:element ref='variations'/>
+          <xs:element ref='construction'/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="id" type="guid" use="required"/>
+      <xs:attribute name="type" type="materialtype" use="required"/>
+      <xs:attribute name="readonly" type="boolean" use="optional" default="1"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='information'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref='names'/>
+        <xs:element ref='labels' minOccurs='0' maxOccurs='1'/>
+        <xs:element ref='countries' minOccurs='0' maxOccurs='1'/>
+        <xs:element ref='explanations' minOccurs='0' maxOccurs='1'/>
+        <xs:element ref='webinfos' minOccurs='0' maxOccurs='1'/>
+        <xs:element ref='companyrefs' minOccurs='0' maxOccurs='1'/>
+      </xs:sequence>
+      <xs:attribute name="group" type="groupkind" use="optional" default="Others"/>
+      <xs:attribute name="wall" type="boolean" use="optional" default="0"/>
+      <xs:attribute name="roof" type="boolean" use="optional" default="0"/>
+      <xs:attribute name="floor" type="boolean" use="optional" default="0"/>
+      <xs:attribute name="door" type="boolean" use="optional" default="0"/>
+      <xs:attribute name="color" type="xs:integer" use="optional"/>
+      <xs:attribute name="BrushStyle" type="xs:integer" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='names'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="TCountryLocalizedString" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='labels'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="label"  type="TNamedString" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='countries'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref='country' maxOccurs='unbounded'/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='country'>
+    <xs:complexType>
+      <xs:attribute name='name' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name="sellingfrom" type="TDateTime" use="required"/>
+      <xs:attribute name="sellinguntil" type="TDateTime" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='explanations'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="explanation" type="TLocalizedString" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='webinfos'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref='webinfo' maxOccurs='unbounded'/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='webinfo'>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name='country' type="ISO_3166_1_alpha_2" use='optional'/>
+          <xs:attribute name='lang'  type="ISO639_1" use='optional'/>
+          <xs:attribute name="mime" type="mimetype" use="required"/>
+          <xs:attribute name="size" type="xs:float" use="optional"/>
+          <xs:attribute name='title' type="xs:string" use='optional'/>
+          <xs:attribute name="href" type="xs:anyURI" use="required"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='companyrefs'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref='companyref' maxOccurs='unbounded'/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='companyref'>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name='reftype' type="xs:string" use='optional'/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='layers'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref='layer' maxOccurs='unbounded'/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='layer'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref='geometry' maxOccurs='unbounded'/>
+        <xs:element ref='thermal' maxOccurs='unbounded'/>
+        <xs:element ref='physical' maxOccurs='unbounded'/>
+        <xs:element ref='security' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element ref='acoustic' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element ref='other' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element ref='lcia' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element ref='emission' minOccurs='0' maxOccurs='unbounded'/>
+      </xs:sequence>
+      <xs:attribute name="id" type="guid" use="required"/>
+      <xs:attribute name='aliases' type="xs:string" use='optional'/>
+      <xs:attribute name="displayorder" type="xs:integer" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='geometry'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name="thick" type="xs:float" use="optional"/>
+      <xs:attribute name='length' type="xs:string" use='optional'/>
+      <xs:attribute name='width' type="xs:string" use='optional'/>
+      <xs:attribute name='design' type="xs:string" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='thermal'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name="lambda_value" type="xs:float" use="optional"/>
+      <xs:attribute name="lambda_value_dry" type="xs:float" use="optional"/>
+      <xs:attribute name="mu_min" type="xs:float" use="optional"/>
+      <xs:attribute name="mu_max" type="xs:float" use="optional"/>
+      <xs:attribute name='therm_capa' type="xs:float" use='optional'/>
+      <xs:attribute name='W80_coef' type="xs:float" use='optional'/>
+      <xs:attribute name='Wf_coef' type="xs:float" use='optional'/>
+      <xs:attribute name='A_coef' type="xs:float" use='optional'/>
+      <xs:attribute name='B_coef' type="xs:float" use='optional'/>
+      <xs:attribute name='Allwd_Moisture' type="xs:float" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='physical'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='MinElas' type="xs:float" use='optional'/>
+      <xs:attribute name='MaxElas' type="xs:float" use='optional'/>
+      <xs:attribute name='ResCompMin' type="xs:float" use='optional'/>
+      <xs:attribute name='ResTractMin' type="xs:float" use='optional'/>
+      <xs:attribute name='density' type="xs:float" use='optional'/>
+      <xs:attribute name='T' type="xs:string" use='optional'/>
+      <xs:attribute name='CP' type="xs:string" use='optional'/>
+      <xs:attribute name='WS' type="xs:string" use='optional'/>
+      <xs:attribute name='Porosity' type="xs:float" use='optional'/>
+      <xs:attribute name='DS_TH' type="xs:string" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='security'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='FireClass' type="xs:string" use='optional'/>
+      <xs:attribute name='FireResis' type="xs:string" use='optional'/>
+      <xs:attribute name='Baustoffklasse' type="xs:string" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='acoustic'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='n125' type="xs:float" use='optional'/>
+      <xs:attribute name='n250' type="xs:float" use='optional'/>
+      <xs:attribute name='n500' type="xs:float" use='optional'/>
+      <xs:attribute name='n1000' type="xs:float" use='optional'/>
+      <xs:attribute name='n2000' type="xs:float" use='optional'/>
+      <xs:attribute name='n4000' type="xs:float" use='optional'/>
+      <xs:attribute name='free_space' type="xs:float" use='optional'/>
+      <xs:attribute name='SD' type="xs:float" use='optional'/>
+      <xs:attribute name='air_flow_resistivity' type="xs:float" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='other'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='Rademissivity' type="xs:float" use='optional'/>
+      <xs:attribute name='Radabsorp' type="xs:float" use='optional'/>
+      <xs:attribute name='usetemplimit' type="xs:float" use='optional'/>
+      <xs:attribute name='ProductCode' type="xs:string" use='optional'/>
+      <xs:attribute name='materialtype' type="xs:string" use='optional'/>
+      <xs:attribute name='TargetPrice' type="xs:float" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='lcia'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='UBP' type="xs:float" use='optional'/>
+      <xs:attribute name='GreyEnergy' type="xs:float" use='optional'/>
+      <xs:attribute name='CO2_Eq' type="xs:float" use='optional'/>
+      <xs:attribute name='KBOB_eq' type="Brackguid" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='emission'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='TVOC' type="xs:float" use='optional'/>
+      <xs:attribute name='Formaldehide' type="xs:float" use='optional'/>
+      <xs:attribute name='Ammonia' type="xs:float" use='optional'/>
+      <xs:attribute name='Carginogenic' type="xs:float" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='variations'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="variation" maxOccurs='unbounded'/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='variation'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref='vgeometry' maxOccurs='unbounded'/>
+        <xs:element ref='vthermal' maxOccurs='unbounded'/>
+        <xs:element ref='vacoustic' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element ref='vother' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element ref='vlcia' minOccurs='0' maxOccurs='unbounded'/>
+      </xs:sequence>
+      <xs:attribute name='id' type="guid" use='required'/>
+      <xs:attribute name='displayorder' type="xs:integer" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='vgeometry'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='thick' type="xs:float" use='optional'/>
+      <xs:attribute name='density' type="xs:float" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='vthermal'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='U_value_without' type="xs:float" use='optional'/>
+      <xs:attribute name='U_value_with' type="xs:float" use='optional'/>
+      <xs:attribute name='ETA1' type="xs:float" use='optional'/>
+      <xs:attribute name='ETA2' type="xs:float" use='optional'/>
+      <xs:attribute name='U24' type="xs:float" use='optional'/>
+      <xs:attribute name='CM1' type="xs:float" use='optional'/>
+      <xs:attribute name='CM2' type="xs:float" use='optional'/>
+      <xs:attribute name="metalcladding" use="optional" type="boolean" default="0"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='vacoustic'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='lang' use='optional' type="ISO639_1"/>
+      <xs:attribute name='ExplainAcoustic' type="xs:string" use='optional'/>
+      <xs:attribute name='RwCalc' type="xs:float" use='optional'/>
+      <xs:attribute name='RwPrimeCalc' type="xs:float" use='optional'/>
+      <xs:attribute name='RwMesured' type="xs:float" use='optional'/>
+      <xs:attribute name='RwPrimeMesured' type="xs:float" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='vlcia'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='UBP' type="xs:float" use='optional'/>
+      <xs:attribute name='GreyEnergy' type="xs:float" use='optional'/>
+      <xs:attribute name='CO2_Eq' type="xs:float" use='optional'/>
+      <xs:attribute name='KBOB_eq' type="Brackguid" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='vother'>
+    <xs:complexType>
+      <xs:attribute name='country' use='optional' type="ISO_3166_1_alpha_2"/>
+      <xs:attribute name='ProductCode' type="xs:string" use='optional'/>
+      <xs:attribute name='Rademissivity' type="xs:float" use='optional'/>
+      <xs:attribute name='Radabsorp' type="xs:float" use='optional'/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name='construction'>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name='source' type="xs:string" use='optional'/>
+          <xs:attribute name='consref' type="xs:string" use='optional'/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+

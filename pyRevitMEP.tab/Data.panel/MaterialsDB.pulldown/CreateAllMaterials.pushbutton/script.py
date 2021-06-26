@@ -39,13 +39,15 @@ def get_valid_name(name):
 
 def create_materials(source, lang, country):
     for material in utils.get_materials(source, country):
-        name = layer_name = get_valid_name(utils.get_material_name(material, lang))
+        name = get_valid_name(utils.get_material_name(material, lang))
         description = str(utils.get_material_description(material, lang))
         url = str(utils.get_material_webinfo(material, lang).href)
         for layer in utils.get_material_layers(material):
             geometry = utils.get_by_country(layer.geometry, country)
             if getattr(geometry, "thick", None):
-                layer_name = f"{name}_{geometry.thick}mm"
+                layer_name = f"{name}_{geometry.thick}mm_id({layer.id})"
+            else:
+                layer_name = f"{name}_id({layer.id})"
             revit_material = doc.GetElement(Material.Create(doc, layer_name))
             # Set material properties
             revit_material.MaterialCategory = str(material.information.group)

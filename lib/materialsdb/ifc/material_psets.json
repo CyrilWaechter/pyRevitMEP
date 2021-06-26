@@ -1,0 +1,582 @@
+{
+    "Pset_MaterialCombustion": {
+        "SpecificHeatCapacity": {
+            "path": null,
+            "primary_measure_type": "IfcSpecificHeatCapacityMeasure"
+        },
+        "N20Content": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "COContent": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "CO2Content": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        }
+    },
+    "Pset_MaterialCommon": {
+        "MolecularWeight": {
+            "path": null,
+            "primary_measure_type": "IfcMolecularWeightMeasure"
+        },
+        "Porosity": {
+            "path": [
+                "physical",
+                "Porosity"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": "IfcNormalisedRatioMeasure"
+        },
+        "MassDensity": {
+            "path": [
+                "physical",
+                "density"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": "IfcMassDensityMeasure"
+        }
+    },
+    "Pset_MaterialEnergy": {
+        "ViscosityTemperatureDerivative": {
+            "path": null,
+            "primary_measure_type": "IfcReal"
+        },
+        "MoistureCapacityThermalGradient": {
+            "path": null,
+            "primary_measure_type": "IfcReal"
+        },
+        "ThermalConductivityTemperatureDerivative": {
+            "path": null,
+            "primary_measure_type": "IfcReal"
+        },
+        "SpecificHeatTemperatureDerivative": {
+            "path": null,
+            "primary_measure_type": "IfcReal"
+        },
+        "VisibleRefractionIndex": {
+            "path": null,
+            "primary_measure_type": "IfcReal"
+        },
+        "SolarRefractionIndex": {
+            "path": null,
+            "primary_measure_type": "IfcReal"
+        },
+        "GasPressure": {
+            "path": null,
+            "primary_measure_type": "IfcPressureMeasure"
+        }
+    },
+    "Pset_MaterialFuel": {
+        "CombustionTemperature": {
+            "path": null,
+            "primary_measure_type": "IfcThermodynamicTemperatureMeasure"
+        },
+        "CarbonContent": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "LowerHeatingValue": {
+            "path": null,
+            "primary_measure_type": "IfcHeatingValueMeasure"
+        },
+        "HigherHeatingValue": {
+            "path": null,
+            "primary_measure_type": "IfcHeatingValueMeasure"
+        }
+    },
+    "Pset_MaterialHygroscopic": {
+        "UpperVaporResistanceFactor": {
+            "path": [
+                "thermal",
+                "mu_max"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "LowerVaporResistanceFactor": {
+            "path": [
+                "thermal",
+                "mu_min"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "IsothermalMoistureCapacity": {
+            "path": null,
+            "primary_measure_type": "IfcIsothermalMoistureCapacityMeasure"
+        },
+        "VaporPermeability": {
+            "path": null,
+            "primary_measure_type": "IfcVaporPermeabilityMeasure"
+        },
+        "MoistureDiffusivity": {
+            "path": null,
+            "primary_measure_type": "IfcMoistureDiffusivityMeasure"
+        }
+    },
+    "Pset_MaterialMechanical": {
+        "DynamicViscosity": {
+            "path": null,
+            "primary_measure_type": "IfcDynamicViscosityMeasure"
+        },
+        "YoungModulus": {
+            "path": [
+                "physical",
+                "MinElas"
+            ],
+            "unit_factor": 1000000.0,
+            "primary_measure_type": "IfcModulusOfElasticityMeasure"
+        },
+        "ShearModulus": {
+            "path": null,
+            "primary_measure_type": "IfcModulusOfElasticityMeasure"
+        },
+        "PoissonRatio": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "ThermalExpansionCoefficient": {
+            "path": null,
+            "primary_measure_type": "IfcThermalExpansionCoefficientMeasure"
+        }
+    },
+    "Pset_MaterialOptical": {
+        "VisibleTransmittance": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "SolarTransmittance": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "ThermalIrTransmittance": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "ThermalIrEmissivityBack": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "ThermalIrEmissivityFront": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "VisibleReflectanceBack": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "VisibleReflectanceFront": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "SolarReflectanceBack": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        },
+        "SolarReflectanceFront": {
+            "path": null,
+            "primary_measure_type": "IfcPositiveRatioMeasure"
+        }
+    },
+    "Pset_MaterialThermal": {
+        "SpecificHeatCapacity": {
+            "path": [
+                "thermal",
+                "therm_capa"
+            ],
+            "unit_factor": 3600,
+            "primary_measure_type": "IfcSpecificHeatCapacityMeasure"
+        },
+        "BoilingPoint": {
+            "path": null,
+            "primary_measure_type": "IfcThermodynamicTemperatureMeasure"
+        },
+        "FreezingPoint": {
+            "path": null,
+            "primary_measure_type": "IfcThermodynamicTemperatureMeasure"
+        },
+        "ThermalConductivity": {
+            "path": [
+                "thermal",
+                "lambda_value"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": "IfcThermalConductivityMeasure"
+        }
+    },
+    "Pset_MaterialWater": {
+        "IsPotable": {
+            "path": null,
+            "primary_measure_type": "IfcBoolean"
+        },
+        "Hardness": {
+            "path": null,
+            "primary_measure_type": "IfcIonConcentrationMeasure"
+        },
+        "AlkalinityConcentration": {
+            "path": null,
+            "primary_measure_type": "IfcIonConcentrationMeasure"
+        },
+        "AcidityConcentration": {
+            "path": null,
+            "primary_measure_type": "IfcIonConcentrationMeasure"
+        },
+        "ImpuritiesContent": {
+            "path": null,
+            "primary_measure_type": "IfcNormalisedRatioMeasure"
+        },
+        "DissolvedSolidsContent": {
+            "path": null,
+            "primary_measure_type": "IfcNormalisedRatioMeasure"
+        },
+        "PHLevel": {
+            "path": null,
+            "primary_measure_type": "IfcPHMeasure"
+        }
+    },
+    "materialsdb.org_layer": {
+        "id": {
+            "path": ["id"],
+            "primary_measure_type": "IfcIdentifier"
+        },
+        "aliases": {
+            "path": ["aliases"],
+            "primary_measure_type": "IfcLabel"
+        },
+        "displayorder": {
+            "path": ["displayorder"],
+            "primary_measure_type": "IfcInteger"
+        }
+    },
+    "materialsdb.org_thermal": {
+        "lambda_value_dry": {
+            "path": [
+                "thermal",
+                "lambda_value_dry"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": "IfcThermalConductivityMeasure"
+        },
+        "W80_coef": {
+            "path": [
+                "thermal",
+                "W80_coef"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": null
+        },
+        "Wf_coef": {
+            "path": [
+                "thermal",
+                "Wf_coef"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": null
+        },
+        "A_coef": {
+            "path": [
+                "thermal",
+                "A_coef"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": null
+        },
+        "B_coef": {
+            "path": [
+                "thermal",
+                "B_coef"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": null
+        },
+        "Allwd_Moisture": {
+            "path": [
+                "thermal",
+                "Allwd_Moisture"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": null
+        }
+    },
+    "materialsdb.org_physical": {
+        "MinElas": {
+            "path": [
+                "physical",
+                "MinElas"
+            ],
+            "unit_factor": 1000000.0,
+            "primary_measure_type": null
+        },
+        "MaxElas": {
+            "path": [
+                "physical",
+                "MaxElas"
+            ],
+            "unit_factor": 1000000.0,
+            "primary_measure_type": null
+        },
+        "ResCompMin": {
+            "path": [
+                "physical",
+                "ResCompMin"
+            ],
+            "unit_factor": 0.001,
+            "primary_measure_type": null
+        },
+        "ResTractMin": {
+            "path": [
+                "physical",
+                "ResTractMin"
+            ],
+            "unit_factor": 0.001,
+            "primary_measure_type": null
+        },
+        "T": {
+            "path": [
+                "physical",
+                "T"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": null
+        },
+        "WS": {
+            "path": [
+                "physical",
+                "WS"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": null
+        },
+        "DS_TH": {
+            "path": [
+                "physical",
+                "DS_TH"
+            ],
+            "unit_factor": null,
+            "primary_measure_type": null
+        }
+    },
+    "materialsdb.org_security": {
+        "FireComb": {
+            "path": [
+                "security",
+                "FireComb"
+            ],
+            "primary_measure_type": null
+        },
+        "FireSmoke": {
+            "path": [
+                "security",
+                "FireSmoke"
+            ],
+            "primary_measure_type": null
+        },
+        "FireResis": {
+            "path": [
+                "security",
+                "FireResis"
+            ],
+            "primary_measure_type": null
+        },
+        "FireReact": {
+            "path": [
+                "security",
+                "FireReact"
+            ],
+            "primary_measure_type": null
+        },
+        "Baustoffklasse": {
+            "path": [
+                "security",
+                "Baustoffklasse"
+            ],
+            "primary_measure_type": null
+        },
+        "FireClass": {
+            "path": [
+                "security",
+                "FireClass"
+            ],
+            "primary_measure_type": null
+        }
+    },
+    "materialsdb.org_acoustic": {
+        "n125": {
+            "path": [
+                "acoustic",
+                "n125"
+            ],
+            "primary_measure_type": null
+        },
+        "n250": {
+            "path": [
+                "acoustic",
+                "n250"
+            ],
+            "primary_measure_type": null
+        },
+        "n500": {
+            "path": [
+                "acoustic",
+                "n500"
+            ],
+            "primary_measure_type": null
+        },
+        "n1000": {
+            "path": [
+                "acoustic",
+                "n1000"
+            ],
+            "primary_measure_type": null
+        },
+        "n2000": {
+            "path": [
+                "acoustic",
+                "n2000"
+            ],
+            "primary_measure_type": null
+        },
+        "n4000": {
+            "path": [
+                "acoustic",
+                "n4000"
+            ],
+            "primary_measure_type": null
+        },
+        "free_space": {
+            "path": [
+                "acoustic",
+                "free_space"
+            ],
+            "primary_measure_type": null
+        },
+        "SD": {
+            "path": [
+                "acoustic",
+                "SD"
+            ],
+            "primary_measure_type": null
+        }
+    },
+    "materialsdb.org_other": {
+        "Rademissivity": {
+            "path": [
+                "other",
+                "Rademissivity"
+            ],
+            "primary_measure_type": null
+        },
+        "Radabsorp": {
+            "path": [
+                "other",
+                "Radabsorp"
+            ],
+            "primary_measure_type": null
+        },
+        "usetemplimit": {
+            "path": [
+                "other",
+                "usetemplimit"
+            ],
+            "primary_measure_type": null
+        },
+        "materialtype": {
+            "path": [
+                "other",
+                "materialtype"
+            ],
+            "primary_measure_type": null
+        },
+        "ProductCode": {
+            "path": [
+                "other",
+                "ProductCode"
+            ],
+            "primary_measure_type": null
+        }
+    },
+    "materialsdb.org_lcia": {
+        "UBP": {
+            "path": [
+                "lcia",
+                "UBP"
+            ],
+            "primary_measure_type": null
+        },
+        "NRE": {
+            "path": [
+                "lcia",
+                "NRE"
+            ],
+            "primary_measure_type": null
+        },
+        "GWP": {
+            "path": [
+                "lcia",
+                "GWP"
+            ],
+            "primary_measure_type": null
+        },
+        "CED": {
+            "path": [
+                "lcia",
+                "CED"
+            ],
+            "primary_measure_type": null
+        },
+        "lprim": {
+            "path": [
+                "lcia",
+                "lprim"
+            ],
+            "primary_measure_type": null
+        },
+        "lenv": {
+            "path": [
+                "lcia",
+                "lenv"
+            ],
+            "primary_measure_type": null
+        },
+        "leco12": {
+            "path": [
+                "lcia",
+                "leco12"
+            ],
+            "primary_measure_type": null
+        }
+    },
+    "materialsdb.org_emission": {
+        "TVOC": {
+            "path": [
+                "lcia",
+                "TVOC"
+            ],
+            "primary_measure_type": null
+        },
+        "Formaldehide": {
+            "path": [
+                "lcia",
+                "Formaldehide"
+            ],
+            "primary_measure_type": null
+        },
+        "Ammonia": {
+            "path": [
+                "lcia",
+                "Ammonia"
+            ],
+            "primary_measure_type": null
+        },
+        "Carginogenic": {
+            "path": [
+                "lcia",
+                "Carginogenic"
+            ],
+            "primary_measure_type": null
+        }
+    }
+}

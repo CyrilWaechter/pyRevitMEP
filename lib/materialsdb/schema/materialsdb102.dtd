@@ -1,0 +1,252 @@
+<!--
+   An XML DTD for Open Materials database (OMaterialsDB 1.02)
+      DOCTYPE materials
+      SYSTEM http://www.materialsdb.org/schemas/materialsdb102.dtd
+      PUBLIC "-//MATERIALSDB//DTD MATERIALSDB 1.02//EN"
+   See the documentation and examples at http://www.materialsdb.org/
+   (c) 2007-2013 E4tech Software SA, Edouard Westphal
+   released under the GNU Public License (GPL)
+-->
+<!--
+  1.02 : 2013.04.17
+     attribute Targetprice added to element other
+  1.01 : 2009.05.04
+     attribute air_flow_resistivity moved from  thermal to acoustic
+  1.00 : created
+-->
+<!ENTITY % boolean "(1|0)" >
+<!ENTITY % uint "CDATA" >
+<!ENTITY % integer "CDATA" >
+<!ENTITY % guid "CDATA" >
+<!ENTITY % float "CDATA" >
+<!ENTITY % datetime "CDATA" >
+<!ENTITY % string "CDATA" >
+<!ENTITY % groupkind "(Others|Water_Proof|Vapour_Proof|Concrete|
+                     Wood_Timberproducts|Insulation|Masonry|Metal|Mortar|
+                     Plastics|Stone|Composite|Films|Render|Covering|Glas|Soil|
+                     air)" >
+<!ENTITY % materialtype "(simple|btk|construction)" >
+<!--    The current XML-recommendation doesn't yet support the
+        three-letter short names for languages (ISO 693-2). So
+        the following section will be using the two-letter
+        (ISO 639-1) encoding for the languages.
+
+	en : English,	de : German,	fr : French,
+	la : Latin, 	it : Italian, 	nl : Dutch,
+	ru : Russian,	pl : Polish,	es : Spanish,
+	tr : Turkish,	zh : Chinese,	ja : Japanese,
+	ko : Korean     ...                     -->
+<!ENTITY % ISO639_1 "(aa|ab|af|am|ar|as|ay|az|ba|be|bg|bh|bi|bn|bo|br|ca|co|
+                    cs|cy|da|de|dz|el|en|eo|es|et|eu|fa|fi|fj|fo|fr|fy|ga|
+                    gd|gl|gn|gu|ha|he|hi|hr|hu|hy|ia|ie|ik|id|is|it|iu|ja|
+                    jv|ka|kk|kl|km|kn|ko|ks|ku|ky|la|ln|lo|lt|lv|mg|mi|mk|
+                    ml|mn|mo|mr|ms|mt|my|na|ne|nl|no|oc|om|or|pa|pl|ps|pt|
+                    qu|rm|rn|ro|ru|rw|sa|sd|sg|sh|si|sk|sl|sm|sn|so|sq|sr|
+                    ss|st|su|sv|sw|ta|te|tg|th|ti|tk|tl|tn|to|tr|ts|tt|tw|
+                    ug|uk|ur|uz|vi|vo|wo|xh|yi|yo|za|zh|zu)">
+<!ENTITY % ISO_3166_1_alpha_2
+        "(AD|AE|AF|AG|AI|AL|AM|AN|AO|AQ|AR|AS|AT|AU|AW|AZ|BA|BB|BD|BE|BF|BG|BH|
+          BI|BJ|BM|BN|BO|BR|BS|BT|BV|BW|BY|BZ|CA|CC|CD|CF|CG|CH|CI|CK|CL|CM|CN|
+          CO|CR|CS|CU|CV|CX|CY|CZ|DE|DJ|DK|DM|DO|DZ|EC|EE|EG|EH|ER|ES|ET|FI|FJ|
+          FK|FM|FO|FR|GA|GB|GD|GE|GF|GH|GI|GL|GM|GN|GP|GQ|GR|GS|GT|GU|GW|GY|HK|
+          HM|HN|HR|HT|HU|ID|IE|IL|IN|IO|IQ|IR|IS|IT|JM|JO|JP|KE|KG|KH|KI|KM|KN|
+          KP|KR|KW|KY|KZ|LA|LB|LC|LI|LK|LR|LS|LT|LU|LV|LY|MA|MC|MD|MG|MH|MK|ML|
+          MM|MN|MO|MP|MQ|MR|MS|MT|MU|MV|MW|MX|MY|MZ|NA|NC|NE|NF|NG|NI|NL|NO|NP|
+          NR|NU|NZ|OM|PA|PE|PF|PG|PH|PK|PL|PM|PN|PR|PS|PT|PW|PY|QA|RE|RO|RU|RW|
+          SA|SB|SC|SD|SE|SG|SH|SI|SJ|SK|SL|SM|SN|SO|SR|ST|SV|SY|SZ|TC|TD|TF|TG|
+          TH|TJ|TK|TL|TM|TN|TO|TR|TT|TV|TW|TZ|UA|UG|UM|US|UY|UZ|VA|VC|VE|VG|VI|
+          VN|VU|WF|WS|YE|YT|ZA|ZM|ZW)" >
+<!ENTITY % mimetype "CDATA" >
+<!ENTITY % url "CDATA" >
+
+
+
+<!ELEMENT materials (material+, sig, publickey)>
+<!ATTLIST materials
+          company %string; #REQUIRED
+          companyid %guid; #REQUIRED
+          ver %uint; #REQUIRED
+          crd %datetime; #REQUIRED
+          verXML %uint; #REQUIRED>
+<!ELEMENT sig (#PCDATA)>
+<!ATTLIST sig
+          ver %uint; #REQUIRED>
+<!ELEMENT publickey (#PCDATA)>
+<!ATTLIST publickey
+          ver %uint; #REQUIRED>
+<!ELEMENT material (information, (layers|variations|construction))>
+<!ATTLIST material
+          id %guid; #REQUIRED
+          type %materialtype; #REQUIRED
+          readonly %boolean; #IMPLIED>
+<!ELEMENT information (names, labels?, countries?, explanations?, webinfos?, companyrefs?)>
+<!ATTLIST information
+          group %groupkind; "Others"
+          wall %boolean; "0"
+          roof %boolean; "0"
+          floor %boolean; "0"
+          door %boolean; "0"
+          color %integer; #IMPLIED
+          BrushStyle %integer; #IMPLIED>
+<!ELEMENT names (name+)>
+<!ELEMENT name (#PCDATA)>
+<!ATTLIST name
+          lang %ISO639_1; #IMPLIED
+          country %ISO_3166_1_alpha_2; #IMPLIED>
+<!ELEMENT labels (label+)>
+<!ELEMENT label (#PCDATA)>
+<!ATTLIST label
+          name %string; #REQUIRED>
+<!ELEMENT countries (country+)>
+<!ELEMENT country EMPTY>
+<!ATTLIST country
+          name %ISO_3166_1_alpha_2; #IMPLIED
+          sellingfrom %datetime; #REQUIRED
+          sellinguntil %datetime; #IMPLIED>
+<!ELEMENT explanations (explanation+)>
+<!ELEMENT explanation (#PCDATA)>
+<!ATTLIST explanation
+          lang %ISO639_1; #IMPLIED>
+<!ELEMENT webinfos (webinfo+)>
+<!ELEMENT webinfo (#PCDATA)>
+<!ATTLIST webinfo
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          lang %ISO639_1; #IMPLIED
+          mime %mimetype; #REQUIRED
+          size %float; #IMPLIED
+          title %string; #IMPLIED
+          href %url; #REQUIRED>
+<!ELEMENT companyrefs (companyref+)>
+<!ELEMENT companyref (#PCDATA)>
+<!ATTLIST companyref
+          reftype %string; #IMPLIED>
+<!ELEMENT layers (layer+)>
+<!ELEMENT layer (geometry+, thermal+, physical+, security*, acoustic*, other*, lcia*, emission*)>
+<!ATTLIST layer
+          id %guid; #REQUIRED
+          aliases %string; #IMPLIED
+          displayorder %integer; #IMPLIED>
+<!ELEMENT geometry EMPTY>
+<!ATTLIST geometry
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          thick %float; #IMPLIED
+          length %string; #IMPLIED
+          width %string; #IMPLIED
+          design %string; #IMPLIED>
+<!ELEMENT thermal EMPTY>
+<!ATTLIST thermal
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          lambda_value %float; #IMPLIED
+          lambda_value_dry %float; #IMPLIED
+          mu_min %float; #IMPLIED
+          mu_max %float; #IMPLIED
+          therm_capa %float; #IMPLIED
+          W80_coef %float; #IMPLIED
+          Wf_coef %float; #IMPLIED
+          A_coef %float; #IMPLIED
+          B_coef %float; #IMPLIED
+          Allwd_Moisture %float; #IMPLIED>
+<!ELEMENT physical EMPTY>
+<!ATTLIST physical
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          MinElas %float; #IMPLIED
+          MaxElas %float; #IMPLIED
+          ResCompMin %float; #IMPLIED
+          ResTractMin %float; #IMPLIED
+          density %float; #IMPLIED
+          T %string; #IMPLIED
+          CP %string; #IMPLIED
+          WS %string; #IMPLIED
+          Porosity %float; #IMPLIED
+          DS_TH %string; #IMPLIED>
+<!ELEMENT security EMPTY>
+<!ATTLIST security
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          FireClass %string; #IMPLIED
+          FireResis %string; #IMPLIED
+          Baustoffklasse %string; #IMPLIED>
+<!ELEMENT acoustic EMPTY>
+<!ATTLIST acoustic
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          n125 %float; #IMPLIED
+          n250 %float; #IMPLIED
+          n500 %float; #IMPLIED
+          n1000 %float; #IMPLIED
+          n2000 %float; #IMPLIED
+          n4000 %float; #IMPLIED
+          free_space %float; #IMPLIED
+          SD %float; #IMPLIED
+          air_flow_resistivity %float; #IMPLIED>
+<!ELEMENT other EMPTY>
+<!ATTLIST other
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          Rademissivity %float; #IMPLIED
+          Radabsorp %float; #IMPLIED
+          usetemplimit %float; #IMPLIED
+          ProductCode %string; #IMPLIED
+          materialtype %string; #IMPLIED
+		  TargetPrice %float; #IMPLIED>
+<!ELEMENT lcia EMPTY>
+<!ATTLIST lcia
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          UBP %float; #IMPLIED
+          GreyEnergy %float; #IMPLIED
+          CO2_Eq %float; #IMPLIED
+          KBOB_eq %guid; #IMPLIED>
+<!ELEMENT emission EMPTY>
+<!ATTLIST emission
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          TVOC %float; #IMPLIED
+          Formaldehide %float; #IMPLIED
+          Ammonia %float; #IMPLIED
+          Carginogenic %float; #IMPLIED>
+<!ELEMENT variations (variation+)>
+<!ELEMENT variation (vgeometry+, vthermal+, vacoustic*, vother*, vlcia*)>
+<!ATTLIST variation
+          id %guid; #REQUIRED
+          displayorder %integer; #IMPLIED>
+<!ELEMENT vgeometry EMPTY>
+<!ATTLIST vgeometry
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          thick %float; #IMPLIED
+          density %float; #IMPLIED>
+<!ELEMENT vthermal EMPTY>
+<!ATTLIST vthermal
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          U_value_without %float; #IMPLIED
+          U_value_with %float; #IMPLIED
+          ETA1 %float; #IMPLIED
+          ETA2 %float; #IMPLIED
+          U24 %float; #IMPLIED
+          CM1 %float; #IMPLIED
+          CM2 %float; #IMPLIED
+          metalcladding %boolean; "0">
+<!ELEMENT vacoustic EMPTY>
+<!ATTLIST vacoustic
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          lang %ISO639_1; #IMPLIED
+          ExplainAcoustic %string; #IMPLIED
+          RwCalc %float; #IMPLIED
+          RwPrimeCalc %float; #IMPLIED
+          RwMesured %float; #IMPLIED
+          RwPrimeMesured %float; #IMPLIED>
+<!ELEMENT vlcia EMPTY>
+<!ATTLIST vlcia
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          UBP %float; #IMPLIED
+          GreyEnergy %float; #IMPLIED
+          CO2_Eq %float; #IMPLIED
+          KBOB_eq %guid; #IMPLIED>
+<!ELEMENT vother EMPTY>
+<!ATTLIST vother
+          country %ISO_3166_1_alpha_2; #IMPLIED
+          ProductCode %string; #IMPLIED
+          Rademissivity %float; #IMPLIED
+          Radabsorp %float; #IMPLIED>
+<!ELEMENT construction (#PCDATA)>
+<!ATTLIST construction
+          source %string; #IMPLIED
+          consref %string; #IMPLIED>
+
+
+

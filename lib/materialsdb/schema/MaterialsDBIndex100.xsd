@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.materialsDB.org"
+  xmlns="http://www.materialsDB.org" elementFormDefault="qualified" version="1.00">
+<!--
+   An XML XSD for Open Materials database (OMaterialsDB 1.00)
+      DOCTYPE MaterialsDBIndex
+      SYSTEM http://www.materialsdb.org/schemas/MaterialsDBIndex100.xsd
+   See the documentation and examples at http://www.materialsdb.org/
+   (c) 2007-2013 E4tech Software SA, Edouard Westphal
+   released under the GNU Public License (GPL)
+-->
+<!--
+  1.00 : 2013.04.17 first version
+-->
+  <xs:simpleType name="TDateTime">
+    <xs:annotation>
+      <xs:documentation>
+  The integral part of a TDateTime value is the number of days that have passed since 12/30/1899.
+  The fractional part of the TDateTime value is fraction of a 24 hour day that has elapsed.
+  </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:float"/>
+  </xs:simpleType>
+  <xs:simpleType name="guid">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name='MaterialsDBIndex'>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="company" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="verXML" type="xs:unsignedInt" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="company">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="id" type="guid" use="required"/>
+          <xs:attribute name="name" type="xs:string" use="required"/>
+          <xs:attribute name="href" type="xs:anyURI" use="required"/>
+          <xs:attribute name="LastKnownDate" type="TDateTime" use="required"/>
+          <xs:attribute name="KnownVersion" type="xs:unsignedInt" use="required"/>
+          <xs:attribute name="KnownCRD" type="TDateTime" use="required"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+
+
+
+
+
