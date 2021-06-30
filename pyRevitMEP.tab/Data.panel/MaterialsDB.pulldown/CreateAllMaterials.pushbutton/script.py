@@ -1,4 +1,6 @@
 #! python3
+import os
+from pathlib import Path
 from Autodesk.Revit.DB import (
     Material,
     Transaction,
@@ -10,13 +12,13 @@ from Autodesk.Revit.DB import (
     PropertySetElement,
     UnitUtils,
     DisplayUnitType,
+    UnitSystem,
+    SaveAsOptions,
 )
 from Autodesk.Revit import Exceptions
 
 from materialsdb import cache, utils, config
 from materialsdb.serialiser import XmlDeserialiser
-
-doc = __revit__.ActiveUIDocument.Document
 
 
 class CustomTransaction:
@@ -88,14 +90,14 @@ def create_materials(source, lang, country):
                     density,
                     DisplayUnitType.DUT_KILOGRAMS_PER_CUBIC_METER,
                 )
-            thermal_asset.Porosity = getattr(physical, "Porosity", 0)
+            thermal_asset.Porosity = getattr(physical, "Porosity", 0) or 0
             specific_heat_capacity = (getattr(thermal, "therm_capa", 0) or 0) * 3600
             if specific_heat_capacity:
                 thermal_asset.SpecificHeat = UnitUtils.ConvertToInternalUnits(
                     specific_heat_capacity,
                     DisplayUnitType.DUT_JOULES_PER_KILOGRAM_CELSIUS,
                 )
-            thermal_conductivity = getattr(thermal, "lambda_value", 0)
+            thermal_conductivity = getattr(thermal, "lambda_value", 0) or 0
             if thermal_conductivity:
                 thermal_asset.ThermalConductivity = UnitUtils.ConvertToInternalUnits(
                     thermal_conductivity,
@@ -125,10 +127,23 @@ def create_materials(source, lang, country):
             revit_material.StructuralAssetId = thermal_property_set.Id
 
 
-with CustomTransaction("Create materials", doc):
-    deserialiser = XmlDeserialiser()
-    lang = config.get_lang()
-    country = config.get_country()
-    for producer in cache.producers():
-        source = deserialiser.from_xml(str(producer))
+deserialiser = XmlDeserialiser()
+lang = config.get_lang()
+country = config.get_country()
+output_folder = cache.get_cache_folder() / "Revit"
+Path.mkdir(output_folder, parents=True, exist_ok=True)
+save_as_options = SaveAsOptions()
+save_as_options.OverwriteExistingFile = True
+save_as_options.MaximumBackups = 1
+save_as_options.Compact = True
+for producer in cache.producers():
+    source = deserialiser.from_xml(str(producer))
+    doc = __revit__.Application.NewProjectDocument(UnitSystem.Metric)
+    with CustomTransaction("Create materials", doc):
         create_materials(source, lang, country)
+    output_path = (output_folder / producer.stem).with_suffix(".rvt")
+    doc.SaveAs(str(output_path), save_as_options)
+    doc.Close(False)
+    break
+
+os.startfile(output_folder)
