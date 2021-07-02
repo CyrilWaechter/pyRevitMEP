@@ -14,6 +14,7 @@ from Autodesk.Revit.DB import (
     DisplayUnitType,
     UnitSystem,
     SaveAsOptions,
+    MaterialAspect,
 )
 from Autodesk.Revit import Exceptions
 
@@ -77,7 +78,7 @@ def create_materials(source, lang, country):
             revit_material.get_Parameter(BuiltInParameter.ALL_MODEL_MODEL).Set(name)
             revit_material.get_Parameter(BuiltInParameter.ALL_MODEL_URL).Set(url)
             # revit_material.AppearanceAssetId = None
-            # Set physical and thermal properties
+            # Create physical and thermal assets
             thermal_asset = ThermalAsset(layer_name, ThermalMaterialType.Solid)
             structural_asset = StructuralAsset(layer_name, StructuralAssetClass.Basic)
             thermal = utils.get_by_country(layer.thermal, country)
@@ -103,6 +104,7 @@ def create_materials(source, lang, country):
                     thermal_conductivity,
                     DisplayUnitType.DUT_WATTS_PER_METER_KELVIN,
                 )
+            # Create thermal and structural property sets
             thermal_property_set = PropertySetElement.Create(doc, thermal_asset)
             structural_property_set = PropertySetElement.Create(doc, structural_asset)
             thermal_property_set.get_Parameter(
@@ -123,8 +125,13 @@ def create_materials(source, lang, country):
             structural_property_set.get_Parameter(
                 BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE
             ).Set("materialsdb.org")
-            revit_material.ThermalAssetId = structural_property_set.Id
-            revit_material.StructuralAssetId = thermal_property_set.Id
+            # Assign thermal and structural property sets to material
+            revit_material.SetMaterialAspectByPropertySet(
+                MaterialAspect.Thermal, thermal_property_set.Id
+            )
+            revit_material.SetMaterialAspectByPropertySet(
+                MaterialAspect.Structural, structural_property_set.Id
+            )
 
 
 deserialiser = XmlDeserialiser()
@@ -144,6 +151,5 @@ for producer in cache.producers():
     output_path = (output_folder / producer.stem).with_suffix(".rvt")
     doc.SaveAs(str(output_path), save_as_options)
     doc.Close(False)
-    break
 
 os.startfile(output_folder)
