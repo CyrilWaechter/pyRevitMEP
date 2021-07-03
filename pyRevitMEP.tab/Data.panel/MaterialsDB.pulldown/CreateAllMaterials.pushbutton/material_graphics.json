@@ -1,0 +1,1304 @@
+{
+    "SIA400_Matériaux absorbants ou isolants": {
+        "Color": [
+            255,
+            128,
+            255
+        ],
+        "SurfaceForegroundPatternColor": [
+            255,
+            128,
+            255
+        ],
+        "CutForegroundPatternColor": [
+            255,
+            128,
+            255
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Matériaux absorbants ou isolants",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.004921259842519685,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Matériaux absorbants ou isolants",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.004921259842519685,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        }
+    },
+    "SIA400_Béton armé et béton non armé": {
+        "Color": [
+            0,
+            128,
+            0
+        ],
+        "SurfaceForegroundPatternColor": [
+            0,
+            128,
+            0
+        ],
+        "CutForegroundPatternColor": [
+            0,
+            128,
+            0
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Béton armé et béton non armé",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.004921259842519685,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 2.3561944901923426,
+                    "Offset": 0.004921259842519685,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Béton armé et béton non armé",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.004921259842519685,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 2.3561944901923426,
+                    "Offset": 0.004921259842519685,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        }
+    },
+    "SIA400_Mortier, plâtre, crépi": {
+        "Color": [
+            64,
+            0,
+            128
+        ],
+        "SurfaceForegroundPatternColor": [
+            64,
+            0,
+            128
+        ],
+        "CutForegroundPatternColor": [
+            64,
+            0,
+            128
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Mortier, plâtre, Crépi",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.8726646259971639,
+                    "Offset": -0.019659649999999997,
+                    "Shift": 0.013765833333333331,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.002499999999999999,
+                        0.027499999999999997
+                    ]
+                },
+                {
+                    "Angle": 6.195918844579864,
+                    "Offset": 0.02457455833333333,
+                    "Shift": -0.006792706666666665,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0019999999999999996,
+                        0.021999999999999995
+                    ]
+                },
+                {
+                    "Angle": 1.7532076682378304,
+                    "Offset": -0.02313255833333333,
+                    "Shift": 0.01910195833333333,
+                    "Origin": [
+                        0.0019923891666666664,
+                        -0.00017431133333333329
+                    ],
+                    "Segments": [
+                        0.002124673333333333,
+                        0.023371399999999997
+                    ]
+                },
+                {
+                    "Angle": 0.8060663523995643,
+                    "Offset": -0.029489474999999994,
+                    "Shift": 0.020648749999999997,
+                    "Origin": [
+                        0.0,
+                        0.006666666666666665
+                    ],
+                    "Segments": [
+                        0.003749999999999999,
+                        0.04124999999999999
+                    ]
+                },
+                {
+                    "Angle": 1.6866093946402305,
+                    "Offset": -0.034698833333333325,
+                    "Shift": 0.028652933333333328,
+                    "Origin": [
+                        0.0029645583333333327,
+                        0.006206889999999998
+                    ],
+                    "Segments": [
+                        0.0031870099999999992,
+                        0.035057099999999994
+                    ]
+                },
+                {
+                    "Angle": 6.129320570982264,
+                    "Offset": 0.03686184166666666,
+                    "Shift": 0.02581094166666666,
+                    "Origin": [
+                        0.0,
+                        0.006666666666666665
+                    ],
+                    "Segments": [
+                        0.002999999999999999,
+                        0.032999999999999995
+                    ]
+                },
+                {
+                    "Angle": 0.3665191429188088,
+                    "Offset": -0.019659649999999997,
+                    "Shift": 0.013765833333333331,
+                    "Origin": [
+                        0.0033333333333333327,
+                        0.004999999999999998
+                    ],
+                    "Segments": [
+                        0.002499999999999999,
+                        0.027499999999999997
+                    ]
+                },
+                {
+                    "Angle": 5.6897733615015085,
+                    "Offset": 0.02457455833333333,
+                    "Shift": -0.006792706666666665,
+                    "Origin": [
+                        0.0033333333333333327,
+                        0.004999999999999998
+                    ],
+                    "Segments": [
+                        0.0019999999999999996,
+                        0.021999999999999995
+                    ]
+                },
+                {
+                    "Angle": 1.2470621851594752,
+                    "Offset": -0.02313255833333333,
+                    "Shift": 0.01910195833333333,
+                    "Origin": [
+                        0.004991407499999999,
+                        0.0038816133333333326
+                    ],
+                    "Segments": [
+                        0.002124673333333333,
+                        0.023371399999999997
+                    ]
+                },
+                {
+                    "Angle": 0.6544984694978729,
+                    "Offset": 0.008556666666666664,
+                    "Shift": 0.007076666666666665,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.020633333333333326,
+                        0.0011,
+                        0.02123333333333333,
+                        0.0011,
+                        0.02098333333333333
+                    ]
+                },
+                {
+                    "Angle": 0.1308996938995746,
+                    "Offset": 0.011889999999999998,
+                    "Shift": 0.010409999999999997,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.011633333333333329,
+                        0.0011,
+                        0.02013333333333333,
+                        0.0011,
+                        0.007316666666666666
+                    ]
+                },
+                {
+                    "Angle": -0.5672320068981566,
+                    "Offset": 0.008926666666666666,
+                    "Shift": 0.015411333333333329,
+                    "Origin": [
+                        -0.007433333333333332,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.007233333333333331,
+                        0.0011,
+                        0.024899999999999995,
+                        0.0011,
+                        0.03339999999999999
+                    ]
+                },
+                {
+                    "Angle": -0.7417649320975893,
+                    "Offset": 0.01559333333333333,
+                    "Shift": 0.012077999999999998,
+                    "Origin": [
+                        -0.010766666666666666,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.009733333333333332,
+                        0.0011,
+                        0.016166666666666663,
+                        0.0011,
+                        0.023399999999999994
+                    ]
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Mortier, plâtre, Crépi",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.8726646259971639,
+                    "Offset": -0.019659649999999997,
+                    "Shift": 0.013765833333333331,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.002499999999999999,
+                        0.027499999999999997
+                    ]
+                },
+                {
+                    "Angle": 6.195918844579864,
+                    "Offset": 0.02457455833333333,
+                    "Shift": -0.006792706666666665,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0019999999999999996,
+                        0.021999999999999995
+                    ]
+                },
+                {
+                    "Angle": 1.7532076682378304,
+                    "Offset": -0.02313255833333333,
+                    "Shift": 0.01910195833333333,
+                    "Origin": [
+                        0.0019923891666666664,
+                        -0.00017431133333333329
+                    ],
+                    "Segments": [
+                        0.002124673333333333,
+                        0.023371399999999997
+                    ]
+                },
+                {
+                    "Angle": 0.8060663523995643,
+                    "Offset": -0.029489474999999994,
+                    "Shift": 0.020648749999999997,
+                    "Origin": [
+                        0.0,
+                        0.006666666666666665
+                    ],
+                    "Segments": [
+                        0.003749999999999999,
+                        0.04124999999999999
+                    ]
+                },
+                {
+                    "Angle": 1.6866093946402305,
+                    "Offset": -0.034698833333333325,
+                    "Shift": 0.028652933333333328,
+                    "Origin": [
+                        0.0029645583333333327,
+                        0.006206889999999998
+                    ],
+                    "Segments": [
+                        0.0031870099999999992,
+                        0.035057099999999994
+                    ]
+                },
+                {
+                    "Angle": 6.129320570982264,
+                    "Offset": 0.03686184166666666,
+                    "Shift": 0.02581094166666666,
+                    "Origin": [
+                        0.0,
+                        0.006666666666666665
+                    ],
+                    "Segments": [
+                        0.002999999999999999,
+                        0.032999999999999995
+                    ]
+                },
+                {
+                    "Angle": 0.3665191429188088,
+                    "Offset": -0.019659649999999997,
+                    "Shift": 0.013765833333333331,
+                    "Origin": [
+                        0.0033333333333333327,
+                        0.004999999999999998
+                    ],
+                    "Segments": [
+                        0.002499999999999999,
+                        0.027499999999999997
+                    ]
+                },
+                {
+                    "Angle": 5.6897733615015085,
+                    "Offset": 0.02457455833333333,
+                    "Shift": -0.006792706666666665,
+                    "Origin": [
+                        0.0033333333333333327,
+                        0.004999999999999998
+                    ],
+                    "Segments": [
+                        0.0019999999999999996,
+                        0.021999999999999995
+                    ]
+                },
+                {
+                    "Angle": 1.2470621851594752,
+                    "Offset": -0.02313255833333333,
+                    "Shift": 0.01910195833333333,
+                    "Origin": [
+                        0.004991407499999999,
+                        0.0038816133333333326
+                    ],
+                    "Segments": [
+                        0.002124673333333333,
+                        0.023371399999999997
+                    ]
+                },
+                {
+                    "Angle": 0.6544984694978729,
+                    "Offset": 0.008556666666666664,
+                    "Shift": 0.007076666666666665,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.020633333333333326,
+                        0.0011,
+                        0.02123333333333333,
+                        0.0011,
+                        0.02098333333333333
+                    ]
+                },
+                {
+                    "Angle": 0.1308996938995746,
+                    "Offset": 0.011889999999999998,
+                    "Shift": 0.010409999999999997,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.011633333333333329,
+                        0.0011,
+                        0.02013333333333333,
+                        0.0011,
+                        0.007316666666666666
+                    ]
+                },
+                {
+                    "Angle": -0.5672320068981566,
+                    "Offset": 0.008926666666666666,
+                    "Shift": 0.015411333333333329,
+                    "Origin": [
+                        -0.007433333333333332,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.007233333333333331,
+                        0.0011,
+                        0.024899999999999995,
+                        0.0011,
+                        0.03339999999999999
+                    ]
+                },
+                {
+                    "Angle": -0.7417649320975893,
+                    "Offset": 0.01559333333333333,
+                    "Shift": 0.012077999999999998,
+                    "Origin": [
+                        -0.010766666666666666,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.009733333333333332,
+                        0.0011,
+                        0.016166666666666663,
+                        0.0011,
+                        0.023399999999999994
+                    ]
+                }
+            ]
+        }
+    },
+    "SIA400_Acier": {
+        "Color": [
+            0,
+            0,
+            0
+        ],
+        "SurfaceForegroundPatternColor": [
+            0,
+            0,
+            0
+        ],
+        "CutForegroundPatternColor": [
+            0,
+            0,
+            0
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "<Remplissage de solide>",
+            "HostOrientation": "ToView",
+            "Target": "Drafting",
+            "IsSolidFill": true,
+            "FillGrids": []
+        },
+        "CutForegroundPatternId": {
+            "Name": "<Remplissage de solide>",
+            "HostOrientation": "ToView",
+            "Target": "Drafting",
+            "IsSolidFill": true,
+            "FillGrids": []
+        }
+    },
+    "SIA400_Matières synthétiques": {
+        "Color": [
+            192,
+            192,
+            192
+        ],
+        "SurfaceForegroundPatternColor": [
+            192,
+            192,
+            192
+        ],
+        "CutForegroundPatternColor": [
+            192,
+            192,
+            192
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "<Remplissage de solide>",
+            "HostOrientation": "ToView",
+            "Target": "Drafting",
+            "IsSolidFill": true,
+            "FillGrids": []
+        },
+        "CutForegroundPatternId": {
+            "Name": "<Remplissage de solide>",
+            "HostOrientation": "ToView",
+            "Target": "Drafting",
+            "IsSolidFill": true,
+            "FillGrids": []
+        }
+    },
+    "SIA400_Étanchéité (vent, vapeur, eau)": {
+        "Color": [
+            128,
+            128,
+            128
+        ],
+        "SurfaceForegroundPatternColor": [
+            0,
+            0,
+            0
+        ],
+        "CutForegroundPatternColor": [
+            0,
+            0,
+            0
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Étanchéité (vent, vapeur, eau)",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0008202099737532807,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0016404199475065614,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.002460629921259842,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.003280839895013123,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.004101049868766403,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.004921259842519684,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Étanchéité (vent, vapeur, eau)",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0008202099737532807,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0016404199475065614,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.002460629921259842,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.003280839895013123,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.004101049868766403,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.009842519685039368,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.004921259842519684,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        }
+    },
+    "SIA400_Métal": {
+        "Color": [
+            135,
+            206,
+            222
+        ],
+        "SurfaceForegroundPatternColor": [
+            135,
+            206,
+            222
+        ],
+        "CutForegroundPatternColor": [
+            135,
+            206,
+            222
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "<Remplissage de solide>",
+            "HostOrientation": "ToView",
+            "Target": "Drafting",
+            "IsSolidFill": true,
+            "FillGrids": []
+        },
+        "CutForegroundPatternId": {
+            "Name": "<Remplissage de solide>",
+            "HostOrientation": "ToView",
+            "Target": "Drafting",
+            "IsSolidFill": true,
+            "FillGrids": []
+        }
+    },
+    "SIA400_Verre": {
+        "Color": [
+            0,
+            64,
+            0
+        ],
+        "SurfaceForegroundPatternColor": [
+            0,
+            64,
+            0
+        ],
+        "CutForegroundPatternColor": [
+            0,
+            64,
+            0
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Matériaux absorbants ou isolants",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.004921259842519685,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Matériaux absorbants ou isolants",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 1.570796326794895,
+                    "Offset": 0.004921259842519685,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        }
+    },
+    "SIA400_Bois massif": {
+        "Color": [
+            128,
+            64,
+            0
+        ],
+        "SurfaceForegroundPatternColor": [
+            128,
+            64,
+            0
+        ],
+        "CutForegroundPatternColor": [
+            128,
+            64,
+            0
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Bois massif",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.0032808398950131233,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Bois massif",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.0032808398950131233,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        }
+    },
+    "SIA400_Brique de terre cuite": {
+        "Color": [
+            219,
+            23,
+            2
+        ],
+        "SurfaceForegroundPatternColor": [
+            219,
+            23,
+            2
+        ],
+        "CutForegroundPatternColor": [
+            219,
+            23,
+            2
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Brique de terre cuite",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.006561679790026247,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Brique de terre cuite",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.006561679790026247,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                }
+            ]
+        }
+    },
+    "SIA400_Pierre natuel en général": {
+        "Color": [
+            128,
+            128,
+            128
+        ],
+        "SurfaceForegroundPatternColor": [
+            0,
+            0,
+            255
+        ],
+        "CutForegroundPatternColor": [
+            0,
+            0,
+            255
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Pierre naturel en général",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.011666666666666665,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.011666666666666665,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.012499999999999997
+                    ],
+                    "Segments": []
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Pierre naturel en général",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.011666666666666665,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.011666666666666665,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.012499999999999997
+                    ],
+                    "Segments": []
+                }
+            ]
+        }
+    },
+    "SIA400_Mastic": {
+        "Color": [
+            252,
+            243,
+            182
+        ],
+        "SurfaceForegroundPatternColor": [
+            252,
+            243,
+            182
+        ],
+        "CutForegroundPatternColor": [
+            252,
+            243,
+            182
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Mastic",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.0,
+                    "Offset": 0.006666666666666666,
+                    "Shift": 0.026666666666666665,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.0389,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.012233333333333332,
+                        0.0011,
+                        0.032233333333333336
+                    ]
+                },
+                {
+                    "Angle": 2.0943951023931935,
+                    "Offset": 0.006666666666666666,
+                    "Shift": 0.026666666666666665,
+                    "Origin": [
+                        0.009999999999999998,
+                        0.003333333333333333
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.0389,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.012233333333333332,
+                        0.0011,
+                        0.032233333333333336
+                    ]
+                },
+                {
+                    "Angle": 4.188790204786387,
+                    "Offset": 0.006666666666666666,
+                    "Shift": 0.026666666666666665,
+                    "Origin": [
+                        0.013333333333333332,
+                        0.016666666666666666
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.0389,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.012233333333333332,
+                        0.0011,
+                        0.032233333333333336
+                    ]
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Mastic",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.0,
+                    "Offset": 0.006666666666666666,
+                    "Shift": 0.026666666666666665,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.0389,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.012233333333333332,
+                        0.0011,
+                        0.032233333333333336
+                    ]
+                },
+                {
+                    "Angle": 2.0943951023931935,
+                    "Offset": 0.006666666666666666,
+                    "Shift": 0.026666666666666665,
+                    "Origin": [
+                        0.009999999999999998,
+                        0.003333333333333333
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.0389,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.012233333333333332,
+                        0.0011,
+                        0.032233333333333336
+                    ]
+                },
+                {
+                    "Angle": 4.188790204786387,
+                    "Offset": 0.006666666666666666,
+                    "Shift": 0.026666666666666665,
+                    "Origin": [
+                        0.013333333333333332,
+                        0.016666666666666666
+                    ],
+                    "Segments": [
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.0389,
+                        0.0011,
+                        0.018899999999999997,
+                        0.0011,
+                        0.012233333333333332,
+                        0.0011,
+                        0.032233333333333336
+                    ]
+                }
+            ]
+        }
+    },
+    "SIA400_Agglomérés à base de ciment": {
+        "Color": [
+            128,
+            128,
+            128
+        ],
+        "SurfaceForegroundPatternColor": [
+            0,
+            0,
+            255
+        ],
+        "CutForegroundPatternColor": [
+            0,
+            0,
+            255
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "SIA400_Pierre naturel en général",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.011666666666666665,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.011666666666666665,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.012499999999999997
+                    ],
+                    "Segments": []
+                }
+            ]
+        },
+        "CutForegroundPatternId": {
+            "Name": "SIA400_Pierre naturel en général",
+            "HostOrientation": "ToHost",
+            "Target": "Drafting",
+            "IsSolidFill": false,
+            "FillGrids": [
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.011666666666666665,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.0
+                    ],
+                    "Segments": []
+                },
+                {
+                    "Angle": 0.7853981633974475,
+                    "Offset": 0.011666666666666665,
+                    "Shift": 0.0,
+                    "Origin": [
+                        0.0,
+                        0.012499999999999997
+                    ],
+                    "Segments": []
+                }
+            ]
+        }
+    },
+    "SIA400_Air": {
+        "Color": [
+            255,
+            255,
+            255
+        ],
+        "SurfaceForegroundPatternColor": [
+            255,
+            255,
+            255
+        ],
+        "CutForegroundPatternColor": [
+            255,
+            255,
+            255
+        ],
+        "SurfaceForegroundPatternId": {
+            "Name": "<Remplissage de solide>",
+            "HostOrientation": "ToView",
+            "Target": "Drafting",
+            "IsSolidFill": true,
+            "FillGrids": []
+        },
+        "CutForegroundPatternId": {
+            "Name": "<Remplissage de solide>",
+            "HostOrientation": "ToView",
+            "Target": "Drafting",
+            "IsSolidFill": true,
+            "FillGrids": []
+        }
+    }
+}

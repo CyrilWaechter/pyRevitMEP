@@ -11,19 +11,18 @@ from Autodesk.Revit.DB import (
 doc = __revit__.ActiveUIDocument.Document
 
 
-color_prop_names = (
+COLOR_PROP_NAMES = (
     "Color",
     "SurfaceForegroundPatternColor",
     "CutForegroundPatternColor",
 )
-pattern_prop_names = ("SurfaceForegroundPatternId", "CutForegroundPatternId")
-enum_props = {
+PATTERN_PROP_NAMES = ("SurfaceForegroundPatternId", "CutForegroundPatternId")
+ENUM_PROPS = {
     "HostOrientation": FillPatternHostOrientation,
     "Target": FillPatternTarget,
 }
-bool_prop_names = ("IsSolidFill",)
-fill_prop_names = ("Angle", "Offset", "Shift")
-segment_prop_names = ()
+BOOL_PROP_NAMES = ("IsSolidFill",)
+FILL_PROP_NAMES = ("Angle", "Offset", "Shift")
 
 
 def color_to_tuple(color):
@@ -36,7 +35,7 @@ def uv_to_tuple(uv):
 
 def fill_grid_to_dict(fill_grid):
     data = {}
-    for prop_name in fill_prop_names:
+    for prop_name in FILL_PROP_NAMES:
         data[prop_name] = getattr(fill_grid, prop_name)
     data["Origin"] = uv_to_tuple(getattr(fill_grid, "Origin"))
     data["Segments"] = [segment for segment in fill_grid.GetSegments()]
@@ -47,11 +46,11 @@ def pattern_to_dict(pattern_element):
     pattern = pattern_element.GetFillPattern()
     data = {}
     data["Name"] = pattern.Name
-    for prop_name, enum in enum_props.items():
+    for prop_name, enum in ENUM_PROPS.items():
         prop_value = getattr(pattern, prop_name)
         value = enum.GetName(enum, prop_value)
         data[prop_name] = value
-    for prop_name in bool_prop_names:
+    for prop_name in BOOL_PROP_NAMES:
         data[prop_name] = getattr(pattern, prop_name)
     data["FillGrids"] = [
         fill_grid_to_dict(fill_grid) for fill_grid in pattern.GetFillGrids()
@@ -63,13 +62,12 @@ graph_dict = {}
 
 
 for material in FilteredElementCollector(doc).OfClass(Material):
-    print(material.Name)
     if not material.Name.startswith("SIA400"):
         continue
     data = {}
-    for prop_name in color_prop_names:
+    for prop_name in COLOR_PROP_NAMES:
         data[prop_name] = color_to_tuple(getattr(material, prop_name))
-    for prop_name in pattern_prop_names:
+    for prop_name in PATTERN_PROP_NAMES:
         data[prop_name] = pattern_to_dict(doc.GetElement(getattr(material, prop_name)))
     graph_dict[material.Name] = data
 
@@ -78,5 +76,5 @@ file_path = (
     / r"CreateAllMaterials.pushbutton\material_graphics.json"
 )
 
-with file_path.open("w") as f:
-    json.dump(graph_dict, f)
+with file_path.open("w", encoding="utf-8") as f:
+    json.dump(graph_dict, f, ensure_ascii=False)
