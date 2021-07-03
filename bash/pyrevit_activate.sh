@@ -9,7 +9,7 @@ cat << EOF > pyRevit.addin
 <RevitAddIns>
     <AddIn Type = "Application">
         <Name>PyRevitLoader</Name>
-        <Assembly>$APPDATA\pyrevit_git\bin\engines\279\pyRevitLoader.dll</Assembly>
+        <Assembly>$APPDATA\pyrevit_git\bin\engines\IPY2710\pyRevitLoader.dll</Assembly>
         <AddInId>B39107C3-A1D7-47F4-A5A1-532DDF6EDB5D</AddInId>
         <FullClassName>PyRevitLoader.PyRevitLoaderApplication</FullClassName>
         <VendorId>eirannejad</VendorId>
