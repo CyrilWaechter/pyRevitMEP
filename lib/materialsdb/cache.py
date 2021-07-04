@@ -1,6 +1,7 @@
 import os
 import pathlib
 import urllib.request
+from collections import namedtuple
 from typing import Optional
 from lxml import etree
 
@@ -60,20 +61,26 @@ def update_producers_data():
     new_root = new_index.getroot()
     producers_dir = get_producers_dir()
     has_index_update = False
+    existing = []
+    updated = []
+    deleted = []
     for company in new_root:
-        cached_company = get_by_id(cached_root, company.get("id"))
-        if (
-            not require_update(cached_company, company)
-            and (producers_dir / pathlib.Path(company.get("href")).name).exists()
-        ):
-            continue
-        if cached_company:
-            (producers_dir / pathlib.Path(cached_company.get("href")).name).unlink(True)
-        has_index_update = True
+        cached_producer = get_by_id(cached_root, company.get("id"))
         producer_path = producers_dir / pathlib.Path(company.get("href")).name
+        if not require_update(cached_producer, company) and producer_path.exists():
+            existing.append(producer_path)
+            continue
+        if cached_producer:
+            cached_path = producers_dir / pathlib.Path(cached_producer.get("href")).name
+            deleted.append(cached_path)
+            cached_path.unlink(True)
+        has_index_update = True
         urllib.request.urlretrieve(company.get("href"), producer_path)
+        updated.append(producer_path)
     if has_index_update:
         new_index.write(str(get_cached_index_path()))
+    Report = namedtuple("Report", ["existing", "updated", "deleted"])
+    return Report(existing, updated, deleted)
 
 
 def producers():
