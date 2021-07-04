@@ -2,7 +2,8 @@
 import os
 import json
 from pathlib import Path
-from System.Collections.Generic import List
+from typing import List
+from System.Collections import Generic
 from Autodesk.Revit.DB import (
     BuiltInParameter,
     Color,
@@ -149,7 +150,7 @@ class MaterialCreator:
         fill_pattern.Name = data["Name"]
         for prop_name, enum in ENUM_PROPS.items():
             setattr(fill_pattern, prop_name, enum.Parse(enum, data[prop_name]))
-        fill_grids = List[FillGrid]()
+        fill_grids = Generic.List[FillGrid]()
         for grid_data in data["FillGrids"]:
             fill_grids.Add(self.fill_grid_from_dict(grid_data))
         fill_pattern.SetFillGrids(fill_grids)
@@ -271,18 +272,49 @@ class MaterialCreator:
             setattr(revit_material, prop_name, pattern_id)
 
 
+def create_save_as_options():
+    return SaveAsOptions(OverwriteExistingFile=True, MaximumBackups=1, Compact=True)
+
+
+def get_cached_revit_folder() -> Path:
+    return cache.get_cache_folder() / "Revit"
+
+
+def get_output_folder() -> Path:
+    revit_ver_number = __revit__.Application.VersionNumber
+    output_folder = get_cached_revit_folder() / f"{revit_ver_number}"
+    Path.mkdir(output_folder, parents=True, exist_ok=True)
+    return output_folder
+
+
+def delete_for_all_versions(deleted: List[Path]) -> None:
+    revit_path = get_cached_revit_folder()
+    for path in deleted:
+        for version_folder in (p for p in revit_path.iterdir() if p.is_dir()):
+            rvt_path = version_folder / path.with_suffix(".rvt").name
+            print(rvt_path)
+            rvt_path.unlink(True)
+
+
+def check_existing(existing: List[Path], output_folder: Path) -> List[Path]:
+    missing = []
+    for path in existing:
+        if not (output_folder / path.with_suffix(".rvt").name).exists():
+            missing.append(path)
+    return missing
+
+
 def main():
     deserialiser = XmlDeserialiser()
     lang = config.get_lang()
     country = config.get_country()
-    output_folder = cache.get_cache_folder() / "Revit"
-    Path.mkdir(output_folder, parents=True, exist_ok=True)
-    save_as_options = SaveAsOptions()
-    save_as_options.OverwriteExistingFile = True
-    save_as_options.MaximumBackups = 1
-    save_as_options.Compact = True
+    output_folder = get_output_folder()
+    save_as_options = create_save_as_options()
     material_creator = MaterialCreator(lang, country)
-    for producer in cache.producers():
+    existing, updated, deleted = cache.update_producers_data()
+    delete_for_all_versions(deleted + updated)
+    updated.extend(check_existing(existing, output_folder))
+    for producer in updated:
         print(f"Creating {producer.stem}")
         source = deserialiser.from_xml(str(producer))
         doc = __revit__.Application.NewProjectDocument(UnitSystem.Metric)
@@ -291,7 +323,6 @@ def main():
         output_path = (output_folder / producer.stem).with_suffix(".rvt")
         doc.SaveAs(str(output_path), save_as_options)
         doc.Close(False)
-        break
 
     os.startfile(output_folder)
 
