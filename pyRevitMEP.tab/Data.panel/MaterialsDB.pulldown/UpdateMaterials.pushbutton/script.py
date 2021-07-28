@@ -1,4 +1,11 @@
 #! python3
+import sys
+# Remove pyrevit lib shipped for ironpython to avoid conflicts
+sys.path = [
+    path
+    for path in sys.path
+    if not (path.endswith("pyrevitlib") or path.endswith("site-packages"))
+]
 import os
 import json
 from pathlib import Path
