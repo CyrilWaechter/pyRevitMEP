@@ -22,13 +22,13 @@ from rpw import revit
 from pyrevit.forms import WPFWindow
 from pyrevitmep.event import CustomizableEvent
 
-# noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import Transaction, ElementTransformUtils, Line, XYZ, Location, UnitType, UnitUtils, ElementId
-# noinspection PyUnresolvedReferences
+from Autodesk.Revit.DB import Transaction, ElementTransformUtils, Line, XYZ, Location, UnitUtils, ElementId
+try: # Revit ⩽ 2021
+    from Autodesk.Revit.DB import UnitType
+except ImportError:  # Revit ⩾ 2022
+    from Autodesk.Revit.DB import ForgeTypeId
 from Autodesk.Revit.UI.Selection import ObjectType, ISelectionFilter
-# noinspection PyUnresolvedReferences
 from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
-# noinspection PyUnresolvedReferences
 from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCanceledException
 
 
@@ -41,7 +41,10 @@ doc = revit.doc
 uidoc = revit.uidoc
 
 # Get current project units for angles
-angle_unit = doc.GetUnits().GetFormatOptions(UnitType.UT_Angle).DisplayUnits
+try:
+    angle_unit = doc.GetUnits().GetFormatOptions(UnitType.UT_Angle).DisplayUnits
+except NameError:
+    angle_unit = doc.GetUnits().GetFormatOptions(ForgeTypeId("autodesk.spec.aec:angle-2.0.0")).GetUnitTypeId()
 
 
 def xyz_axis(element_id):
