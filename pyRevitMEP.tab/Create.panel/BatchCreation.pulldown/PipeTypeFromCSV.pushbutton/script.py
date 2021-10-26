@@ -6,11 +6,7 @@ from System.Collections.Generic import List
 
 from Autodesk.Revit.DB import (
     FilteredElementCollector,
-    BuiltInCategory,
-    BuiltInParameter,
-    Parameter,
     UnitUtils,
-    DisplayUnitType,
     Document,
     MEPSize,
     Material,
@@ -18,7 +14,13 @@ from Autodesk.Revit.DB import (
 from Autodesk.Revit.DB.Plumbing import PipeSegment, PipeScheduleType
 
 import rpw
-from pyrevit import script, forms, revit
+from pyrevit import script, forms, revit, HOST_APP
+if HOST_APP.is_older_than(2022):
+    from Autodesk.Revit.DB import DisplayUnitType
+    LENGTH_UNIT = DisplayUnitType.DUT_MILLIMETERS
+else:
+    from Autodesk.Revit.DB import UnitTypeId
+    LENGTH_UNIT = UnitTypeId.Millimeters
 
 doc = __revit__.ActiveUIDocument.Document  # type: Document
 logger = script.get_logger()
@@ -48,7 +50,7 @@ def read_csv(csv_path):
 
 def convert_to_internal(value, unit="mm"):
     return UnitUtils.ConvertToInternalUnits(
-        float(value), DisplayUnitType.DUT_MILLIMETERS
+        float(value), LENGTH_UNIT
     )
 
 

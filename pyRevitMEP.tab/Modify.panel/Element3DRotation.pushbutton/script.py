@@ -26,7 +26,7 @@ from Autodesk.Revit.DB import Transaction, ElementTransformUtils, Line, XYZ, Loc
 try: # Revit ⩽ 2021
     from Autodesk.Revit.DB import UnitType
 except ImportError:  # Revit ⩾ 2022
-    from Autodesk.Revit.DB import ForgeTypeId
+    from Autodesk.Revit.DB import SpecTypeId
 from Autodesk.Revit.UI.Selection import ObjectType, ISelectionFilter
 from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
 from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCanceledException
@@ -44,7 +44,7 @@ uidoc = revit.uidoc
 try:
     angle_unit = doc.GetUnits().GetFormatOptions(UnitType.UT_Angle).DisplayUnits
 except NameError:
-    angle_unit = doc.GetUnits().GetFormatOptions(ForgeTypeId("autodesk.spec.aec:angle-2.0.0")).GetUnitTypeId()
+    angle_unit = doc.GetUnits().GetFormatOptions(SpecTypeId.Angle).GetUnitTypeId()
 
 
 def xyz_axis(element_id):

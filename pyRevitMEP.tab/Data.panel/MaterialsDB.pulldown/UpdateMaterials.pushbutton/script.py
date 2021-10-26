@@ -14,7 +14,6 @@ from System.Collections import Generic
 from Autodesk.Revit.DB import (
     BuiltInParameter,
     Color,
-    DisplayUnitType,
     FillGrid,
     FillPattern,
     FillPatternElement,
@@ -34,11 +33,14 @@ from Autodesk.Revit.DB import (
     UnitSystem,
     UV,
 )
+try: # Revit ⩽ 2021
+    from Autodesk.Revit.DB import DisplayUnitType
+except ImportError:  # Revit ⩾ 2022
+    from Autodesk.Revit.DB import UnitTypeId
 from Autodesk.Revit import Exceptions
 
 from materialsdb import cache, utils, config
 from materialsdb.serialiser import XmlDeserialiser
-
 
 COLOR_PROP_NAMES = (
     "Color",
@@ -71,6 +73,27 @@ GROUP_GRAPHICS = {
     "Soil": "SIA400_Agglomérés à base de ciment",
     "air": "SIA400_Air",
 }
+
+
+def get_density_unit():
+    try:
+        return DisplayUnitType.DUT_KILOGRAMS_PER_CUBIC_METER
+    except NameError:
+        return UnitTypeId.KilogramsPerCubicMeter
+
+
+def get_heat_capacity_unit():
+    try:
+        return DisplayUnitType.DUT_JOULES_PER_KILOGRAM_CELSIUS
+    except NameError:
+        return UnitTypeId.JoulesPerKilogramDegreeCelsius
+
+
+def get_conductivity_unit():
+    try:
+        return DisplayUnitType.DUT_WATTS_PER_METER_KELVIN
+    except NameError:
+        return UnitTypeId.WattsPerMeterKelvin
 
 
 class CustomTransaction:
@@ -224,20 +247,20 @@ class MaterialCreator:
                 structural_asset.Density
             ) = UnitUtils.ConvertToInternalUnits(
                 density,
-                DisplayUnitType.DUT_KILOGRAMS_PER_CUBIC_METER,
+                get_density_unit(),
             )
         thermal_asset.Porosity = getattr(physical, "Porosity", 0) or 0
         specific_heat_capacity = (getattr(thermal, "therm_capa", 0) or 0) * 3600
         if specific_heat_capacity:
             thermal_asset.SpecificHeat = UnitUtils.ConvertToInternalUnits(
                 specific_heat_capacity,
-                DisplayUnitType.DUT_JOULES_PER_KILOGRAM_CELSIUS,
+                get_heat_capacity_unit(),
             )
         thermal_conductivity = getattr(thermal, "lambda_value", 0) or 0
         if thermal_conductivity:
             thermal_asset.ThermalConductivity = UnitUtils.ConvertToInternalUnits(
                 thermal_conductivity,
-                DisplayUnitType.DUT_WATTS_PER_METER_KELVIN,
+                get_conductivity_unit(),
             )
         # Create thermal and structural property sets
         thermal_property_set = PropertySetElement.Create(doc, thermal_asset)
