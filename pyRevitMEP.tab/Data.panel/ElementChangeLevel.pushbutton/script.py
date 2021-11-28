@@ -2,9 +2,9 @@
 Copyright (c) 2017 Cyril Waechter
 Python scripts for Autodesk Revit
 
-This file is part of pypevitmep repository at https://github.com/CyrilWaechter/pypevitmep
+This file is part of pyrevitmep repository at https://github.com/CyrilWaechter/pyrevitmep
 
-pypevitmep is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
+pyrevitmep is an extension for pyRevit. It contain free set of scripts for Autodesk Revit:
 you can redistribute it and/or modify it under the terms of the GNU General Public License
 version 3, as published by the Free Software Foundation.
 
@@ -18,8 +18,15 @@ https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
 
 # noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import Transaction, BuiltInParameter, Element, Level, MEPCurve, ElementId, FamilyInstance\
-    , FilteredElementCollector, BuiltInCategory, Category
+from Autodesk.Revit.DB import (
+    BuiltInParameter,
+    Level,
+    MEPCurve,
+    FamilyInstance,
+    FilteredElementCollector,
+    BuiltInCategory,
+    Category,
+)
 from pyrevit import script, HOST_APP
 from pyrevit.forms import WPFWindow, alert
 import rpw
@@ -36,25 +43,44 @@ uidoc = revit.uidoc
 
 logger = script.get_logger()
 
-is_revit_2020 = int(HOST_APP.version) >= 2020
-logger.debug(is_revit_2020)
+is_revit_2020_or_above = int(HOST_APP.version) >= 2020
+logger.debug(is_revit_2020_or_above)
 
 
-def get_enhanced_ids():
-    # Modified category for Revit 2020 and above. When you change level, object doesn't move. eg. fittings.
-    enhanced_cat = (
-        BuiltInCategory.OST_DuctAccessory,
-        BuiltInCategory.OST_DuctFitting,
-        BuiltInCategory.OST_PipeAccessory,
-        BuiltInCategory.OST_PipeFitting,
-        BuiltInCategory.OST_CableTrayFitting,
-        BuiltInCategory.OST_ConduitFitting
-    )
-    return (Category.GetCategory(doc, cat).Id for cat in enhanced_cat)
+class Offset:
+    def __init__(self):
+        # Modified category for Revit 2020 and above. When you change level, object doesn't move. eg. fittings.
+        to_offset = {
+            BuiltInCategory.OST_DuctAccessory,
+            BuiltInCategory.OST_DuctFitting,
+            BuiltInCategory.OST_PipeAccessory,
+            BuiltInCategory.OST_PipeFitting,
+            BuiltInCategory.OST_CableTrayFitting,
+            BuiltInCategory.OST_ConduitFitting,
+            BuiltInCategory.OST_DuctTerminal,
+            BuiltInCategory.OST_PlumbingFixtures,
+        }
+        no_offset_from_2020 = {
+            BuiltInCategory.OST_DuctAccessory,
+            BuiltInCategory.OST_DuctFitting,
+            BuiltInCategory.OST_PipeAccessory,
+            BuiltInCategory.OST_PipeFitting,
+            BuiltInCategory.OST_CableTrayFitting,
+            BuiltInCategory.OST_ConduitFitting,
+        }
+        if is_revit_2020_or_above:
+            self.category_ids_to_offset = self.get_category_ids(
+                to_offset.difference(no_offset_from_2020)
+            )
+        else:
+            self.category_ids_to_offset = self.get_category_ids(to_offset)
+        logger.debug(self.category_ids_to_offset)
 
+    def is_required(self, element):
+        return element.Category.Id in self.category_ids_to_offset
 
-enhanced_cat_ids = get_enhanced_ids()
-logger.debug([cat_id for cat_id in enhanced_cat_ids])
+    def get_category_ids(self, categories):
+        return tuple(Category.GetCategory(doc, cat).Id for cat in categories)
 
 
 def get_level_from_object():
@@ -77,26 +103,34 @@ def change_level(ref_level):
         # moving the object
         selection_ids = uidoc.Selection.GetElementIds()
 
+        offset = Offset()
         for id in selection_ids:
             el = doc.GetElement(id)
             # Change reference level of objects like ducts, pipes and cable trays
             if isinstance(el, MEPCurve):
                 el.ReferenceLevel = ref_level
 
-            # Change reference level of objects like ducts, pipes and cable trays
+            # Change reference level of family objects like fittings, accessories, air terminal
             elif isinstance(el, FamilyInstance) and el.Host is None:
                 el_level = doc.GetElement(el.LevelId)
                 el_level_param = el.get_Parameter(BuiltInParameter.FAMILY_LEVEL_PARAM)
-                logger.debug("Category is in enhanced categories ? {}".format(el.Category.Id in enhanced_cat_ids))
-                if not(is_revit_2020 or el.Category.Id in enhanced_cat_ids):
-                    el_param_offset = el.get_Parameter(BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM)
-                    el_newoffset = el_param_offset.AsDouble() + el_level.Elevation - ref_level.Elevation
+                if offset.is_required(el):
+                    el_param_offset = el.get_Parameter(
+                        BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM
+                    )
+                    el_newoffset = (
+                        el_param_offset.AsDouble()
+                        + el_level.Elevation
+                        - ref_level.Elevation
+                    )
                     el_param_offset.Set(el_newoffset)
                 el_level_param.Set(ref_level.Id)
 
             # Ignore other objects
             else:
-                logger.info("Warning. Following element was ignored. It is probably an hosted element.")
+                logger.info(
+                    "Warning. Following element was ignored. It is probably an hosted element."
+                )
                 logger.info(el)
 
 
@@ -133,4 +167,4 @@ if __forceddebugmode__:
     uidoc.Selection.SetElementIds(selection)
     change_level(level)
 else:
-    ReferenceLevelSelection('ReferenceLevelSelection.xaml').Show()
+    ReferenceLevelSelection("ReferenceLevelSelection.xaml").Show()
