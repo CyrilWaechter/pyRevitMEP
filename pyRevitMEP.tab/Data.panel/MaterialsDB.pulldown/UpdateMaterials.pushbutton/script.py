@@ -344,6 +344,9 @@ def main():
     material_creator = MaterialCreator(lang, country)
     existing, updated, deleted = cache.update_producers_data()
     delete_for_all_versions(deleted + updated)
+    for producer in cache.producers():
+        if producer not in existing + updated:
+            existing.append(producer)
     updated.extend(check_existing(existing, output_folder))
     for producer in updated:
         print(f"Creating {producer.stem}")
