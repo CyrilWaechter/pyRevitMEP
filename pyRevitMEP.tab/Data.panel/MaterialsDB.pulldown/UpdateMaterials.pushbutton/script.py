@@ -71,7 +71,7 @@ GROUP_GRAPHICS = {
     "Covering": "SIA400_Mortier, plâtre, crépi",
     "Glas": "SIA400_Verre",
     "Soil": "SIA400_Agglomérés à base de ciment",
-    "air": "SIA400_Air",
+    "Air": "SIA400_Air",
 }
 
 
@@ -116,13 +116,14 @@ def get_valid_name(name):
         str(name)
         .split("\n")[0]
         .replace(":", "_")
+        .replace(";", "_")
         .replace("{", "(")
         .replace("}", ")")
         .replace("[", "(")
         .replace("]", ")")
         .replace("|", "_")
-        .replace("<", "(")
-        .replace(">", "]")
+        .replace("<", "inf.")
+        .replace(">", "sup.")
         .replace("?", "")
         .replace("`", "’")
         .replace("~", "")
