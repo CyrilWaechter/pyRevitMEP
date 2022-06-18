@@ -5,7 +5,10 @@ from collections import namedtuple
 from typing import Optional
 from lxml import etree
 
-MATERIALSDBINDEXURL = "http://www.materialsdb.org/download/ProducerIndex.xml"
+MATERIALSDBINDEXURLLIST = [
+    "http://www.materialsdb.org/download/ProducerIndex.xml",
+    "http://www.materialsdb.org/download/generic/GenericIndex.xml",
+]
 
 
 def get_cache_folder():
@@ -20,12 +23,12 @@ def get_cache_folder():
     return cache_dir
 
 
-def get_cached_index_path() -> pathlib.Path:
-    return get_cache_folder() / "ProducerIndex.xml"
+def get_cached_index_path(index) -> pathlib.Path:
+    return get_cache_folder() / pathlib.Path(index).name
 
 
-def parse_cached_index() -> etree._ElementTree:
-    path = get_cached_index_path()
+def parse_cached_index(index) -> etree._ElementTree:
+    path = get_cached_index_path(index)
     if path.exists():
         return etree.parse(str(path))
     root = etree.Element("root")
@@ -54,10 +57,25 @@ def get_producers_dir() -> pathlib.Path:
     return producer_path
 
 
-def update_producers_data():
-    cached_index = parse_cached_index()
+Report = namedtuple("Report", ["existing", "updated", "deleted"])
+
+
+def update_producers_data(url_list=MATERIALSDBINDEXURLLIST):
+    existing = []
+    updated = []
+    deleted = []
+    for index in url_list:
+        report = update_producers_from_index(index)
+        existing.extend(report.existing)
+        updated.extend(report.updated)
+        deleted.extend(report.deleted)
+    return Report(existing, updated, deleted)
+
+
+def update_producers_from_index(index):
+    cached_index = parse_cached_index(index)
     cached_root = cached_index.getroot()
-    new_index = etree.parse(MATERIALSDBINDEXURL)
+    new_index = etree.parse(index)
     new_root = new_index.getroot()
     producers_dir = get_producers_dir()
     has_index_update = False
@@ -78,8 +96,7 @@ def update_producers_data():
         urllib.request.urlretrieve(company.get("href"), producer_path)
         updated.append(producer_path)
     if has_index_update:
-        new_index.write(str(get_cached_index_path()))
-    Report = namedtuple("Report", ["existing", "updated", "deleted"])
+        new_index.write(str(get_cached_index_path(index)))
     return Report(existing, updated, deleted)
 
 

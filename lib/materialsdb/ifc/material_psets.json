@@ -238,7 +238,7 @@
         }
     },
     "materialsdb.org_layer": {
-        "id": {
+        "MaterialsDBLayerId": {
             "path": ["id"],
             "primary_measure_type": "IfcIdentifier"
         },

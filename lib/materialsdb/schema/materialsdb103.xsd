@@ -103,7 +103,7 @@ version="1.03">
       <xs:enumeration value='Covering'/>
       <xs:enumeration value='Glas'/>
       <xs:enumeration value='Soil'/>
-      <xs:enumeration value='air'/>
+      <xs:enumeration value='Air'/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="materialtype">
