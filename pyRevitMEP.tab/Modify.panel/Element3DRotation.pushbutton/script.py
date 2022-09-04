@@ -17,19 +17,17 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
-import rpw
-from rpw import revit
+from pyrevit import revit
 from pyrevit.forms import WPFWindow
 from pyrevitmep.event import CustomizableEvent
 
-from Autodesk.Revit.DB import Transaction, ElementTransformUtils, Line, XYZ, Location, UnitUtils, ElementId
+from Autodesk.Revit.DB import ElementTransformUtils, Line, UnitUtils
 try: # Revit ⩽ 2021
     from Autodesk.Revit.DB import UnitType
 except ImportError:  # Revit ⩾ 2022
-    from Autodesk.Revit.DB import SpecTypeId
+    from Autodesk.Revit.DB import SpecTypeId, WorksharingUtils
 from Autodesk.Revit.UI.Selection import ObjectType, ISelectionFilter
-from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
-from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCanceledException
+from Autodesk.Revit.Exceptions import OperationCanceledException
 
 
 __doc__ = "Rotate object in any direction"
@@ -81,12 +79,20 @@ def axis_selection():
 class RotateElement(object):
     """class used to store rotation parameters. Methods then rotate elements."""
     def __init__(self):
-        self.selection = uidoc.Selection.GetElementIds()
+        self.set_selection(uidoc.Selection.GetElementIds())
         self.angles = [0]
+
+    def set_selection(self, element_ids):
+        if doc.IsWorkshared:
+            try:
+                WorksharingUtils.CheckoutElements(doc, element_ids)
+            except:
+                raise
+        self.selection = element_ids
 
     def around_itself(self):
         """Method used to rotate elements on themselves"""
-        with rpw.db.Transaction("Rotate around itself", doc):
+        with revit.Transaction("Rotate around itself", doc):
             for elid in self.selection:
                 el_axis = xyz_axis(elid)
                 for i in range(3):
@@ -97,7 +103,7 @@ class RotateElement(object):
 
     def around_axis(self):
         """Method used to rotate elements around selected axis"""
-        with rpw.db.Transaction("Rotate around axis", doc):
+        with revit.Transaction("Rotate around axis", doc):
             axis = axis_selection()
             ElementTransformUtils.RotateElements(doc, self.selection, axis, self.angles)
         uidoc.Selection.SetElementIds(rotate_elements.selection)
@@ -121,7 +127,7 @@ class RotateOptions(WPFWindow):
     # noinspection PyUnusedLocal
     def around_itself_click(self, sender, e):
         try:
-            rotate_elements.selection = uidoc.Selection.GetElementIds()
+            rotate_elements.set_selection(uidoc.Selection.GetElementIds())
             angles = [self.x_axis.Text, self.y_axis.Text, self.z_axis.Text]
             internal_angles = [UnitUtils.ConvertToInternalUnits(float(i), angle_unit) for i in angles]
             rotate_elements.angles = internal_angles
@@ -135,7 +141,7 @@ class RotateOptions(WPFWindow):
     def around_axis_click(self, sender, e):
         try:
             rotate_elements.angles = UnitUtils.ConvertToInternalUnits(float(self.rotation_angle.Text), angle_unit)
-            rotate_elements.selection = uidoc.Selection.GetElementIds()
+            rotate_elements.set_selection(uidoc.Selection.GetElementIds())
         except ValueError:
             self.warning.Text = "Incorrect angles, input format required '0.0'"
         else:
