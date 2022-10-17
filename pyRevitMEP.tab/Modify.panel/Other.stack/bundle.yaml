@@ -1,4 +1,4 @@
 layout:
   - Delete
-  - MoveToOrigin
+  - Move
   - FlexFlatten
