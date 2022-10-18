@@ -49,10 +49,14 @@ def check_room_vs_space(doc, room_doc):
         )
     )
     print_missing(
-        "## Following room have no corresponding space", missing_space, room_dict
+        "## {} following rooms have no corresponding spaces".format(len(missing_space)),
+        missing_space,
+        room_dict,
     )
     print_missing(
-        "## Following space have no corresponding room", missing_room, space_dict
+        "## {} following spaces have no corresponding rooms".format(len(missing_room)),
+        missing_room,
+        space_dict,
     )
 
 
