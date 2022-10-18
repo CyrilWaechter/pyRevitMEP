@@ -12,6 +12,7 @@ class CancelledByUserError(BaseException):
 
 
 logger = script.get_logger()
+output = script.get_output()
 
 doc = revit.doc
 room_doc = forms.SelectFromList.show(
@@ -38,6 +39,11 @@ def move_space_to_room(doc, room_doc):
                 raise CancelledByUserError
             room = room_dict.get(space.Number)
             if not room:
+                continue
+            if not room.Location:
+                output.log_warning(
+                    "Room {} exist but is not placed".format(room.Number)
+                )
                 continue
             i += 1
             pb.update_progress(i, len(room_dict))
