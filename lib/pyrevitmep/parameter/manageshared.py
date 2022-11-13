@@ -129,7 +129,7 @@ class ManageSharedParameter(WPFWindow):
             return
         for item in list(self.datagrid.SelectedItems):
             SharedParameter.delete_from_definition_file(
-                self.datagrid.SelectedItems, definition_file
+                [param for param in self.datagrid.SelectedItems], self.definition_file_path
             )
             self.data_grid_content.Remove(item)
 
