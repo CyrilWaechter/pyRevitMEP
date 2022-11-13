@@ -1,7 +1,7 @@
 # coding: utf8
 import os
 import re
-import tempfile
+import codecs
 
 from System.ComponentModel import ListSortDirection, SortDescription
 from System.Collections.ObjectModel import ObservableCollection
@@ -100,7 +100,7 @@ class ManageFamilyParameter(forms.WPFWindow):
 
         # Clean definition file from temporary created external definitions
         src_file = SharedParameter.get_definition_file().Filename
-        if script.coreutils.check_revittxt_encoding(src_file):
+        if script.coreutils.check_encoding_bom(src_file, bom_bytes=codecs.BOM_UTF16):
             encoding = "utf_16_le"
         else:
             encoding = "utf_8"
