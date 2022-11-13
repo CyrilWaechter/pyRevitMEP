@@ -21,7 +21,7 @@
                         <Image x:Name="ok_img" Height="20"/>
                     </Button>
                     <Button Click="save_click"
-                            Style="{StaticResource buttonStyle}" ToolTip="Sive parameters to definition file">
+                            Style="{StaticResource buttonStyle}" ToolTip="Save parameters to definition file">
                         <Image x:Name="save_img" Height="20"/>
                     </Button>
                     <Button Click="delete_click"
