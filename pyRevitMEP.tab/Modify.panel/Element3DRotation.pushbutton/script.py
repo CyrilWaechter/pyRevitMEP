@@ -21,11 +21,12 @@ from pyrevit import revit
 from pyrevit.forms import WPFWindow
 from pyrevitmep.event import CustomizableEvent
 
-from Autodesk.Revit.DB import ElementTransformUtils, Line, UnitUtils
-try: # Revit ⩽ 2021
+from Autodesk.Revit.DB import ElementTransformUtils, Line, UnitUtils, WorksharingUtils
+
+try:  # Revit ⩽ 2021
     from Autodesk.Revit.DB import UnitType
 except ImportError:  # Revit ⩾ 2022
-    from Autodesk.Revit.DB import SpecTypeId, WorksharingUtils
+    from Autodesk.Revit.DB import SpecTypeId
 from Autodesk.Revit.UI.Selection import ObjectType, ISelectionFilter
 from Autodesk.Revit.Exceptions import OperationCanceledException
 
@@ -50,7 +51,10 @@ def xyz_axis(element_id):
     :type element_id: ElementId
     """
     transform = doc.GetElement(element_id).GetTransform()
-    axis = [Line.CreateBound(transform.Origin, transform.Origin + transform.Basis[i]) for i in range(3)]
+    axis = [
+        Line.CreateBound(transform.Origin, transform.Origin + transform.Basis[i])
+        for i in range(3)
+    ]
     return axis
 
 
@@ -68,7 +72,9 @@ class AxisISelectionFilter(ISelectionFilter):
 def axis_selection():
     """Ask user to select an element, return the axis of the element"""
     try:
-        reference = uidoc.Selection.PickObject(ObjectType.Element, AxisISelectionFilter(), "Select an axis")
+        reference = uidoc.Selection.PickObject(
+            ObjectType.Element, AxisISelectionFilter(), "Select an axis"
+        )
     except OperationCanceledException:
         pass
     else:
@@ -78,6 +84,7 @@ def axis_selection():
 
 class RotateElement(object):
     """class used to store rotation parameters. Methods then rotate elements."""
+
     def __init__(self):
         self.set_selection(uidoc.Selection.GetElementIds())
         self.angles = [0]
@@ -99,7 +106,9 @@ class RotateElement(object):
                     if self.angles[i] == 0:
                         pass
                     else:
-                        ElementTransformUtils.RotateElement(doc, elid, el_axis[i], self.angles[i])
+                        ElementTransformUtils.RotateElement(
+                            doc, elid, el_axis[i], self.angles[i]
+                        )
 
     def around_axis(self):
         """Method used to rotate elements around selected axis"""
@@ -129,7 +138,9 @@ class RotateOptions(WPFWindow):
         try:
             rotate_elements.set_selection(uidoc.Selection.GetElementIds())
             angles = [self.x_axis.Text, self.y_axis.Text, self.z_axis.Text]
-            internal_angles = [UnitUtils.ConvertToInternalUnits(float(i), angle_unit) for i in angles]
+            internal_angles = [
+                UnitUtils.ConvertToInternalUnits(float(i), angle_unit) for i in angles
+            ]
             rotate_elements.angles = internal_angles
         except ValueError:
             self.warning.Text = "Incorrect angles, input format required '0.0'"
@@ -140,11 +151,14 @@ class RotateOptions(WPFWindow):
     # noinspection PyUnusedLocal
     def around_axis_click(self, sender, e):
         try:
-            rotate_elements.angles = UnitUtils.ConvertToInternalUnits(float(self.rotation_angle.Text), angle_unit)
+            rotate_elements.angles = UnitUtils.ConvertToInternalUnits(
+                float(self.rotation_angle.Text), angle_unit
+            )
             rotate_elements.set_selection(uidoc.Selection.GetElementIds())
         except ValueError:
             self.warning.Text = "Incorrect angles, input format required '0.0'"
         else:
             customizable_event.raise_event(rotate_elements.around_axis)
 
-RotateOptions('RotateOptions.xaml').Show()
+
+RotateOptions("RotateOptions.xaml").Show()
