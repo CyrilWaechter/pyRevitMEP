@@ -1,8 +1,6 @@
 # coding: utf8
 
-import rpw
-from rpw import revit
-from pyrevit.forms import WPFWindow
+from pyrevit import revit, forms
 from pyrevitmep.workset import Workset
 # noinspection PyUnresolvedReferences
 from System.Collections.ObjectModel import ObservableCollection
@@ -12,9 +10,9 @@ __title__ = "Worksets"
 __author__ = "Cyril Waechter"
 
 
-class Gui(WPFWindow):
+class Gui(forms.WPFWindow):
     def __init__(self, xaml_file_name):
-        WPFWindow.__init__(self, xaml_file_name)
+        forms.WPFWindow.__init__(self, xaml_file_name)
         self.data_grid_content = ObservableCollection[object]()
         self.datagrid.ItemsSource = self.data_grid_content
 
@@ -30,7 +28,7 @@ class Gui(WPFWindow):
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
-        with rpw.db.Transaction("Batch workset creation"):
+        with revit.Transaction("Batch workset creation"):
             for workset in self.data_grid_content:
                 workset.create()
 
@@ -48,9 +46,6 @@ class Gui(WPFWindow):
         for item in list(self.datagrid.SelectedItems):
             self.data_grid_content.Remove(item)
 
-
-if not revit.doc.IsWorkshared:
-    rpw.ui.forms.Alert("Current document is not workshared. You cannot create worksets.")
-else:
+if forms.check_workshared():
     gui = Gui("WPFWindow.xaml")
     gui.ShowDialog()
