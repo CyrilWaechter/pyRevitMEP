@@ -11,8 +11,8 @@ class CancelledByUserError(BaseException):
     pass
 
 
-logger = script.get_logger()
 output = script.get_output()
+logger = script.get_logger()
 
 doc = revit.doc
 room_doc = forms.SelectFromList.show(
@@ -39,15 +39,36 @@ def move_space_to_room(doc, room_doc):
                 raise CancelledByUserError
             room = room_dict.get(space.Number)
             if not room:
+                output.print_html(
+                    '<div style="background:orange">Space {} do not have corresponding room</div>'.format(
+                        space.Number
+                    )
+                )
                 continue
+            logger.debug("{} - Id: {}".format(room.Number, room.Id))
             if not room.Location:
-                output.log_warning(
-                    "Room {} exist but is not placed".format(room.Number)
+                output.print_html(
+                    '<div style="background:orange">Room {} exist but is not placed</div>'.format(
+                        room.Number
+                    )
+                )
+                continue
+            if not space.Location:
+                output.print_html(
+                    '<div style="background:orange">Space {} exist but is not placed</div>'.format(
+                        room.Number
+                    )
                 )
                 continue
             i += 1
             pb.update_progress(i, len(room_dict))
-            space.Location.Move(room.Location.Point - space.Location.Point)
+            if not space.Location.Point.IsAlmostEqualTo(room.Location.Point):
+                space.Location.Move(room.Location.Point - space.Location.Point)
+                output.print_html(
+                    '<div style="background:green">Space {} has been moved</div>'.format(
+                        space.Number
+                    )
+                )
 
 
 if room_doc:
