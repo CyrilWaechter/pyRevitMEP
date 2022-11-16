@@ -1,5 +1,9 @@
 # coding: utf8
-from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory
+from Autodesk.Revit.DB import (
+    FilteredElementCollector,
+    BuiltInCategory,
+    BuiltInParameter,
+)
 from pyrevit import script, forms, revit
 
 __title__ = "SpaceVsRoom"
@@ -22,7 +26,13 @@ def print_missing(title, missing, base_dict):
     output.print_md(title)
     for number in missing:
         element = base_dict[number]
-        print("{}: {}".format(element.Number, output.linkify(element.Id)))
+        print(
+            "{} - {}: {}".format(
+                element.Number,
+                element.get_Parameter(BuiltInParameter.ROOM_NAME).AsString(),
+                output.linkify(element.Id),
+            )
+        )
 
 
 def check_room_vs_space(doc, room_doc):
