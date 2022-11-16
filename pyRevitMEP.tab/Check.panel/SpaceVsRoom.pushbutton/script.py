@@ -22,15 +22,22 @@ room_doc = forms.SelectFromList.show(
 )
 
 
+def is_placed_str(element):
+    if not element.Location:
+        return "but is unplaced"
+    return "despite being placed"
+
+
 def print_missing(title, missing, base_dict):
     output.print_md(title)
     for number in missing:
         element = base_dict[number]
         print(
-            "{} - {}: {}".format(
+            "{} - {}: {} {}".format(
                 element.Number,
                 element.get_Parameter(BuiltInParameter.ROOM_NAME).AsString(),
                 output.linkify(element.Id),
+                is_placed_str(element),
             )
         )
 
