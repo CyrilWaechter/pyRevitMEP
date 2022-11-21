@@ -57,14 +57,11 @@ def check_room_vs_space(doc, room_doc):
     }
     room_set = set(room_dict.keys())
     space_set = set(space_dict.keys())
+    common_set = room_set.intersection(space_set)
     missing_room = space_set.difference(room_set)
     missing_space = room_set.difference(space_set)
     output.print_md("# Check result")
-    output.print_md(
-        "## {} corresponding room/space found".format(
-            len(room_set.intersection(space_set))
-        )
-    )
+    output.print_md("## {} corresponding room/space found".format(len(common_set)))
     print_missing(
         "## {} following rooms have no corresponding spaces".format(len(missing_space)),
         missing_space,
@@ -74,6 +71,20 @@ def check_room_vs_space(doc, room_doc):
         "## {} following spaces have no corresponding rooms".format(len(missing_room)),
         missing_room,
         space_dict,
+    )
+    output.print_md(
+        "## Following space/room pair have common number but different names"
+    )
+    data = []
+    for number in common_set:
+        room = room_dict[number]
+        space = space_dict[number]
+        room_name = room.get_Parameter(BuiltInParameter.ROOM_NAME).AsString()
+        space_name = space.get_Parameter(BuiltInParameter.ROOM_NAME).AsString()
+        if room_name != space_name:
+            data.append([number, room_name, space_name])
+    output.print_table(
+        data, columns=["Number", "Room Name", "Space Name"], formats=["", "", ""]
     )
 
 
