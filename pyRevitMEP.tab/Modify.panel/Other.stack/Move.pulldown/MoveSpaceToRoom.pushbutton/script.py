@@ -40,7 +40,7 @@ def move_space_to_room(doc, room_doc):
             room = room_dict.get(space.Number)
             if not room:
                 output.print_html(
-                    '<div style="background:orange">Space {} do not have corresponding room</div>'.format(
+                    '<div>Space <mark style="background:orange">{}</mark> do not have corresponding room</div>'.format(
                         space.Number
                     )
                 )
@@ -48,14 +48,14 @@ def move_space_to_room(doc, room_doc):
             logger.debug("{} - Id: {}".format(room.Number, room.Id))
             if not room.Location:
                 output.print_html(
-                    '<div style="background:orange">Room {} exist but is not placed</div>'.format(
+                    '<div>Room <mark style="background:orange">{}</mark> exist but is not placed</div>'.format(
                         room.Number
                     )
                 )
                 continue
             if not space.Location:
                 output.print_html(
-                    '<div style="background:orange">Space {} exist but is not placed</div>'.format(
+                    '<div>Space <mark style="background:orange">{}</mark> exist but is not placed</div>'.format(
                         room.Number
                     )
                 )
@@ -65,7 +65,7 @@ def move_space_to_room(doc, room_doc):
             if not space.Location.Point.IsAlmostEqualTo(room.Location.Point):
                 space.Location.Move(room.Location.Point - space.Location.Point)
                 output.print_html(
-                    '<div style="background:green">Space {} has been moved</div>'.format(
+                    '<div>Space <mark style="background:green">{}</mark> has been moved</div>'.format(
                         space.Number
                     )
                 )
