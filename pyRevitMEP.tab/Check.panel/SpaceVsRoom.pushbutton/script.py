@@ -83,9 +83,12 @@ def check_room_vs_space(doc, room_doc):
         space_name = space.get_Parameter(BuiltInParameter.ROOM_NAME).AsString()
         if room_name != space_name:
             data.append([number, room_name, space_name])
-    output.print_table(
-        data, columns=["Number", "Room Name", "Space Name"], formats=["", "", ""]
-    )
+    if data:
+        output.print_table(
+            data, columns=["Number", "Room Name", "Space Name"], formats=["", "", ""]
+        )
+    else:
+        print(None)
 
 
 if room_doc:
