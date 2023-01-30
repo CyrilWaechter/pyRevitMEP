@@ -58,6 +58,11 @@ def connect_to():
             import time
             time.sleep(2)
 
+    # Check if user has selected same element twice to prevent errors and unintended movements
+    if target_element.Id == moved_element.Id:
+        rpw.ui.forms.Alert("Oops, it looks like you've selected the same object twice.", header='Attribute Error')
+        return True
+
     # Get associated unused connectors
     moved_connector = get_connector_closest_to(get_connector_manager(moved_element).UnusedConnectors,
                                                moved_point)
