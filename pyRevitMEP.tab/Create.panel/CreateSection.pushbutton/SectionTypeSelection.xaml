@@ -1,9 +1,0 @@
-<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Section type selection" SizeToContent="WidthAndHeight" ShowInTaskbar="False" Topmost="True"
-        WindowStartupLocation="CenterScreen" HorizontalContentAlignment="Center">
-    <StackPanel Margin="10">
-        <ComboBox x:Name="combob_selector" ItemsSource="{Binding}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedValue="{Binding Name}" SelectedIndex="0"/>
-        <Button Click="select_click">Select</Button>
-    </StackPanel>
-</Window>
