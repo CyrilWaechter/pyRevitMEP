@@ -19,6 +19,10 @@ from System.Collections.ObjectModel import ObservableCollection
 from System.Windows.Controls import DataGrid
 from System.ComponentModel import ListSortDirection, SortDescription
 
+from pyrevit import HOST_APP
+if HOST_APP.is_older_than(2023):
+    from Autodesk.Revit.DB import ParameterType
+
 logger = get_logger()
 
 

@@ -9,7 +9,6 @@ from System import Guid, Enum
 
 from Autodesk.Revit import Exceptions
 from Autodesk.Revit.DB import (
-    ParameterType,
     DefinitionFile,
     DefinitionGroup,
     InstanceBinding,
@@ -25,8 +24,9 @@ from Autodesk.Revit.DB import (
     DefinitionBindingMapIterator,
     Document,
 )
-
 from pyrevit import forms, revit, HOST_APP
+if HOST_APP.is_older_than(2023):
+    from Autodesk.Revit.DB import ParameterType
 
 import rsparam
 
@@ -86,21 +86,8 @@ class SharedParameter:
         else:
             self.guid = guid
 
-        # Check if given parameter type is valid. If not user is prompted to choose one.
-        if isinstance(ptype, ParameterType):
-            self.type = ptype
-        else:
-            try:
-                self.type = getattr(ParameterType, ptype)
-            except AttributeError:
-                self.type = ptype
-                while not isinstance(self.type, ParameterType):
-                    self.type = forms.SelectFromList.show(
-                        PType.enum_generator(),
-                        "Parameter {} ParameterType: {} not valid. Please select a parameter type".format(
-                            name, ptype
-                        ),
-                    )
+        if HOST_APP.is_older_than(2023):
+            self.check_parameter_type(ptype, name)
 
         self.initial_values = {}
         if new is True:
@@ -349,6 +336,24 @@ class SharedParameter:
         if path:
             HOST_APP.app.SharedParametersFilename = path
             return cls.get_definition_file()
+
+    def check_parameter_type(self, ptype):
+        # Check if given parameter type is valid. If not user is prompted to choose one.
+        if isinstance(ptype, ParameterType):
+            self.type = ptype
+        else:
+            try:
+                self.type = getattr(ParameterType, ptype)
+            except AttributeError:
+                self.type = ptype
+                while not isinstance(self.type, ParameterType):
+                    self.type = forms.SelectFromList.show(
+                        PType.enum_generator(),
+                        "Parameter {} ParameterType: {} not valid. Please select a parameter type".format(
+                            self.name, ptype
+                        ),
+                    )
+
 
 
 class ProjectParameter:
