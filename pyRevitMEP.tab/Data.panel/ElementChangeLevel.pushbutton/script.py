@@ -26,11 +26,13 @@ from Autodesk.Revit.DB import (
     FilteredElementCollector,
     BuiltInCategory,
     Category,
+    UV,
+    StorageType,
 )
+from Autodesk.Revit.DB.Mechanical import Space
+from pyrevit import revit
 from pyrevit import script, HOST_APP
 from pyrevit.forms import WPFWindow, alert
-import rpw
-from rpw import revit
 from pyrevitmep.event import CustomizableEvent
 
 __doc__ = "Change selected elements level without moving it"
@@ -86,8 +88,7 @@ class Offset:
 def get_level_from_object():
     """Ask user to select an object and retrieve its associated level"""
     try:
-        ref_id = rpw.ui.Pick.pick_element("Select reference object").ElementId
-        ref_object = doc.GetElement(ref_id)
+        ref_object = revit.pick_element("Select reference object")
         if isinstance(ref_object, MEPCurve):
             level = ref_object.ReferenceLevel
         else:
@@ -97,8 +98,19 @@ def get_level_from_object():
         print("Unable to retrieve reference level from this object")
 
 
+def get_param_value(param):
+    if param.StorageType == StorageType.Double:
+        return param.AsDouble()
+    elif param.StorageType == StorageType.ElementId:
+        return param.AsElementId()
+    elif param.StorageType == StorageType.Integer:
+        return param.AsInteger()
+    elif param.StorageType == StorageType.String:
+        return param.AsString()
+
+
 def change_level(ref_level):
-    with rpw.db.Transaction("Change reference level"):
+    with revit.Transaction("Change reference level", doc):
         # Change reference level and relative offset for each selected object in order to change reference plane without
         # moving the object
         selection_ids = uidoc.Selection.GetElementIds()
@@ -125,6 +137,25 @@ def change_level(ref_level):
                     )
                     el_param_offset.Set(el_newoffset)
                 el_level_param.Set(ref_level.Id)
+            elif isinstance(el, Space):
+                point = el.Location.Point
+                newspace = doc.Create.NewSpace(ref_level, UV(point.X, point.Y))
+                for param in el.Parameters:
+                    if param.IsReadOnly:
+                        continue
+                    value = get_param_value(param)
+                    if not value:
+                        continue
+                    newspace.LookupParameter(param.Definition.Name).Set(value)
+                newspace.get_Parameter(BuiltInParameter.ROOM_UPPER_LEVEL).Set(
+                    ref_level.Id
+                )
+                upper_offset = newspace.get_Parameter(
+                    BuiltInParameter.ROOM_UPPER_OFFSET
+                )
+                if upper_offset.AsDouble() <= 0:
+                    upper_offset.Set(1 / 0.3048)
+                doc.Delete(el.Id)
 
             # Ignore other objects
             else:
