@@ -2,6 +2,10 @@
 from Autodesk.Revit.DB import Element, ConnectorManager, ConnectorSet, Connector, XYZ
 
 
+class NoConnectorManagerError(LookupError):
+    pass
+
+
 def get_connector_manager(element):
     # type: (Element) -> ConnectorManager
     """Return element connector manager"""
@@ -15,7 +19,7 @@ def get_connector_manager(element):
         # Return ConnectorManager for family instances etc…
         return element.MEPModel.ConnectorManager
     except AttributeError:
-        raise AttributeError("Cannot find connector manager in given element")
+        raise NoConnectorManagerError("Cannot find connector manager in given element")
 
 
 def get_connector_closest_to(connectors, xyz):

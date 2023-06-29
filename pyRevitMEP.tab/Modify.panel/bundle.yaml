@@ -1,5 +1,5 @@
 layout:
-  - ConnectTo
+  - Connect
   - Transition
   - Element3DRotation
   - MakeParallel
