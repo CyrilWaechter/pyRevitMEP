@@ -32,7 +32,7 @@ from Autodesk.Revit.DB import (
 from Autodesk.Revit.DB.Mechanical import Space
 from pyrevit import revit
 from pyrevit import script, HOST_APP
-from pyrevit.forms import WPFWindow, alert
+from pyrevit.forms import WPFWindow
 from pyrevitmep.event import CustomizableEvent
 
 __doc__ = "Change selected elements level without moving it"
@@ -61,6 +61,7 @@ class Offset:
             BuiltInCategory.OST_ConduitFitting,
             BuiltInCategory.OST_DuctTerminal,
             BuiltInCategory.OST_PlumbingFixtures,
+            BuiltInCategory.OST_GenericModel,
         }
         no_offset_from_2020 = {
             BuiltInCategory.OST_DuctAccessory,
