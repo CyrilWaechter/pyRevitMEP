@@ -1,9 +1,14 @@
 # coding: utf8
 import os
-import rpw
-from rpw import revit
-from Autodesk.Revit.DB import Element, FilteredElementCollector, BuiltInParameter, CopyPasteOptions, MEPSystemType, \
-    ElementTransformUtils, ElementId, Transform
+
+from Autodesk.Revit.DB import (
+    Element,
+    FilteredElementCollector,
+    BuiltInParameter,
+    MEPSystemType,
+    ElementId,
+)
+from pyrevit import revit
 from pyrevit.script import get_logger
 from pyrevit.forms import WPFWindow
 from System.Collections.Generic import List
@@ -64,7 +69,9 @@ class Gui(WPFWindow):
         row_count = 2
         for mep_system_type in FilteredElementCollector(doc).OfClass(MEPSystemType):
             name = Element.Name.__get__(mep_system_type)
-            abv = mep_system_type.get_Parameter(BuiltInParameter.RBS_SYSTEM_ABBREVIATION_PARAM).AsString()
+            abv = mep_system_type.get_Parameter(
+                BuiltInParameter.RBS_SYSTEM_ABBREVIATION_PARAM
+            ).AsString()
             system_classification = mep_system_type.SystemClassification.ToString()
             revit_id = mep_system_type.Id
 
@@ -75,7 +82,7 @@ class Gui(WPFWindow):
                     logger.debug(param_value)
 
             self.mep_system_type_dict[name] = revit_id
-            row_count +=1
+            row_count += 1
         logger.debug(self.mep_system_type_dict)
 
     # noinspection PyUnusedLocal
@@ -83,7 +90,7 @@ class Gui(WPFWindow):
         names = []
         abbreviations = []
         id_list = List[ElementId]()
-        with rpw.db.Transaction("BatchCreateSystemTypes"):
+        with revit.Transaction("BatchCreateSystemTypes"):
             for row in self.sheet_loop_generator(import_sheet):
                 # Get inputs from sheet
                 name = import_sheet.Cells(row, 1).Value2
@@ -91,9 +98,13 @@ class Gui(WPFWindow):
                 base_system_type_name = import_sheet.Cells(row, 3).Value2
 
                 # Duplicate existing type with desired new name and optional abbreviation
-                new_type = doc.GetElement(self.mep_system_type_dict[base_system_type_name]).Duplicate(name)
+                new_type = doc.GetElement(
+                    self.mep_system_type_dict[base_system_type_name]
+                ).Duplicate(name)
                 if abv:
-                    abv_param = new_type.get_Parameter(BuiltInParameter.RBS_SYSTEM_ABBREVIATION_PARAM)
+                    abv_param = new_type.get_Parameter(
+                        BuiltInParameter.RBS_SYSTEM_ABBREVIATION_PARAM
+                    )
                     abv_param.Set(abv)
 
     # noinspection PyUnusedLocal

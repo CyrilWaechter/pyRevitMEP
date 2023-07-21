@@ -1,9 +1,7 @@
 # coding: utf8
-import rpw
-# noinspection PyUnresolvedReferences
-from rpw import revit, DB
-# noinspection PyUnresolvedReferences
+from pyrevit import revit, DB, forms
 from Autodesk.Revit import Exceptions
+
 
 class Workset:
     def __init__(self, name):
@@ -11,8 +9,7 @@ class Workset:
 
     @staticmethod
     def read_from_txt():
-        file = rpw.ui.forms.select_file(extensions='All Files (*.txt*)|*.txt*', title='Select Text File',
-                                        multiple=False, restore_directory=True)
+        file = forms.pick_file(file_ext="txt", title="Select Text File")
         workset_list = []
         with open(file, "r") as text:
             for line in text.readlines():
@@ -24,7 +21,11 @@ class Workset:
         try:
             DB.Workset.Create(doc, self.name)
         except Exceptions.ArgumentException as error:
-            print("Failed to create a workset named {}\n{}".format(self.name,error.Message))
+            print(
+                "Failed to create a workset named {}\n{}".format(
+                    self.name, error.Message
+                )
+            )
 
     def save_to_file(self):
         # TODO

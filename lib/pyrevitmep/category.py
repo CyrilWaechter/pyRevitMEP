@@ -1,8 +1,7 @@
 # coding: utf8
 import os
 
-import rpw
-from rpw import revit
+from pyrevit import revit
 from pyrevit.forms import WPFWindow
 from Autodesk.Revit.DB import BuiltInCategory, Category
 from System.Collections.ObjectModel import ObservableCollection
@@ -26,8 +25,9 @@ def categories_description():
             raise
         print(get_full_name(category))
 
+
 def selection_window():
-    gui = Gui(os.path.join(os.path.dirname(__file__),"category/WPFWindow.xaml"))
+    gui = Gui(os.path.join(os.path.dirname(__file__), "category/WPFWindow.xaml"))
     gui.ShowDialog()
 
 
@@ -39,4 +39,3 @@ class Gui(WPFWindow):
             if category.AllowsBoundParameters:
                 self.categories.Add(category)
         self.datagrid.ItemsSource = self.categories
-

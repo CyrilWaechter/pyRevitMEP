@@ -13,13 +13,15 @@ from Autodesk.Revit.DB import (
 )
 from Autodesk.Revit.DB.Plumbing import PipeSegment, PipeScheduleType
 
-import rpw
 from pyrevit import script, forms, revit, HOST_APP
+
 if HOST_APP.is_older_than(2022):
     from Autodesk.Revit.DB import DisplayUnitType
+
     LENGTH_UNIT = DisplayUnitType.DUT_MILLIMETERS
 else:
     from Autodesk.Revit.DB import UnitTypeId
+
     LENGTH_UNIT = UnitTypeId.Millimeters
 
 doc = __revit__.ActiveUIDocument.Document  # type: Document
@@ -49,9 +51,7 @@ def read_csv(csv_path):
 
 
 def convert_to_internal(value, unit="mm"):
-    return UnitUtils.ConvertToInternalUnits(
-        float(value), LENGTH_UNIT
-    )
+    return UnitUtils.ConvertToInternalUnits(float(value), LENGTH_UNIT)
 
 
 csv_path = forms.pick_file(file_ext="csv")
@@ -87,4 +87,3 @@ if csv_path:
             )
             material_id = Material.Create()
         PipeSegment.Create(doc, material_id, schedule_id, size_set)
-

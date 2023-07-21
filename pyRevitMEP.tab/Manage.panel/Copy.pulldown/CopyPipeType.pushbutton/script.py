@@ -17,23 +17,29 @@ See this link for a copy of the GNU General Public License protecting this packa
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
 # noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import FilteredElementCollector, CopyPasteOptions, ElementTransformUtils, Element,\
-    ElementId, Transform, Transaction
-# noinspection PyUnresolvedReferences
+from Autodesk.Revit.DB import (
+    FilteredElementCollector,
+    CopyPasteOptions,
+    ElementTransformUtils,
+    Element,
+    ElementId,
+    Transform,
+)
+
 from Autodesk.Revit.DB.Plumbing import PipeType
-# noinspection PyUnresolvedReferences
+
 from System.Collections.Generic import List
 
-import rpw
-from rpw import doc
+from pyrevit import revit
 from pyrevit.forms import WPFWindow
 
 __doc__ = "Copy pipe types from a selected opened document to active document"
 __title__ = "PipeType"
 __author__ = "Cyril Waechter"
 
+doc = revit.doc
 
-opened_docs = {d.Title:d for d in rpw.revit.docs}
+opened_docs = {d.Title: d for d in revit.docs}
 
 
 def copy(source_doc, elem):
@@ -47,8 +53,10 @@ def copy(source_doc, elem):
     id_list = List[ElementId]()
     id_list.Add(elem.Id)
 
-    with rpw.db.Transaction("Copy pipe type", doc):
-        ElementTransformUtils.CopyElements(source_doc, id_list, doc, Transform.Identity, copypasteoptions)
+    with revit.Transaction("Copy pipe type", doc):
+        ElementTransformUtils.CopyElements(
+            source_doc, id_list, doc, Transform.Identity, copypasteoptions
+        )
 
 
 class PipeTypeSelectionForm(WPFWindow):
@@ -58,13 +66,15 @@ class PipeTypeSelectionForm(WPFWindow):
 
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
-        self.source_docs.DataContext = rpw.revit.docs
+        self.source_docs.DataContext = revit.docs
 
     # noinspection PyUnusedLocal
     def source_doc_selection_changed(self, sender, e):
         try:
             self.source_doc = sender.SelectedItem
-            self.source_pipe.DataContext = FilteredElementCollector(self.source_doc).OfClass(PipeType)
+            self.source_pipe.DataContext = FilteredElementCollector(
+                self.source_doc
+            ).OfClass(PipeType)
         except:
             pass
 
@@ -75,4 +85,4 @@ class PipeTypeSelectionForm(WPFWindow):
         copy(self.source_doc, elem)
 
 
-PipeTypeSelectionForm('PipeTypeSelection.xaml').ShowDialog()
+PipeTypeSelectionForm("PipeTypeSelection.xaml").ShowDialog()

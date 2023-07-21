@@ -1,12 +1,11 @@
 # coding: utf8
-import rpw
-from rpw import DB
+from pyrevit import revit, DB
 
 __doc__ = "Move selected annotation to center (set 0,0,0 coordinates)"
 __title__ = "TitleBlock"
 __author__ = "Cyril Waechter"
-__context__ = 'Selection'
+__context__ = "Selection"
 
-with rpw.db.Transaction("Move title block to origin"):
-    for text_element in rpw.ui.Selection():
-        text_element.Location.Point = DB.XYZ(0,0,0)
+with revit.Transaction("Move title block to origin"):
+    for text_element in revit.get_selection():
+        text_element.Location.Point = DB.XYZ(0, 0, 0)

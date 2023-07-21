@@ -16,12 +16,10 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
-import rpw
-doc = rpw.revit.doc
-uidoc = rpw.revit.uidoc
+from pyrevit import revit
 
-# noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import Transaction, FamilySymbol
+doc = revit.doc
+uidoc = revit.uidoc
 
 __doc__ = "Delete selected families from project"
 __title__ = "Family delete"
@@ -29,7 +27,7 @@ __author__ = "Cyril Waechter"
 __context__ = "Selection"
 
 
-with rpw.db.Transaction("Delete families from project"):
+with revit.Transaction("Delete families from project"):
     # Find families of selected object and delete it
     for id in uidoc.Selection.GetElementIds():
         el = doc.GetElement(id)

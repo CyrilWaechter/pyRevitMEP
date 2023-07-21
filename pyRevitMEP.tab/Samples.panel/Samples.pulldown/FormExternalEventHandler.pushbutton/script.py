@@ -17,12 +17,12 @@ See this link for a copy of the GNU General Public License protecting this packa
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
 from Autodesk.Revit.UI import IExternalEventHandler, ExternalEvent
-from Autodesk.Revit.DB import Transaction
 from Autodesk.Revit.Exceptions import InvalidOperationException
-import rpw
+from pyrevit import revit
 from pyrevit.forms import WPFWindow
-doc = rpw.revit.doc
-uidoc = rpw.revit.uidoc
+
+doc = revit.doc
+uidoc = revit.uidoc
 
 __doc__ = "A simple modeless form sample"
 __title__ = "Modeless Form"
@@ -31,9 +31,10 @@ __persistentengine__ = True
 
 # Simple function we want to run
 def delete_elements():
-    with rpw.db.Transaction("Delete selection"):
+    with revit.Transaction("Delete selection"):
         for elid in uidoc.Selection.GetElementIds():
             doc.Delete(elid)
+
 
 # Create a subclass of IExternalEventHandler
 class SimpleEventHandler(IExternalEventHandler):
@@ -52,7 +53,7 @@ class SimpleEventHandler(IExternalEventHandler):
             self.do_this()
         except InvalidOperationException:
             # If you don't catch this exeption Revit may crash.
-            print "InvalidOperationException catched"
+            print("InvalidOperationException catched")
 
     def GetName(self):
         return "simple function executed by an IExternalEventHandler in a Form"
@@ -78,6 +79,7 @@ class ModelessForm(WPFWindow):
     def delete_click(self, sender, e):
         # This Raise() method launch a signal to Revit to tell him you want to do something in the API context
         ext_event.Raise()
+
 
 # Let's launch our beautiful and useful form !
 modeless_form = ModelessForm("ModelessForm.xaml")

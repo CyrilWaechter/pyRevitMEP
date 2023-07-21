@@ -17,20 +17,17 @@ See this link for a copy of the GNU General Public License protecting this packa
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
 
-import rpw
-# noinspection PyUnresolvedReferences
 from System.Collections.Generic import List
+from Autodesk.Revit.DB import XYZ
+from pyrevit import revit
 
 __doc__ = "Flatten selected flexible pipe/duct"
 __title__ = "Flatten flex pipe/duct"
 __author__ = "Cyril Waechter"
 __context__ = "Selection"
 
-XYZ = rpw.DB.XYZ
-selection = rpw.ui.Selection()
-
-with rpw.db.Transaction('Aplanize flex objects'):
-    for flex_el in selection:
+with revit.Transaction("Aplanize flex objects"):
+    for flex_el in revit.get_selection():
         # Make tangents planar
         for tangent_name in ["StartTangent", "EndTangent"]:
             old_tangent = getattr(flex_el, tangent_name)

@@ -1,34 +1,47 @@
 # coding: utf8
 from math import pi, acos
 
-from Autodesk.Revit.DB import Line, ViewSection, XYZ, FilteredElementCollector, Grid, ReferencePlane, FamilyInstance, \
-    BuiltInParameter, ElevationMarker, ViewType
+from Autodesk.Revit.DB import (
+    Line,
+    ViewSection,
+    XYZ,
+    FilteredElementCollector,
+    Grid,
+    ReferencePlane,
+    FamilyInstance,
+    BuiltInParameter,
+    ElevationMarker,
+    ViewType,
+)
 from Autodesk.Revit.UI.Selection import ObjectType
 from Autodesk.Revit import Exceptions
 
-import rpw
-from pyrevit import forms, script
+from pyrevit import forms, script, revit
 
 __doc__ = """Make 2 elements parallel. First element selected is reference. Second element selected rotate."""
 __title__ = "Make Parallel (XY)"
 __author__ = "Cyril Waechter"
 
-uidoc = rpw.revit.uidoc
-doc = rpw.revit.doc
+uidoc = revit.uidoc
+doc = revit.doc
 logger = script.get_logger()
 
 
 def element_selection():
     try:
         with forms.WarningBar(title="Pick reference element"):
-            reference = uidoc.Selection.PickObject(ObjectType.Element, "Pick reference element")
+            reference = uidoc.Selection.PickObject(
+                ObjectType.Element, "Pick reference element"
+            )
     except Exceptions.OperationCanceledException:
         return False
 
     try:
         element1 = doc.GetElement(reference)
         with forms.WarningBar(title="Pick target element"):
-            reference = uidoc.Selection.PickObject(ObjectType.Element, "Pick target element")
+            reference = uidoc.Selection.PickObject(
+                ObjectType.Element, "Pick target element"
+            )
         element2 = doc.GetElement(reference)
 
         logger.debug("ELEMENTS \n 1: {} \n 2: {}".format(element1, element2))
@@ -40,13 +53,17 @@ def element_selection():
         xy_v2 = XYZ(v2.X, v2.Y, 0)  # type: XYZ
 
         angle = xy_v2.AngleTo(xy_v1)
-        if angle > pi/2:
+        if angle > pi / 2:
             angle = angle - pi
         normal = xy_v2.CrossProduct(xy_v1)
 
         logger.debug("ANGLE : {}".format(angle))
         logger.debug("NORMAL : {}".format(normal))
-        logger.debug("DIRECTION \n 1: {} \n 2: {}".format(direction(element1), direction(element2)))
+        logger.debug(
+            "DIRECTION \n 1: {} \n 2: {}".format(
+                direction(element1), direction(element2)
+            )
+        )
 
         axis = Line.CreateBound(origin(element2), origin(element2) + normal)
 
@@ -57,7 +74,7 @@ def element_selection():
         except AttributeError:
             pass
 
-        with rpw.db.Transaction("Make parallel", doc):
+        with revit.Transaction("Make parallel", doc):
             element2.Location.Rotate(axis, angle)
 
         return True
@@ -67,13 +84,18 @@ def element_selection():
 
 def get_view_from(element):
     # type: (Element) -> ViewSection
-    sketch_parameter = element.get_Parameter(BuiltInParameter.VIEW_FIXED_SKETCH_PLANE)  # type: SketchPlane
+    sketch_parameter = element.get_Parameter(
+        BuiltInParameter.VIEW_FIXED_SKETCH_PLANE
+    )  # type: SketchPlane
     return doc.GetElement(doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId)
+
 
 def get_elevation_marker(element):
     # type: (Element) -> ElevationMarker
     view = get_view_from(element)
-    for elevation_marker in FilteredElementCollector(doc).OfClass(ElevationMarker):  # type: ElevationMarker
+    for elevation_marker in FilteredElementCollector(doc).OfClass(
+        ElevationMarker
+    ):  # type: ElevationMarker
         for i in range(4):
             id = elevation_marker.GetViewId(i)
             if view.Id == id:
@@ -82,8 +104,12 @@ def get_elevation_marker(element):
 
 def section_direction(element):
     # type: (Element) -> XYZ
-    sketch_parameter = element.get_Parameter(BuiltInParameter.VIEW_FIXED_SKETCH_PLANE)  # type: SketchPlane
-    view = doc.GetElement(doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId)  # type: ViewSection
+    sketch_parameter = element.get_Parameter(
+        BuiltInParameter.VIEW_FIXED_SKETCH_PLANE
+    )  # type: SketchPlane
+    view = doc.GetElement(
+        doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId
+    )  # type: ViewSection
     return view.RightDirection
 
 
@@ -107,7 +133,13 @@ def family_direction(element):
 
 
 def direction(element):
-    direction_funcs = (grid_direction, plane_direction, family_direction, line_direction, section_direction)
+    direction_funcs = (
+        grid_direction,
+        plane_direction,
+        family_direction,
+        line_direction,
+        section_direction,
+    )
 
     for func in direction_funcs:
         try:
@@ -120,9 +152,14 @@ def direction(element):
 
 def section_origin(element):
     # type: (Element) -> XYZ
-    sketch_parameter = element.get_Parameter(BuiltInParameter.VIEW_FIXED_SKETCH_PLANE)  # type: SketchPlane
-    view = doc.GetElement(doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId)  # type: ViewSection
+    sketch_parameter = element.get_Parameter(
+        BuiltInParameter.VIEW_FIXED_SKETCH_PLANE
+    )  # type: SketchPlane
+    view = doc.GetElement(
+        doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId
+    )  # type: ViewSection
     return view.Origin
+
 
 def grid_origin(element):
     # type: (Grid) -> XYZ
@@ -144,7 +181,13 @@ def family_origin(element):
 
 
 def origin(element):
-    origin_funcs = (grid_origin, plane_origin, family_origin, line_origin, section_origin)
+    origin_funcs = (
+        grid_origin,
+        plane_origin,
+        family_origin,
+        line_origin,
+        section_origin,
+    )
 
     for func in origin_funcs:
         try:

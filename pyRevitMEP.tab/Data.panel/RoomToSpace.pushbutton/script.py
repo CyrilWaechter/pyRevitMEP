@@ -1,10 +1,8 @@
 # coding: utf8
-import rpw
-from rpw import revit
 from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, Transaction
 import System
 from pyrevit.forms import WPFWindow
-from pyrevit import script, forms
+from pyrevit import script, forms, revit
 
 __title__ = "RoomToSpace"
 __author__ = "Cyril Waechter"
@@ -34,34 +32,47 @@ class Gui(WPFWindow):
         try:
             self.room_initialise(revit.docs[1])
         except System.IndexOutOfRangeException:
-            forms.alert("Error : You need to have at least 1 link or 1 other document opened.")
+            forms.alert(
+                "Error : You need to have at least 1 link or 1 other document opened."
+            )
             import sys
+
             sys.exit()
         self.space_initialise(revit.docs[0])
 
     def room_initialise(self, doc):
-        self.sample_room_id = FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).FirstElementId()
+        self.sample_room_id = (
+            FilteredElementCollector(doc)
+            .OfCategory(BuiltInCategory.OST_Rooms)
+            .FirstElementId()
+        )
         try:
             for parameter in doc.GetElement(self.sample_room_Id).Parameters:
                 self.room_parameters_set.add(parameter.Definition.Name)
         except AttributeError:
             return
-        logger.debug("ROOM PARAMETER SET : {} \n ROOM ID : {}".format(self.room_parameters_set,
-                                                                      self.sample_room_id
-                                                                      )
-                     )
+        logger.debug(
+            "ROOM PARAMETER SET : {} \n ROOM ID : {}".format(
+                self.room_parameters_set, self.sample_room_id
+            )
+        )
 
     def space_initialise(self, doc):
-        self.sample_space_id = FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_MEPSpaces).FirstElementId()
+        self.sample_space_id = (
+            FilteredElementCollector(doc)
+            .OfCategory(BuiltInCategory.OST_MEPSpaces)
+            .FirstElementId()
+        )
         try:
             for parameter in doc.GetElement(self.sample_space_Id).Parameters:
                 self.space_parameters_set.add(parameter.Definition.Name)
         except AttributeError:
             return
-        logger.debug("SPACE PARAMETER SET : {} \n SPACE ID : {}".format(self.space_parameters_set,
-                                                                        self.sample_space_id
-                                                                        )
-                     )
+        logger.debug(
+            "SPACE PARAMETER SET : {} \n SPACE ID : {}".format(
+                self.space_parameters_set, self.sample_space_id
+            )
+        )
 
     def room_to_space(self, room, space):
         if not room:
@@ -71,8 +82,9 @@ class Gui(WPFWindow):
         room_attributes = self.source_parameters.Text.replace("\r", "")
         space_parameters = self.target_parameters.Text.replace("\r", "")
         logger.debug(space_parameters.Split("\n"))
-        for room_field, space_param in zip(room_attributes.Split("\n"), \
-                                           space_parameters.Split("\n")):
+        for room_field, space_param in zip(
+            room_attributes.Split("\n"), space_parameters.Split("\n")
+        ):
             space_param = space_param
             value = ""
             for room_attr in room_field.split("\t"):
@@ -87,8 +99,11 @@ class Gui(WPFWindow):
             if space_param:
                 space_param.Set(value)
             else:
-                logger.info("Failed to find a parameter on space with name : {}, {}".format(space_param,
-                                                                                            len(space_param)))
+                logger.info(
+                    "Failed to find a parameter on space with name : {}, {}".format(
+                        space_param, len(space_param)
+                    )
+                )
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
@@ -113,9 +128,10 @@ class Gui(WPFWindow):
         t.RollBack()
 
         # Copy from values from
-        with rpw.db.Transaction(doc=space_doc, name="RoomToSpace"):
+        with revit.Transaction(doc=space_doc, name="RoomToSpace"):
             for space in FilteredElementCollector(
-                    self.target_project.SelectedItem).OfCategory(BuiltInCategory.OST_MEPSpaces):
+                self.target_project.SelectedItem
+            ).OfCategory(BuiltInCategory.OST_MEPSpaces):
                 if space.Location:
                     room = room_doc.GetRoomAtPoint(space.Location.Point)
                 if room:

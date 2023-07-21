@@ -1,5 +1,4 @@
 # coding: utf8
-import rpw
 from pyrevit import script, forms
 
 __title__ = "Title"

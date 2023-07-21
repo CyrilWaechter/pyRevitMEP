@@ -1,15 +1,17 @@
 # coding: utf8
 
 # noinspection PyUnresolvedReferences
-from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCanceledException, ArgumentException
+from Autodesk.Revit.Exceptions import (
+    InvalidOperationException,
+)
 
 # noinspection PyUnresolvedReferences
-from rpw import revit, DB, UI
+from pyrevit import UI
 
 
 class CustomizableEvent:
     def __init__(self):
-        """ An instance of this class need to be created before any modeless operation.
+        """An instance of this class need to be created before any modeless operation.
         You can then call the raise_event method to perform any modeless operation.
         Any modification to Revit DB need to be performed inside a valid Transaction.
         This Transaction needs to be open inside the function_or_method, NOT before calling raise_event.
@@ -27,7 +29,7 @@ class CustomizableEvent:
         self.kwargs = {}
 
     def _raised_method(self):
-        """ !!! DO NOT USE THIS METHOD IN YOUR SCRIPT !!!
+        """!!! DO NOT USE THIS METHOD IN YOUR SCRIPT !!!
         Method executed by IExternalEventHandler.Execute when ExternalEvent is raised by ExternalEvent.Raise.
         """
         self.function_or_method(*self.args, **self.kwargs)
@@ -46,8 +48,9 @@ class CustomizableEvent:
 
 
 class _CustomHandler(UI.IExternalEventHandler):
-    """ Subclass of IExternalEventHandler intended to be used in CustomizableEvent class
+    """Subclass of IExternalEventHandler intended to be used in CustomizableEvent class
     Input : function or method. Execute input in a IExternalEventHandler"""
+
     def __init__(self):
         self.customizable_event = None
 

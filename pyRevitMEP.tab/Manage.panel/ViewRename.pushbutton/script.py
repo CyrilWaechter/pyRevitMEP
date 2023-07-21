@@ -20,9 +20,18 @@ https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 
 from System import Guid
 
-from Autodesk.Revit.DB import Transaction, Element, BuiltInParameter, FilteredElementCollector, \
-    ViewPlan, ViewSection, View3D, StorageType, InstanceBinding, CategorySet, Document
-from Autodesk.Revit.Exceptions import InvalidOperationException, OperationCanceledException, ArgumentException
+from Autodesk.Revit.DB import (
+    FilteredElementCollector,
+    ViewPlan,
+    ViewSection,
+    View3D,
+    StorageType,
+    InstanceBinding,
+    Document,
+)
+from Autodesk.Revit.Exceptions import (
+    ArgumentException,
+)
 
 from pyrevitmep.parameter import SharedParameter, ProjectParameter
 from pyrevitmep.event import CustomizableEvent
@@ -31,9 +40,8 @@ import operator
 import re
 import collections
 from pyrevit.forms import WPFWindow
-from pyrevit import script
+from pyrevit import script, revit, DB, HOST_APP
 import rpw
-from rpw import revit, DB
 
 __doc__ = "Rename selected views according to a pattern"
 __title__ = "Rename\nViews"
@@ -42,10 +50,12 @@ __persistentengine__ = True
 
 doc = revit.doc  # type: Document
 uidoc = revit.uidoc
+app = HOST_APP.app
 
 
 # Create a regular expression to retrieve Guid (including constructor) in a string
-parameterGuidRegex = re.compile(r'''
+parameterGuidRegex = re.compile(
+    r"""
 Guid\(              # Guid constructor. Example : Guid("F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4")
 [\" | \']           # Single or double quote required in Guid constructor
 ([0-9a-f]{8}        # First 8 hexa
@@ -53,7 +63,9 @@ Guid\(              # Guid constructor. Example : Guid("F9168C5E-CEB2-4faa-B6BF-
 -?[0-9a-f]{12})     # Optional separator + 12 hexa
 [\" | \']           # Single or double quote required in Guid constructor
 \)                  # Close parenthesis necessary to build a Guid
-''', re.IGNORECASE | re.VERBOSE)
+""",
+    re.IGNORECASE | re.VERBOSE,
+)
 
 # Create a regular expression to retrieve BuiltInParameter in a string
 parameterBipRegex = re.compile(r"bip\((\w+)\)")
@@ -179,41 +191,50 @@ def apply_pattern(view, pattern, func):
     :type view: View
     :return: a string with pattern applied
     """
-    result = parameterNameRegex.sub(lambda m: func(getparameters_byname(view, m.group(1)),
-                                                   m.group(1)),
-                                    pattern)
-    result = parameterGuidRegex.sub(lambda m: func(getparameter(view, m.group()),
-                                                   m.group()),
-                                    result)
-    result = parameterBipRegex.sub(lambda m: func(getparameter(view, "BuiltInParameter." + m.group(1)),
-                                                  m.group(1)),
-                                   result)
+    result = parameterNameRegex.sub(
+        lambda m: func(getparameters_byname(view, m.group(1)), m.group(1)), pattern
+    )
+    result = parameterGuidRegex.sub(
+        lambda m: func(getparameter(view, m.group()), m.group()), result
+    )
+    result = parameterBipRegex.sub(
+        lambda m: func(
+            getparameter(view, "BuiltInParameter." + m.group(1)), m.group(1)
+        ),
+        result,
+    )
     return result
 
 
 def rename_views(views_and_names):
     """Rename all views with their associated new name"""
-    logger.debug('Start rename function')
-    with rpw.db.Transaction("Rename views"):
-        logger.debug('Start batch renaming: {}'.format(views_and_names))
+    logger.debug("Start rename function")
+    with revit.Transaction("Rename views"):
+        logger.debug("Start batch renaming: {}".format(views_and_names))
         for view, newname in views_and_names:
-            logger.debug('{}{}'.format(view, newname))
+            logger.debug("{}{}".format(view, newname))
             try:
                 view.Name = newname
             except ArgumentException:
                 i = 1
                 while True:
-                    logger.debug('ArgumentException catched with newname: {}'.format(newname))
+                    logger.debug(
+                        "ArgumentException catched with newname: {}".format(newname)
+                    )
                     try:
-                        alt_name = newname + ' ' + str(i)
+                        alt_name = newname + " " + str(i)
                         view.Name = alt_name
                     except ArgumentException:
-                        logger.debug('ArgumentException catched with newname: {}'.format(alt_name))
+                        logger.debug(
+                            "ArgumentException catched with newname: {}".format(
+                                alt_name
+                            )
+                        )
                         i += 1
                     else:
                         break
             else:
-                logger.debug('Successfully renamed views')
+                logger.debug("Successfully renamed views")
 
 
 customizable_event = CustomizableEvent()
@@ -236,61 +257,81 @@ class ViewRename(WPFWindow):
         self.storage_pattern_parameter = "pyRevitMEP_viewrename_patterns"
 
         self.view_class_dict = {
-            'viewplan': {
-                'pattern': "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_PE_bip(PLAN_VIEW_LEVEL)_bip("
-                           "VIEWER_VOLUME_OF_INTEREST_CROP)",
-                'pattern_textbox': self.viewplan_pattern,
-                'preview_textbox': self.viewplan_preview,
-                'name_preview_textbox': self.viewplan_toname_preview,
-                'parameter_combobox': self.cb_viewplan_parameters},
-            'view3D': {
-                'pattern': "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_3D"},
-            'viewsection': {
-                'pattern': "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_CP"}
+            "viewplan": {
+                "pattern": "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_PE_bip(PLAN_VIEW_LEVEL)_bip("
+                "VIEWER_VOLUME_OF_INTEREST_CROP)",
+                "pattern_textbox": self.viewplan_pattern,
+                "preview_textbox": self.viewplan_preview,
+                "name_preview_textbox": self.viewplan_toname_preview,
+                "parameter_combobox": self.cb_viewplan_parameters,
+            },
+            "view3D": {
+                "pattern": "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_3D"
+            },
+            "viewsection": {
+                "pattern": "name(ORG_Métier)_name(ORG_Métier_Sous_catégorie)_CP"
+            },
         }
 
         # Initialize pattern and parameter list
         for view_class in self.view_class_dict.keys():
             try:
-                sample_view = eval('sample{}'.format(view_class))
-                pattern_textbox = eval('self.{}_pattern'.format(view_class))
-                preview_textbox = eval('self.{}_preview'.format(view_class))
-                preview_by_name_textbox = eval('self.{}_toname_preview'.format(view_class))
-                parameter_combobox = eval('self.cb_{}_parameters'.format(view_class))
+                sample_view = eval("sample{}".format(view_class))
+                pattern_textbox = eval("self.{}_pattern".format(view_class))
+                preview_textbox = eval("self.{}_preview".format(view_class))
+                preview_by_name_textbox = eval(
+                    "self.{}_toname_preview".format(view_class)
+                )
+                parameter_combobox = eval("self.cb_{}_parameters".format(view_class))
 
                 param_list = list(sample_view.Parameters)
                 param_list.sort(key=operator.attrgetter("Definition.Name"))
                 parameter_combobox.ItemsSource = param_list
                 try:
                     # Try to load patterns from project parameter
-                    project_info_param_set = rpw.db.ParameterSet(revit.doc.ProjectInformation)
+                    project_info_param_set = rpw.db.ParameterSet(
+                        revit.doc.ProjectInformation
+                    )
                     param = project_info_param_set[self.storage_pattern_parameter]
                     pattern_textbox.Text = eval(param.value)[view_class]
 
-                except (TypeError, SyntaxError, rpw.exceptions.RpwParameterNotFound) as error:
+                except (
+                    TypeError,
+                    SyntaxError,
+                    rpw.exceptions.RpwParameterNotFound,
+                ) as error:
                     try:
                         # Try to load patterns from config file
-                        pattern_textbox.Text = getattr(my_config, view_class).decode('utf8')
+                        pattern_textbox.Text = getattr(my_config, view_class).decode(
+                            "utf8"
+                        )
                     except AttributeError:
                         # Else load default values
-                        pattern = self.view_class_dict[view_class]['pattern']
+                        pattern = self.view_class_dict[view_class]["pattern"]
                         pattern_textbox.Text = pattern
 
-                preview_textbox.Text = apply_pattern(sample_view, pattern_textbox.Text, param_display_value)
-                preview_by_name_textbox.Text = apply_pattern(sample_view, pattern_textbox.Text, param_name)
+                preview_textbox.Text = apply_pattern(
+                    sample_view, pattern_textbox.Text, param_display_value
+                )
+                preview_by_name_textbox.Text = apply_pattern(
+                    sample_view, pattern_textbox.Text, param_name
+                )
 
             except AttributeError:
                 # Disable options and preview for view_class which not exist in the project
-                view_class_checkbox = eval('self.cb_{}'.format(view_class))
-                view_class_button = eval('self.btn_{}_add_parameter'.format(view_class))
+                view_class_checkbox = eval("self.cb_{}".format(view_class))
+                view_class_button = eval("self.btn_{}_add_parameter".format(view_class))
                 self.cb_all.IsEnabled = False
                 view_class_checkbox.IsChecked = False
                 view_class_checkbox.IsEnabled = False
                 view_class_button.IsEnabled = False
 
         # Create a dict with key=View class, value=pattern location
-        self.pattern_dict = {ViewPlan: self.viewplan_pattern, View3D: self.view3D_pattern,
-                             ViewSection: self.viewsection_pattern}
+        self.pattern_dict = {
+            ViewPlan: self.viewplan_pattern,
+            View3D: self.view3D_pattern,
+            ViewSection: self.viewsection_pattern,
+        }
 
     # noinspection PyUnusedLocal
     def save_to_parameter_click(self, sender, e):
@@ -303,80 +344,96 @@ class ViewRename(WPFWindow):
             pattern_dict = eval(param.value)
         except (rpw.exceptions.RpwParameterNotFound, SyntaxError) as error:
             # create a project parameter to store patterns
-            category_set = revit.app.Create.NewCategorySet()
-            category = revit.doc.Settings.Categories.get_Item(DB.BuiltInCategory.OST_ProjectInformation)
+            category_set = app.Create.NewCategorySet()
+            category = revit.doc.Settings.Categories.get_Item(
+                DB.BuiltInCategory.OST_ProjectInformation
+            )
             category_set.Insert(category)
             # if no parameter with given name exist, create a temporary one
-            definition = SharedParameter.get_definition_by_name(self.storage_pattern_parameter)
+            definition = SharedParameter.get_definition_by_name(
+                self.storage_pattern_parameter
+            )
             if not definition:
-                shared_param = SharedParameter(self.storage_pattern_parameter, DB.ParameterType.Text)
+                shared_param = SharedParameter(
+                    self.storage_pattern_parameter, DB.ParameterType.Text
+                )
                 definition = shared_param.write_to_definition_file()
                 shared_param.delete_from_definition_file()
             binding = InstanceBinding(category_set)
             project_param = ProjectParameter(definition, binding)
             project_param.bip_group.bip_group = DB.BuiltInParameterGroup.PG_PATTERN
-            with rpw.db.Transaction("Add {} to project parameters".format(self.storage_pattern_parameter)):
+            with revit.Transaction(
+                "Add {} to project parameters".format(self.storage_pattern_parameter)
+            ):
                 project_param.save_to_revit_doc()
             param = project_info_param_set[self.storage_pattern_parameter]
             pattern_dict = {}
 
         for view_class in self.view_class_dict.keys():
-            view_class_checkbox = eval('self.cb_{}'.format(view_class))
+            view_class_checkbox = eval("self.cb_{}".format(view_class))
             if view_class_checkbox.IsChecked:
-                pattern_textbox = eval('self.{}_pattern'.format(view_class))
+                pattern_textbox = eval("self.{}_pattern".format(view_class))
                 pattern_dict[view_class] = pattern_textbox.Text
 
-        with rpw.db.Transaction("Saving configuration to parameter"):
-            param.value = str(pattern_dict).encode('utf8')
+        with revit.Transaction("Saving configuration to parameter"):
+            param.value = str(pattern_dict).encode("utf8")
 
     # noinspection PyUnusedLocal
     def save_config_click(self, sender, e):
-        logger.debug('Start writing config file')
+        logger.debug("Start writing config file")
         for view_class in self.view_class_dict.keys():
-            view_class_checkbox = eval('self.cb_{}'.format(view_class))
+            view_class_checkbox = eval("self.cb_{}".format(view_class))
             logger.debug(view_class_checkbox.IsChecked)
             if view_class_checkbox.IsChecked:
-                pattern_textbox = eval('self.{}_pattern'.format(view_class))
+                pattern_textbox = eval("self.{}_pattern".format(view_class))
                 logger.debug(type(pattern_textbox.Text))
-                setattr(my_config, view_class, pattern_textbox.Text.encode('utf8'))
+                setattr(my_config, view_class, pattern_textbox.Text.encode("utf8"))
         script.save_config()
-        logger.debug('End writing config file')
+        logger.debug("End writing config file")
 
     # noinspection PyUnusedLocal
     def btn_add_parameter_click(self, sender, e):
         for view_class in self.view_class_dict.keys():
             if view_class in sender.Name:
-                parameters_combobox = eval('self.cb_{}_parameters'.format(view_class))
-                param_reference = add_parameter_in_pattern(parameters_combobox.SelectedItem)
+                parameters_combobox = eval("self.cb_{}_parameters".format(view_class))
+                param_reference = add_parameter_in_pattern(
+                    parameters_combobox.SelectedItem
+                )
                 index = self.cursorposition
-                pattern_textbox = eval('self.{}_pattern'.format(view_class))
-                pattern_textbox.Text = pattern_textbox.Text[:index] + param_reference + pattern_textbox.Text[index:]
+                pattern_textbox = eval("self.{}_pattern".format(view_class))
+                pattern_textbox.Text = (
+                    pattern_textbox.Text[:index]
+                    + param_reference
+                    + pattern_textbox.Text[index:]
+                )
 
     # noinspection PyUnusedLocal
     def pattern_changed(self, sender, e):
-        view_class = sender.Name.split('_')[0]
+        view_class = sender.Name.split("_")[0]
         sample_view = eval("sample{}".format(view_class))
         pattern_textbox = eval("self.{}_pattern".format(view_class))
-        parameter_preview = eval('self.{}_preview'.format(view_class))
-        name_preview = eval('self.{}_toname_preview'.format(view_class))
+        parameter_preview = eval("self.{}_preview".format(view_class))
+        name_preview = eval("self.{}_toname_preview".format(view_class))
         self.cursorposition = sender.SelectionStart
-        parameter_preview.Text = apply_pattern(sample_view,
-                                               pattern_textbox.Text,
-                                               param_display_value)
-        name_preview.Text = apply_pattern(sample_view,
-                                          pattern_textbox.Text,
-                                          param_name)
+        parameter_preview.Text = apply_pattern(
+            sample_view, pattern_textbox.Text, param_display_value
+        )
+        name_preview.Text = apply_pattern(sample_view, pattern_textbox.Text, param_name)
 
     # noinspection PyUnusedLocal
     def cb_checked_changed(self, sender, e):
         self.cb_all.IsChecked = None
-        if self.cb_viewplan.IsChecked \
-                and self.cb_view3D.IsChecked \
-                and self.cb_viewsection.IsChecked:
+        if (
+            self.cb_viewplan.IsChecked
+            and self.cb_view3D.IsChecked
+            and self.cb_viewsection.IsChecked
+        ):
             self.cb_all.IsChecked = True
-        if not self.cb_viewplan.IsChecked \
-                and not self.cb_view3D.IsChecked \
-                and not self.cb_viewsection.IsChecked:
+        if (
+            not self.cb_viewplan.IsChecked
+            and not self.cb_view3D.IsChecked
+            and not self.cb_viewsection.IsChecked
+        ):
             self.cb_all.IsChecked = False
 
     # noinspection PyUnusedLocal
@@ -414,10 +471,10 @@ class ViewRename(WPFWindow):
             pattern = self.pattern_dict[type(view)].Text
             newname = apply_pattern(view, pattern, param_display_value)
             viewplusname.append((view, newname))
-        logger.debug('[viewplusname:{}'.format(viewplusname))
+        logger.debug("[viewplusname:{}".format(viewplusname))
         customizable_event.raise_event(rename_views, viewplusname)
 
 
-wpf_viewrename = ViewRename('ViewRename.xaml')
+wpf_viewrename = ViewRename("ViewRename.xaml")
 
 wpf_viewrename.Show()

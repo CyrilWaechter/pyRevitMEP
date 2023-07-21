@@ -22,24 +22,26 @@ __title__ = "ExEvent Delete"
 __author__ = "Cyril Waechter"
 __persistentengine__ = True
 
-from Autodesk.Revit.UI import IExternalEventHandler, IExternalApplication, Result, ExternalEvent, IExternalCommand
-from Autodesk.Revit.DB import Transaction
+from Autodesk.Revit.UI import IExternalEventHandler, ExternalEvent
 from Autodesk.Revit.Exceptions import InvalidOperationException
-import rpw
-doc = rpw.revit.doc
-uidoc = rpw.revit.uidoc
+from pyrevit import revit
+
+doc = revit.doc
+uidoc = revit.uidoc
+
 
 class ExternalEventMy(IExternalEventHandler):
     def Execute(self, uiapp):
         try:
-            with rpw.db.Transaction("MyEvent"):
+            with revit.Transaction("MyEvent"):
                 for elid in uidoc.Selection.GetElementIds():
                     doc.Delete(elid)
         except InvalidOperationException:
-            print "exception catched"
+            print("exception catched")
 
     def GetName(self):
         return "my event"
+
 
 handler_event = ExternalEventMy()
 exEvent = ExternalEvent.Create(handler_event)

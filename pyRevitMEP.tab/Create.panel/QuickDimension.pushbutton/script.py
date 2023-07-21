@@ -1,13 +1,21 @@
 # coding: utf8
-from Autodesk.Revit.DB import Reference, ReferenceArray, XYZ, Line, Options, FamilyInstance, Point, \
-    FamilyInstanceReferenceType, Edge
+from Autodesk.Revit.DB import (
+    Reference,
+    ReferenceArray,
+    XYZ,
+    Line,
+    Options,
+    FamilyInstance,
+    Point,
+    FamilyInstanceReferenceType,
+    Edge,
+)
 from Autodesk.Revit import Exceptions
 from Autodesk.Revit.UI.Selection import ObjectType, ISelectionFilter
 
 from pyrevit import script, forms
 
-import rpw
-from rpw import revit
+from pyrevit import revit
 
 __doc__ = """"
 Quick dimension selected elements
@@ -54,10 +62,15 @@ class CurveLineFilter(ISelectionFilter):
 
 if not selection:
     try:
-        selection = [doc.GetElement(reference) for reference in uidoc.Selection.PickObjects(
-            ObjectType.Element, CustomFilter(), "Pick")]
+        selection = [
+            doc.GetElement(reference)
+            for reference in uidoc.Selection.PickObjects(
+                ObjectType.Element, CustomFilter(), "Pick"
+            )
+        ]
     except Exceptions.OperationCanceledException:
         import sys
+
         sys.exit()
 
 # All reference in reference will be dimensioned
@@ -73,24 +86,31 @@ def family_origin_reference(family_instance):
             return geom.Reference
     else:
         try:
-            for type in FamilyInstanceReferenceType.GetValues(FamilyInstanceReferenceType):
+            for type in FamilyInstanceReferenceType.GetValues(
+                FamilyInstanceReferenceType
+            ):
                 for reference in family_instance.GetReferences(type):
                     return reference
                     geom = family_instance.GetGeometryObjectFromReference(reference)
-                    if isinstance(geom, Point) and geom.Coord == family_instance.Location.Point:
+                    if (
+                        isinstance(geom, Point)
+                        and geom.Coord == family_instance.Location.Point
+                    ):
                         return reference
 
                     if isinstance(geom, Edge):
                         curve = geom.AsCurve()
                         if (
-                                isinstance(curve, Line) and
-                                curve.Direction.CrossProduct(direction).IsZeroLength()
+                            isinstance(curve, Line)
+                            and curve.Direction.CrossProduct(direction).IsZeroLength()
                         ):
                             logger.debug("{} {}".format(geom.Origin, geom.Direction))
                             return reference
         except NameError:
             raise
-            logger.info("Some part of the function (FamilyInstanceReferenceType) is only available from Revit 2018")
+            logger.info(
+                "Some part of the function (FamilyInstanceReferenceType) is only available from Revit 2018"
+            )
 
 
 def get_reference(element):
@@ -124,17 +144,19 @@ for element in selection:
     except AttributeError:
         continue
 else:
-    with forms.WarningBar(title="Unable to find a lead direction. Please pick a parallel line."):
+    with forms.WarningBar(
+        title="Unable to find a lead direction. Please pick a parallel line."
+    ):
         ref = uidoc.Selection.PickObject(ObjectType.Element, CurveLineFilter())
         direction = doc.GetElement(ref).Location.Curve.Direction
 
 pt1 = uidoc.Selection.PickPoint()  # type: XYZ
 pt2 = pt1 + XYZ(-direction.Y, direction.X, 0)
-line = Line.CreateBound(pt1,pt2)
+line = Line.CreateBound(pt1, pt2)
 
 for element in selection:
     reference_array.Append(get_reference(element))
 
-with rpw.db.Transaction("QuickDimensionPipe"):
+with revit.Transaction("QuickDimensionPipe"):
     logger.debug([reference for reference in reference_array])
     dim = doc.Create.NewDimension(doc.ActiveView, line, reference_array)

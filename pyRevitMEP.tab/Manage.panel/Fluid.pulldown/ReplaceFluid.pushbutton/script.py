@@ -17,31 +17,34 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
-# noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import FilteredElementCollector, Element, Transaction
-# noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB.Plumbing import PipingSystemType, FluidTemperature
-# For future implementation in rpw
-# from rpw.db.plumbing import FluidType
+from Autodesk.Revit.DB import FilteredElementCollector
+
+from Autodesk.Revit.DB.Plumbing import PipingSystemType
 from pyrevitmep.plumbing import FluidType
 
 import rpw
-from pyrevit import script
+from pyrevit import script, revit
 from pyrevit.forms import WPFWindow
 
 __doc__ = "Replace a selected fluid and temperature find in all systems by an other selected fluid and temperature"
 __title__ = "Replace fluid"
 __author__ = "Cyril Waechter"
 
-doc = rpw.revit.doc
+doc = revit.doc
 logger = script.get_logger()
 ComboBox = rpw.ui.forms.flexform.ComboBox
 Label = rpw.ui.forms.flexform.Label
 Button = rpw.ui.forms.flexform.Button
 
 
-def change_temperature(source_fluid, source_temp, target_fluid, target_temp,
-                       any_source_temp=False, find_target_temp=False):
+def change_temperature(
+    source_fluid,
+    source_temp,
+    target_fluid,
+    target_temp,
+    any_source_temp=False,
+    find_target_temp=False,
+):
     """
     :param source_fluid: FluidType.Id to be changed
     :param source_temp: Temperature in K to be changed (float)
@@ -51,8 +54,11 @@ def change_temperature(source_fluid, source_temp, target_fluid, target_temp,
     :param find_target_temp: boolean combined with any_source_temp to automatically match closest temperature
     :return:
     """
-    logger.debug("change_temperature inputs:\n  {0}\n   {1}\n   {2}\n   {3}\n   {4}\n END OF INPUTS"
-                 .format(source_fluid, source_temp, target_fluid, target_temp, any_source_temp))
+    logger.debug(
+        "change_temperature inputs:\n  {0}\n   {1}\n   {2}\n   {3}\n   {4}\n END OF INPUTS".format(
+            source_fluid, source_temp, target_fluid, target_temp, any_source_temp
+        )
+    )
     systems = FilteredElementCollector(doc).OfClass(PipingSystemType)
     system_list = []
     for system in systems:
@@ -60,9 +66,13 @@ def change_temperature(source_fluid, source_temp, target_fluid, target_temp,
             logger.debug("{}=={}?".format(system.FluidTemperature, source_temp))
             if system.FluidTemperature == source_temp or any_source_temp:
                 system_list.append(system)
-    logger.info("{} systems will get their fluid and or temperature changed".format(len(system_list)))
+    logger.info(
+        "{} systems will get their fluid and or temperature changed".format(
+            len(system_list)
+        )
+    )
 
-    with rpw.db.Transaction('change systems fluid'):
+    with rpw.db.Transaction("change systems fluid"):
         for system in system_list:
             system.FluidType = target_fluid
             if find_target_temp:
@@ -84,9 +94,16 @@ class TemperatureSelection(WPFWindow):
 
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
-        self.fluids_dict = {FluidType(fluid_type).name:FluidType(fluid_type) for fluid_type in FluidType.collect()}
-        self.cb_source_fluid_type.ItemsSource = {v['name'] for k, v in FluidType.in_use_dict().iteritems()}
-        self.cb_target_fluid_type.ItemsSource = [FluidType(fluid).name for fluid in FluidType.collect()]
+        self.fluids_dict = {
+            FluidType(fluid_type).name: FluidType(fluid_type)
+            for fluid_type in FluidType.collect()
+        }
+        self.cb_source_fluid_type.ItemsSource = {
+            v["name"] for k, v in FluidType.in_use_dict().iteritems()
+        }
+        self.cb_target_fluid_type.ItemsSource = [
+            FluidType(fluid).name for fluid in FluidType.collect()
+        ]
         self.update_source_temperatures()
         self.update_target_temperatures()
 
@@ -99,11 +116,13 @@ class TemperatureSelection(WPFWindow):
         return self.fluids_dict[self.cb_target_fluid_type.SelectedItem]
 
     def update_source_temperatures(self):
-        temps = {v['temperature'] for k, v in FluidType.in_use_dict().iteritems()}
+        temps = {v["temperature"] for k, v in FluidType.in_use_dict().iteritems()}
         self.cb_source_fluid_temperature.ItemsSource = sorted(list(temps))
 
     def update_target_temperatures(self):
-        self.cb_target_fluid_temperature.ItemsSource = sorted(self.target_fluid.temperatures)
+        self.cb_target_fluid_temperature.ItemsSource = sorted(
+            self.target_fluid.temperatures
+        )
 
     # noinspection PyUnusedLocal
     def source_fluid_type_changed(self, sender, e):
@@ -124,4 +143,4 @@ class TemperatureSelection(WPFWindow):
         change_temperature(source_fluid_id, source_temp, target_fluid_id, target_temp)
 
 
-TemperatureSelection('TemperatureSelection.xaml').ShowDialog()
+TemperatureSelection("TemperatureSelection.xaml").ShowDialog()

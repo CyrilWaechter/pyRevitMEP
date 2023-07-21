@@ -16,14 +16,12 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
-# noinspection PyUnresolvedReferences
-from Autodesk.Revit.DB import Element, ElementId, MEPModel, ConnectorManager, MEPSystem
-# noinspection PyUnresolvedReferences
+from pyrevit import revit
+from Autodesk.Revit.DB import Element, ElementId
 from System.Collections.Generic import List
 
-import rpw
-doc = rpw.revit.doc
-uidoc = rpw.revit.uidoc
+doc = revit.doc
+uidoc = revit.uidoc
 
 
 __doc__ = "Delete MEP system of selected objects"
@@ -47,5 +45,5 @@ for element_id in uidoc.Selection.GetElementIds():
         except AttributeError:
             pass
 
-with rpw.db.Transaction("delete selected objects system"):
+with revit.Transaction("delete selected objects system"):
     doc.Delete(system_list)
