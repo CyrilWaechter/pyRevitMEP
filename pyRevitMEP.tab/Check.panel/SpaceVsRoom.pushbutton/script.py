@@ -61,6 +61,7 @@ def check_room_vs_space(doc, room_doc):
     missing_room = space_set.difference(room_set)
     missing_space = room_set.difference(space_set)
     output.print_md("# Check result")
+    output.print_md("Comparing room from {} vs space from {}".format(room_doc.Title, doc.Title))
     output.print_md("## {} corresponding room/space found".format(len(common_set)))
     print_missing(
         "## {} following rooms have no corresponding spaces".format(len(missing_space)),
