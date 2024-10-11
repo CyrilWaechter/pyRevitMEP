@@ -1,6 +1,5 @@
 # coding: utf8
 from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, Transaction
-import System
 from pyrevit.forms import WPFWindow
 from pyrevit import script, forms, revit
 
@@ -15,13 +14,27 @@ def sample_id_by_category(doc, category):
     return FilteredElementCollector(doc).OfCategory(category).FirstElementId()
 
 
+def sample_element_by_category(doc, category):
+    return FilteredElementCollector(doc).OfCategory(category).FirstElement()
+
+
 class Gui(WPFWindow):
     def __init__(self, xaml_file_name):
         WPFWindow.__init__(self, xaml_file_name)
 
         # Add currently opened documents to dropdowns
-        self.source_project.DataContext = revit.docs
-        self.target_project.DataContext = revit.docs
+        source_projects = [
+            doc
+            for doc in revit.docs
+            if sample_element_by_category(doc, BuiltInCategory.OST_Rooms)
+        ]
+        target_projects = [
+            doc
+            for doc in revit.docs
+            if sample_element_by_category(doc, BuiltInCategory.OST_MEPSpaces)
+        ]
+        self.source_project.DataContext = source_projects
+        self.target_project.DataContext = target_projects
 
         self.sample_room_id = None
         self.sample_space_id = None
@@ -29,18 +42,21 @@ class Gui(WPFWindow):
         self.room_parameters_set = set()
         self.space_parameters_set = set()
 
-        try:
-            self.room_initialise(revit.docs[1])
-        except System.IndexOutOfRangeException:
+        if not len(source_projects) > 0:
             forms.alert(
-                "Error : You need to have at least 1 link or 1 other document opened."
+                "Error : You need to have at least 1 link or 1 other document opened containing rooms.",
+                exitscript=True,
             )
-            import sys
-
-            sys.exit()
-        self.space_initialise(revit.docs[0])
+        if not len(target_projects) > 0:
+            forms.alert(
+                "Error : You need to have at least 1 document opened containing spaces.",
+                exitscript=True,
+            )
+        self.space_initialise(revit.doc)
+        self.target_project.SelectedItem = revit.doc
 
     def room_initialise(self, doc):
+        logger.info("Initialise room")
         self.sample_room_id = (
             FilteredElementCollector(doc)
             .OfCategory(BuiltInCategory.OST_Rooms)
@@ -58,6 +74,7 @@ class Gui(WPFWindow):
         )
 
     def space_initialise(self, doc):
+        logger.info("Initialise space")
         self.sample_space_id = (
             FilteredElementCollector(doc)
             .OfCategory(BuiltInCategory.OST_MEPSpaces)
@@ -109,6 +126,9 @@ class Gui(WPFWindow):
     def ok_click(self, sender, e):
         room_doc = self.source_project.SelectedItem
         space_doc = self.target_project.SelectedItem
+        if space_doc.IsLinked:
+            forms.alert("Target cannot be a linked model")
+            return
         room = room_doc.GetElement(self.sample_room_id)
         space = space_doc.GetElement(self.sample_space_id)
 
