@@ -30,20 +30,18 @@ def is_valid_target_fields(element, fields):
             logger.info("Space field too short: {}".format(field))
             forms.alert("Only 1 target parameter per line")
             return False
-        for attr_type, attr_name in field:
-            if attr_type != "param":
-                continue
-            param = element.LookupParameter(attr_name)
-            if not param:
-                unvalid_param.append(attr_name)
-                continue
-            if param.StorageType != StorageType.String:
-                unvalid_param.append(attr_name)
-                continue
+        attr_type, attr_name = field[0]
+        if attr_type != "param":
+            unvalid_param.append(attr_name)
+            continue
+        param = element.LookupParameter(attr_name)
+        if param.StorageType != StorageType.String:
+            unvalid_param.append(attr_name)
+            continue
     if not unvalid_param:
         return True
     forms.alert(
-        "Following parameter names are invalid \n {}".format("\n".join(unvalid_param))
+        "Following parameter names are invalid \n{}".format("\n".join(unvalid_param))
     )
     return False
 

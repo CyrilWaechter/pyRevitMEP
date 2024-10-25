@@ -22,9 +22,11 @@
                     <TextBlock Margin="5">
                         <Bold>Enter source parameters or text separated with tab</Bold><LineBreak />
                         Every source on a single line will be concatenated :<LineBreak />
-                        %Number |TAB| %separator |TAB| %CustomParameterName<LineBreak />
-                        %Name<LineBreak />
-                        %Comments |TAB| %separator |TAB| %CustomParameterName
+                        %room_parameter1_name |TAB| %separator |TAB| %room_parameter2…<LineBreak />
+                        Examples:<LineBreak />
+                        Number |TAB| - |TAB| CustomParameterName<LineBreak />
+                        Name<LineBreak />
+                        Comments |TAB| _ |TAB| CustomParameterName
                     </TextBlock>
                     <TextBox x:Name="source_parameters" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"/>
                 </StackPanel>
@@ -38,9 +40,11 @@
                     <TextBlock Margin="5">
                         <Bold>Enter target parameters.</Bold><LineBreak />
                         One per line corresponding to each source line :<LineBreak />
-                        %Number<LineBreak />
-                        %Name<LineBreak />
-                        %Comments
+                        %space_parameter1_name<LineBreak />
+                        Examples:<LineBreak />
+                        Number<LineBreak />
+                        Name<LineBreak />
+                        Comments
                     </TextBlock>
                     <TextBox x:Name="target_parameters" TextWrapping="Wrap" AcceptsReturn="True"/>
                 </StackPanel>
