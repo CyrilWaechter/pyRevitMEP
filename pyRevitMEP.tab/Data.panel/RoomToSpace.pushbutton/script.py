@@ -1,5 +1,10 @@
 # coding: utf8
-from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, Transaction
+from Autodesk.Revit.DB import (
+    FilteredElementCollector,
+    BuiltInCategory,
+    Transaction,
+    StorageType,
+)
 from pyrevit.forms import WPFWindow
 from pyrevit import script, forms, revit
 
@@ -16,6 +21,31 @@ def sample_id_by_category(doc, category):
 
 def sample_element_by_category(doc, category):
     return FilteredElementCollector(doc).OfCategory(category).FirstElement()
+
+
+def is_valid_target_fields(element, fields):
+    unvalid_param = []
+    for field in fields:
+        if len(field) > 1:
+            logger.info("Space field too short: {}".format(field))
+            forms.alert("Only 1 target parameter per line")
+            return False
+        for attr_type, attr_name in field:
+            if attr_type != "param":
+                continue
+            param = element.LookupParameter(attr_name)
+            if not param:
+                unvalid_param.append(attr_name)
+                continue
+            if param.StorageType != StorageType.String:
+                unvalid_param.append(attr_name)
+                continue
+    if not unvalid_param:
+        return True
+    forms.alert(
+        "Following parameter names are invalid \n {}".format("\n".join(unvalid_param))
+    )
+    return False
 
 
 class Gui(WPFWindow):
@@ -36,9 +66,6 @@ class Gui(WPFWindow):
         self.source_project.DataContext = source_projects
         self.target_project.DataContext = target_projects
 
-        self.sample_room_id = None
-        self.sample_space_id = None
-
         self.room_parameters_set = set()
         self.space_parameters_set = set()
 
@@ -57,70 +84,51 @@ class Gui(WPFWindow):
 
     def room_initialise(self, doc):
         logger.info("Initialise room")
-        self.sample_room_id = (
-            FilteredElementCollector(doc)
-            .OfCategory(BuiltInCategory.OST_Rooms)
-            .FirstElementId()
-        )
-        try:
-            for parameter in doc.GetElement(self.sample_room_Id).Parameters:
-                self.room_parameters_set.add(parameter.Definition.Name)
-        except AttributeError:
-            return
+        sample_room = sample_element_by_category(doc, BuiltInCategory.OST_Rooms)
+        for parameter in sample_room.Parameters:
+            self.room_parameters_set.add(parameter.Definition.Name)
         logger.debug(
             "ROOM PARAMETER SET : {} \n ROOM ID : {}".format(
-                self.room_parameters_set, self.sample_room_id
+                self.room_parameters_set, sample_room
             )
         )
 
     def space_initialise(self, doc):
         logger.info("Initialise space")
-        self.sample_space_id = (
-            FilteredElementCollector(doc)
-            .OfCategory(BuiltInCategory.OST_MEPSpaces)
-            .FirstElementId()
-        )
-        try:
-            for parameter in doc.GetElement(self.sample_space_Id).Parameters:
-                self.space_parameters_set.add(parameter.Definition.Name)
-        except AttributeError:
-            return
+        sample_space = sample_element_by_category(doc, BuiltInCategory.OST_MEPSpaces)
+        for parameter in sample_space.Parameters:
+            self.space_parameters_set.add(parameter.Definition.Name)
         logger.debug(
             "SPACE PARAMETER SET : {} \n SPACE ID : {}".format(
-                self.space_parameters_set, self.sample_space_id
+                self.space_parameters_set, sample_space
             )
         )
 
-    def room_to_space(self, room, space):
-        if not room:
-            raise ValueError("There is no room in source project")
-        if not space:
-            raise ValueError("There is no space in target project")
-        room_attributes = self.source_parameters.Text.replace("\r", "")
-        space_parameters = self.target_parameters.Text.replace("\r", "")
-        logger.debug(space_parameters.Split("\n"))
-        for room_field, space_param in zip(
-            room_attributes.Split("\n"), space_parameters.Split("\n")
-        ):
-            space_param = space_param
-            value = ""
-            for room_attr in room_field.split("\t"):
-                room_attr = room_attr
-                param = room.LookupParameter(room_attr)
-                if param:
-                    if param.AsString():
-                        value += param.AsString()
-                else:
-                    value += room_attr
-            space_param = space.LookupParameter(space_param)
-            if space_param:
-                space_param.Set(value)
-            else:
-                logger.info(
-                    "Failed to find a parameter on space with name : {}, {}".format(
-                        space_param, len(space_param)
-                    )
-                )
+    def processed_fields(self, parameters):
+        attributes = parameters.Text.replace("\r", "")
+        fields = []
+        for field in attributes.Split("\n"):
+            attrs = []
+            for attr in field.split("\t"):
+                if attr in self.room_parameters_set:
+                    attrs.append(("param", attr))
+                    continue
+                attrs.append(("sep", attr))
+            fields.append(attrs)
+        return fields
+
+    def room_to_space(self, room, space, room_fields, space_fields):
+        for room_field, space_field in zip(room_fields, space_fields):
+            space_param = space.LookupParameter(space_field[0][1])
+            value = []
+            for attr_type, attr_name in room_field:
+                if not attr_type == "param":
+                    logger.info(attr_type, attr_name)
+                    value.append(attr_name)
+                    continue
+                param = room.LookupParameter(attr_name)
+                value.append(param.AsString())
+            space_param.Set("".join(value))
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
@@ -129,14 +137,28 @@ class Gui(WPFWindow):
         if space_doc.IsLinked:
             forms.alert("Target cannot be a linked model")
             return
-        room = room_doc.GetElement(self.sample_room_id)
-        space = space_doc.GetElement(self.sample_space_id)
+        room = sample_element_by_category(room_doc, BuiltInCategory.OST_Rooms)
+        space = sample_element_by_category(space_doc, BuiltInCategory.OST_MEPSpaces)
+
+        logger.info("Room parameter set: ", self.room_parameters_set)
+        logger.info("Space parameter set: ", self.space_parameters_set)
+        room_fields = self.processed_fields(self.source_parameters)
+        space_fields = self.processed_fields(self.target_parameters)
+        logger.info(room_fields)
+        logger.info(space_fields)
+
+        if not is_valid_target_fields(space, space_fields):
+            return
+
+        if len(room_fields) != len(space_fields):
+            forms.alert("You need the same amount of source and target")
+            return
 
         # Try RoomToSpace with sample room and space to make sure it works before batch on all with all spaces
         try:
             t = Transaction(space_doc, "Test")
             t.Start()
-            self.room_to_space(room, space)
+            self.room_to_space(room, space, room_fields, space_fields)
         except ValueError as e:
             logger.info("{}".format(e.message))
             t.RollBack()
@@ -155,7 +177,7 @@ class Gui(WPFWindow):
                 if space.Location:
                     room = room_doc.GetRoomAtPoint(space.Location.Point)
                 if room:
-                    self.room_to_space(room, space)
+                    self.room_to_space(room, space, room_fields, space_fields)
         self.Close()
 
     # noinspection PyUnusedLocal
