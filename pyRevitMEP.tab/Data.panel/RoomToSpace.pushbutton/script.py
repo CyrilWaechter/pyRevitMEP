@@ -64,9 +64,6 @@ class Gui(WPFWindow):
         self.source_project.DataContext = source_projects
         self.target_project.DataContext = target_projects
 
-        self.room_parameters_set = set()
-        self.space_parameters_set = set()
-
         if not len(source_projects) > 0:
             forms.alert(
                 "Error : You need to have at least 1 link or 1 other document opened containing rooms.",
@@ -77,38 +74,16 @@ class Gui(WPFWindow):
                 "Error : You need to have at least 1 document opened containing spaces.",
                 exitscript=True,
             )
-        self.space_initialise(revit.doc)
         self.target_project.SelectedItem = revit.doc
 
-    def room_initialise(self, doc):
-        logger.info("Initialise room")
-        sample_room = sample_element_by_category(doc, BuiltInCategory.OST_Rooms)
-        for parameter in sample_room.Parameters:
-            self.room_parameters_set.add(parameter.Definition.Name)
-        logger.debug(
-            "ROOM PARAMETER SET : {} \n ROOM ID : {}".format(
-                self.room_parameters_set, sample_room
-            )
-        )
-
-    def space_initialise(self, doc):
-        logger.info("Initialise space")
-        sample_space = sample_element_by_category(doc, BuiltInCategory.OST_MEPSpaces)
-        for parameter in sample_space.Parameters:
-            self.space_parameters_set.add(parameter.Definition.Name)
-        logger.debug(
-            "SPACE PARAMETER SET : {} \n SPACE ID : {}".format(
-                self.space_parameters_set, sample_space
-            )
-        )
-
-    def processed_fields(self, parameters):
+    def processed_fields(self, parameters, room_or_space):
         attributes = parameters.Text.replace("\r", "")
         fields = []
         for field in attributes.Split("\n"):
             attrs = []
             for attr in field.split("\t"):
-                if attr in self.room_parameters_set:
+                param = room_or_space.LookupParameter(attr)
+                if param:
                     attrs.append(("param", attr))
                     continue
                 attrs.append(("sep", attr))
@@ -138,10 +113,8 @@ class Gui(WPFWindow):
         room = sample_element_by_category(room_doc, BuiltInCategory.OST_Rooms)
         space = sample_element_by_category(space_doc, BuiltInCategory.OST_MEPSpaces)
 
-        logger.info("Room parameter set: ", self.room_parameters_set)
-        logger.info("Space parameter set: ", self.space_parameters_set)
-        room_fields = self.processed_fields(self.source_parameters)
-        space_fields = self.processed_fields(self.target_parameters)
+        room_fields = self.processed_fields(self.source_parameters, room)
+        space_fields = self.processed_fields(self.target_parameters, space)
         logger.info(room_fields)
         logger.info(space_fields)
 
@@ -177,14 +150,6 @@ class Gui(WPFWindow):
                 if room:
                     self.room_to_space(room, space, room_fields, space_fields)
         self.Close()
-
-    # noinspection PyUnusedLocal
-    def source_project_changed(self, sender, e):
-        self.room_initialise(self.source_project.SelectedItem)
-
-    # noinspection PyUnusedLocal
-    def target_project_changed(self, sender, e):
-        self.space_initialise(self.target_project.SelectedItem)
 
     # noinspection PyUnusedLocal
     def window_closed(self, sender, e):

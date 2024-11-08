@@ -16,7 +16,7 @@
             <GroupBox Header="Room">
                 <StackPanel>
                     <TextBlock Margin="5"><Bold>Pick Source Project</Bold></TextBlock>
-                    <ComboBox x:Name="source_project" SelectionChanged="source_project_changed"
+                    <ComboBox x:Name="source_project" 
                               ItemsSource="{Binding}" DisplayMemberPath="Title"
                               SelectedValuePath="Title" SelectedValue="{Binding Title, Mode=OneWay}"/>
                     <TextBlock Margin="5">
@@ -34,7 +34,7 @@
             <GroupBox Header="Space">
                 <StackPanel>
                     <TextBlock Margin="5"><Bold>Target Project</Bold></TextBlock>
-                    <ComboBox x:Name="target_project" SelectionChanged="target_project_changed"
+                    <ComboBox x:Name="target_project" 
                               ItemsSource="{Binding}" DisplayMemberPath="Title"
                               SelectedValuePath="Title" SelectedValue="{Binding Title, Mode=OneWay}"/>
                     <TextBlock Margin="5">
