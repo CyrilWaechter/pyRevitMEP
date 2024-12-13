@@ -1,6 +1,6 @@
+title:
+  fr-fr: Créer
+  en-us: Create
 layout:
   - Transition
-  - Copy
-  - BatchCreation
-  - CreateSection
-  - QuickDimension
+  - create1

@@ -6,10 +6,6 @@ from Autodesk.Revit.DB import (
 )
 from pyrevit import script, forms, revit
 
-__title__ = "SpaceVsRoom"
-__author__ = "Cyril Waechter"
-__doc__ = "Check if all room have his corresponding space and vice versa"
-
 logger = script.get_logger()
 output = script.get_output()
 

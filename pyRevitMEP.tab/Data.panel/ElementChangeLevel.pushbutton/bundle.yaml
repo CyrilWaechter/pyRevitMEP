@@ -1,0 +1,13 @@
+title:
+  fr_fr: Changer niveau
+  en_us: Change level
+tooltip:
+  fr_fr: |
+    Changer le niveau de référence des objets sélectionnés sans les déplacer.
+  en_us: |
+    Change selected elements reference level without moving it.
+help_url: "https://www.youtube.com/watch?v=zHp8-JYteOY"
+author: "{{author}}"
+
+engine:
+  persistent: true

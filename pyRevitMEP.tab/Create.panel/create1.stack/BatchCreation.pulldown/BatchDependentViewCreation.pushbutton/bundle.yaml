@@ -1,0 +1,9 @@
+title:
+  fr_fr: Vues dépendantes
+  en_us: Dependent views
+context: "selection"
+tooltip:
+  fr_fr: Créer des vues dépendantes par zones de définition choisies pour les vues sélectionnées
+  en_us: Batch create dependent views corresponding to existing Scope Boxes for selected views
+help_url: "{{youtube}}"
+author: "{{author}}"

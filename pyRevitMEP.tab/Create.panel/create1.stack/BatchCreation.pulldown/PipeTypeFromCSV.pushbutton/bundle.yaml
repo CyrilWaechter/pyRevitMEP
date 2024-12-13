@@ -1,0 +1,8 @@
+title:
+  fr_fr: Types de tuyau
+  en_us: Pipe types
+tooltip:
+  fr_fr: Crée des segments et tailles de canalisation depuis un fichier csv
+  en_us: Create pipe segments and sizes from a csv file
+help_url: "{{youtube}}"
+author: "{{author}}"

@@ -1,0 +1,21 @@
+title:
+  fr_fr: Altitude sous
+  en_us: Elevation under
+tooltip:
+  fr_fr: |
+    Calcule la distance entre :
+      - les éléments sélectionnés depuis le point d’origine ou au centre de la courbe (eg. tuyau)
+      - le sol ou le toit au dessus le plus proche
+    La valeur est en ensuite stocké dans un paramètre dédié.
+
+    La fonction doit être lancée dans une *vue 3D*, dédiée de préférence pour limiter le nombre d’objets potentiels.
+
+    La fonction lance un rayon vers le haut (axe z) et s’arrête au niveau du premier élément trouvé.
+  en_us: |
+    Compute distance of selected elements (origin or middle of the curve) to closest floor/roof above.
+    Result is stored in designated parameter
+help_url: "{{youtube}}"
+author: "{{author}}"
+
+engine:
+  persistent: true

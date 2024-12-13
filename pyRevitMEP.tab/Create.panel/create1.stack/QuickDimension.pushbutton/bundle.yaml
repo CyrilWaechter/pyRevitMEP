@@ -1,0 +1,16 @@
+title:
+  fr_fr: Cote rapide
+  en_us: Quick dimension
+tooltip:
+  fr_fr: |
+    Créer une cote rapide pour les éléments sélectionnés
+    Attention : 
+      - Fonctionne avec tous les éléments basés sur une ligne (eg. tuyaux, murs, lignes, axes)
+      - Ne fonctionne pas pour les familles
+  en_us: |
+    Quick dimension selected elements
+    Warning : 
+      - Full support for line base elements only (eg. pipes, walls, lines, grids). 
+      - Don't currently fully work with family instance.
+help_url: "{{youtube}}"
+author: "{{author}}"

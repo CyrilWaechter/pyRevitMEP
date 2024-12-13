@@ -1,0 +1,9 @@
+title:
+  fr_fr: Types de système
+  en_us: MEP System types
+tooltip:
+  fr_fr: Créer des types de système depuis un tableur
+  en_us: Batch create MEPSystemTypes from a sheet file
+is_beta: true
+help_url: "{{youtube}}"
+author: "{{author}}"

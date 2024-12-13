@@ -1,0 +1,13 @@
+title:
+  fr_fr: Coupes
+  en_us: Sections
+tooltip:
+  fr_fr: |
+    Crée une coupe devant chaque élément linéaire sélectionné (ex. mur)
+    SHIFT-CLIC pour afficher les options
+  en_us: |
+    Create sections from selected linear objects (eg. walls)
+    SHIFT-CLICK to display options
+context: selection
+help_url: "{{youtube}}"
+author: "{{author}}"

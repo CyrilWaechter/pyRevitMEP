@@ -1,0 +1,12 @@
+title:
+  fr_fr: Mise à jour matériaux
+  en_us: Update materials
+tooltip:
+  fr_fr: |
+    Création des matériaux depuis la base de données https://www.materialsdb.org/.
+    Le script crée un fichier rvt par fournisseur.
+  en_us: |
+    Creates materials from https://www.materialsdb.org/ database.
+    One rvt file per manufacturer is generated.
+help_url: "https://www.youtube.com/watch?v=8iYpbKUIeTo"
+author: "{{author}}"

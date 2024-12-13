@@ -3,11 +3,6 @@
 from pyrevit import revit, forms, script
 from pyrevit import script
 
-__doc__ = "Batch create dependent views corresponding to existing Scope Boxes for selected views"
-__title__ = "DependentViews"
-__author__ = "Cyril Waechter"
-__context__ = "selection"
-
 doc = revit.doc
 output = script.get_output()
 logger = script.get_logger()

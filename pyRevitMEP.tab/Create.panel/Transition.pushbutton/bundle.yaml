@@ -1,0 +1,14 @@
+title:
+  fr_fr: Transformation
+  en_us: Transition
+tooltip:
+  fr_fr: |
+    Créer une transformation entre 2 éléments ouverts :
+      1. Sélectioner objet 1 (cliquer à proximité du connecteur souhaité)
+      2. Sélectioner objet 2 (cliquer à proximité du connecteur souhaité)
+  en_us: |
+    Create a MEP transition between 2 open ends.
+      1. Select first object (pick a location close to the desired connector)
+      2. Select second object (pick a location close to the desired connector)
+help_url: "https://www.youtube.com/watch?v=C2PZgXclG0Y"
+author: "{{author}}"

@@ -1,0 +1,8 @@
+title:
+  fr_fr: EspaceVsPièce
+  en_us: SpaceVsRoom
+tooltip:
+  fr_fr: Vérifie si toutes les pièces ont un espace correspondant et vice versa
+  en_us: Check if all room have his corresponding space and vice versa
+help_url: "{{youtube}}"
+author: "{{author}}"

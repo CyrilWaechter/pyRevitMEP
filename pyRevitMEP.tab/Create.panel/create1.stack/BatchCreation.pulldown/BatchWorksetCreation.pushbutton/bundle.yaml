@@ -1,0 +1,8 @@
+title:
+  fr_fr: Sous-projets
+  en_us: Worksets
+tooltip:
+  fr_fr: Crée une liste de sous-projets depuis un fichier texte ou en créant une liste
+  en_us: Batch create worksets from a text file or on the fly by creating a list
+help_url: "{{youtube}}"
+author: "{{author}}"

@@ -1,12 +1,4 @@
 # coding: utf8
-
-__doc__ = """Create sections from selected linear objects (eg. walls)
-SHIFT-CLICK to display options"""
-__title__ = "CreateSectionFrom"
-__author__ = "Cyril Waechter"
-__context__ = "selection"
-
-
 from Autodesk.Revit.DB import (
     Document,
     Line,

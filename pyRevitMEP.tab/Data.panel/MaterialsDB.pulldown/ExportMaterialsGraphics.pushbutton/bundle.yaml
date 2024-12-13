@@ -1,0 +1,10 @@
+title:
+  fr_fr: Export apparence matériaux
+  en_us: Export materials graphics
+tooltip:
+  fr_fr: |
+    À utiliser pour personnaliser l’apparence des matériaux dans la fonction «Mise à jour des matériaux».
+  en_us: |
+    Use this to customize graphics when you use UpdateMaterials button.
+help_url: "{{youtube}}"
+author: "{{author}}"

@@ -13,10 +13,6 @@ from pyrevit.script import get_logger
 from pyrevit.forms import WPFWindow
 from System.Collections.Generic import List
 
-__doc__ = "Batch create MEPSystemTypes from a sheet file"
-__title__ = "MEPSystemTypes"
-__author__ = "Cyril Waechter"
-
 doc = __revit__.ActiveUIDocument.Document  # type: Document
 
 logger = get_logger()

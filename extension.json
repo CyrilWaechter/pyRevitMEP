@@ -1,0 +1,12 @@
+{
+    "default_enabled": "True",
+    "type": "extension",
+    "rocket_mode_compatible": "True",
+    "name": "pyRevitMEP",
+    "description": "A set of tools for MEP and general usage",
+    "author": "Cyril Waechter",
+    "author_profile": "https://github.com/CyrilWaechter",
+    "url": "https://github.com/CyrilWaechter/pyRevitMEP",
+    "website": "https://pythoncvc.net",
+    "dependencies": []
+}

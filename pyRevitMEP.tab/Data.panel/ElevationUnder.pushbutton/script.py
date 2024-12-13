@@ -21,12 +21,6 @@ from pyrevit.forms import select_views, WPFWindow
 
 from pyrevitmep.event import CustomizableEvent
 
-__doc__ = """Compute distance of selected elements (origin or middle of the curve) to closest floor/roof above.
-Result is stored in designated parameter"""
-__title__ = "ElevationUnder"
-__author__ = "Cyril Waechter"
-__persistentengine__ = True
-
 doc = revit.doc  # type: Document
 uidoc = revit.uidoc  # type: UIDocument
 logger = get_logger()
