@@ -1,0 +1,9 @@
+title:
+  fr_fr: Griser
+  en_us: Grey out
+context: "selection"
+tooltip:
+  fr_fr: Griser les éléments sélectionnés
+  en_us: Grey out selected elements
+help_url: "{{youtube}}"
+author: "{{author}}"
