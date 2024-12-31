@@ -1,0 +1,13 @@
+title:
+  fr_fr: Libéllé/Texte
+  en_us: Label/Text
+tooltip:
+  fr_fr: |
+    Conçu pour les familles d’annotation.
+    Cela déplace le libéllé ou texte vers le centre (coordonnées 0,0,0).
+  en_us: |
+    Designed for annotation families. It moves selected annotation to center (set 0,0,0 coordinates).
+help_url: "{{youtube}}"
+author: "{{author}}"
+
+context: selection

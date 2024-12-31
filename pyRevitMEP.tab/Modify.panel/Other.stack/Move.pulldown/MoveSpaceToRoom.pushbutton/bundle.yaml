@@ -1,0 +1,10 @@
+title:
+  fr_fr: Espace vers pièce
+  en_us: Space to room
+tooltip:
+  fr_fr: |
+    Déplace l’espace vers la pièce. La correspondance est réalisée par numéro.
+  en_us: |
+    Move space to room location by corresponding number.
+help_url: "{{youtube}}"
+author: "{{author}}"

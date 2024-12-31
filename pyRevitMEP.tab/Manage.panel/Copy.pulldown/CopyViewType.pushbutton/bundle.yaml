@@ -1,0 +1,10 @@
+title:
+  fr_fr: Type de vue
+  en_us: View type
+tooltip:
+  fr_fr: |
+    Copier les types de vues depuis un document ouvert.
+  en_us: |
+    Copy all view types from a selected opened project to another.
+help_url: "{{youtube}}"
+author: "{{author}}"

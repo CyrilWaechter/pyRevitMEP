@@ -1,0 +1,12 @@
+title:
+  fr_fr: Cartouche
+  en_us: Titleblock
+tooltip:
+  fr_fr: |
+    Déplacer le cartouche vers l’origine de la feuille (coordonnées 0,0,0)
+  en_us: |
+    Move titleblock to sheet origin (0,0,0 coordinates).
+help_url: "{{youtube}}"
+author: "{{author}}"
+
+context: selection

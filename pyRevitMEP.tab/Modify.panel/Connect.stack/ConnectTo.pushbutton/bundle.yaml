@@ -1,0 +1,14 @@
+title:
+  fr_fr: Connecter
+  en_us: ConnectTo
+tooltip:
+  fr_fr: |
+    Connecter un objet à un autre.
+    1. Sélectionner l’objet à connecter (cliquer sur une position proche du connecteur désiré).
+    2. Sélectionner l’objet cible (cliquer sur une position proche du connecteur désiré).
+  en_us: |
+    Connect an object to an other.
+    Select first object to connect (pick a location close to the desired connector)
+    Select second object to be connected (pick a location close to the desired connector)
+help_url: "https://youtu.be/FH92RUqu5pI"
+author: "{{author}}"

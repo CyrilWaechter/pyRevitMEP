@@ -1,0 +1,12 @@
+title:
+  fr_fr: Plage de vue
+  en_us: View range
+tooltip:
+  fr_fr: |
+    Copier la plage de vue depuis les vues sources vers les vues cibles.
+    Si 1 seule vue source est sélectionnée, la plage de vue est appliquée à toutes les vues cibles.
+  en_us: |
+    Copy view range from source views to target views.
+    If only 1 source view is selected same view range is applied to all views.
+help_url: "{{youtube}}"
+author: "{{author}}"

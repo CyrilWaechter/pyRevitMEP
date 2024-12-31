@@ -33,10 +33,6 @@ from System.Collections.Generic import List
 from pyrevit import revit
 from pyrevit.forms import WPFWindow
 
-__doc__ = "Copy pipe types from a selected opened document to active document"
-__title__ = "PipeType"
-__author__ = "Cyril Waechter"
-
 doc = revit.doc
 
 opened_docs = {d.Title: d for d in revit.docs}

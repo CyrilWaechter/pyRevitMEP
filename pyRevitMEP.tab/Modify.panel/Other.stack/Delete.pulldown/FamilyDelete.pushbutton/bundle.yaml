@@ -1,0 +1,12 @@
+title:
+  fr_fr: Famille
+  en_us: Family
+tooltip:
+  fr_fr: |
+    Supprimer la famille sélectionnée du projet.
+  en_us: |
+    Delete selected families from project.
+help_url: "{{youtube}}"
+author: "{{author}}"
+
+context: selection

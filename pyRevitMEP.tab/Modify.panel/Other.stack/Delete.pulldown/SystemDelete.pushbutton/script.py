@@ -24,11 +24,6 @@ doc = revit.doc
 uidoc = revit.uidoc
 
 
-__doc__ = "Delete MEP system of selected objects"
-__title__ = "System delete"
-__author__ = "Cyril Waechter"
-__context__ = "Selection"
-
 # Find systems id and delete it
 system_list = List[ElementId]()
 for element_id in uidoc.Selection.GetElementIds():

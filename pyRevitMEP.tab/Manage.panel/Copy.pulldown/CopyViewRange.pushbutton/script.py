@@ -4,11 +4,6 @@ from Autodesk.Revit.DB import Document, ViewPlan
 
 from pyrevit import forms, script, revit
 
-__doc__ = """Copy view range from source views to target views.
-If only 1 source view is selected same view range is applied to all views"""
-__title__ = "ViewRange"
-__author__ = "Cyril Waechter"
-
 doc = revit.doc  # type:Document
 logger = script.get_logger()
 

@@ -1,0 +1,12 @@
+title:
+  fr_fr: Système
+  en_us: System
+tooltip:
+  fr_fr: |
+    Supprimer les systèmes MEP des éléments sélectionnés.
+  en_us: |
+    Delete MEP system of selected objects.
+help_url: "{{youtube}}"
+author: "{{author}}"
+
+context: selection

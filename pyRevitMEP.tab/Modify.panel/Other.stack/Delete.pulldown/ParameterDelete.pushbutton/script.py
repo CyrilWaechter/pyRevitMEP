@@ -22,10 +22,6 @@ from revitutils import doc
 # noinspection PyUnresolvedReferences
 from Autodesk.Revit.DB import Transaction, FilteredElementCollector, ParameterElement
 
-__doc__ = "Delete project parameters including hidden ones"
-__title__ = "Project Parameter delete"
-__author__ = "Cyril Waechter"
-
 #Retrieve all parameters in the document
 params = FilteredElementCollector(doc).OfClass(ParameterElement)
 filteredparams = []

@@ -8,12 +8,6 @@ from Autodesk.Revit import Exceptions
 from pyrevit import script, revit, forms
 from pyrevitmep.meputils import get_connector_manager, get_connector_closest_to
 
-__doc__ = """Connect an object to an other.
-Select first object to connect (pick a location close to the desired connector)
-Select second object to be connected (pick a location close to the desired connector)"""
-__title__ = "ConnectTo"
-__author__ = "Cyril Waechter"
-
 logger = script.get_logger()
 uidoc = revit.uidoc
 doc = revit.doc

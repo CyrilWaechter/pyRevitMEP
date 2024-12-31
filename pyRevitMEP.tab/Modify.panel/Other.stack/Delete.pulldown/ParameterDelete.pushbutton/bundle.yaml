@@ -1,0 +1,10 @@
+title:
+  fr_fr: Paramètre de projet
+  en_us: Project parameter
+tooltip:
+  fr_fr: |
+    Supprimer les paramètres de projet y compris ceux qui sont masqués.
+  en_us: |
+    Delete project parameters including hidden ones.
+help_url: "{{youtube}}"
+author: "{{author}}"

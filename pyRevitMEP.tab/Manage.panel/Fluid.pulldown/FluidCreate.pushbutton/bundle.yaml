@@ -1,0 +1,10 @@
+title:
+  fr_fr: Créer fluide
+  en_us: Create fluid
+tooltip:
+  fr_fr: |
+    Créer un fluide avec toutes les températures dans la plage choisie.
+  en_us: |
+    Create a Fluid with all temperatures within desired range.
+help_url: "{{youtube}}"
+author: "{{author}}"

@@ -22,13 +22,9 @@ from Autodesk.Revit.DB import FilteredElementCollector, ViewFamilyType, CopyPast
 # noinspection PyUnresolvedReferences
 from System.Collections.Generic import List
 import rpw
-from pyrevit import script
+from pyrevit import script, revit
 
 logger = script.get_logger()
-
-__doc__ = "Copy all view types from a selected opened project to another"
-__title__ = "CopyViewTypes"
-__author__ = "Cyril Waechter"
 
 ComboBox = rpw.ui.forms.flexform.ComboBox
 Label = rpw.ui.forms.flexform.Label
@@ -92,7 +88,7 @@ source_viewtype_id_list = get_all_viewfamilytype_ids(source_doc)
 
 source_doc_dict = view_type_name_template_name_dict(source_doc)
 
-with rpw.db.Transaction(doc=target_doc, name="Copy view types"):
+with revit.Transaction(name="Copy view types", doc=target_doc):
     # Copy view type
     ElementTransformUtils.CopyElements(source_doc,
                                        source_viewtype_id_list,

@@ -1,0 +1,10 @@
+title:
+  fr_fr: Type tuyau
+  en_us: Pipe type
+tooltip:
+  fr_fr: |
+    Copier les types de tuyaux depuis le document ouvert choisi.
+  en_us: |
+    Copy pipe types from a selected opened document to active document.
+help_url: "{{youtube}}"
+author: "{{author}}"

@@ -4,11 +4,6 @@ from Autodesk.Revit.DB import Document
 import rpw
 from pyrevit import script, revit
 
-__doc__ = """Copy project units from another document. 
-Display a form to select source and target document."""
-__title__ = "Project Units"
-__author__ = "Cyril Waechter"
-
 logger = script.get_logger()
 doc = revit.doc  # type: Document
 

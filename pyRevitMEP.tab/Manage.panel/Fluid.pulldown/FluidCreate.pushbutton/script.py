@@ -13,10 +13,6 @@ from pyrevit.forms import WPFWindow
 import ctypes
 import os
 
-__doc__ = "Create a Fluid with all temperatures within desired range"
-__title__ = "Create a fluid"
-__author__ = "Cyril Waechter"
-
 logger = script.get_logger()
 
 # Load CoolProp shared library and configure PropsSI c_types units

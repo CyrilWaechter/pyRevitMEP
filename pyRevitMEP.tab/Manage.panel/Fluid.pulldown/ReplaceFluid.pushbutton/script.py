@@ -26,10 +26,6 @@ import rpw
 from pyrevit import script, revit
 from pyrevit.forms import WPFWindow
 
-__doc__ = "Replace a selected fluid and temperature find in all systems by an other selected fluid and temperature"
-__title__ = "Replace fluid"
-__author__ = "Cyril Waechter"
-
 doc = revit.doc
 logger = script.get_logger()
 ComboBox = rpw.ui.forms.flexform.ComboBox

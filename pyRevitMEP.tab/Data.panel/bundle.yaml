@@ -1,3 +1,6 @@
+title:
+  fr_fr: Données
+  en_us: Data
 layout:
   - ElementChangeLevel
   - RoomToSpace

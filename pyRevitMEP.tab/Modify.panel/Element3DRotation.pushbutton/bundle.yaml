@@ -1,0 +1,15 @@
+title:
+  fr_fr: Rotation 3D
+  en_us: 3D Rotate
+tooltip:
+  fr_fr: |
+    Effectuer une rotation des objets dans toutes les directions.
+  en_us: |
+    Rotate object in any direction.
+help_url: "https://youtu.be/60Y_DJbIL5Y"
+author: "{{author}}"
+
+engine:
+  clean: true
+  full_frame: true
+  persistent: true

@@ -1,0 +1,10 @@
+title:
+  fr_fr: Recharger familles
+  en_us: Reload families
+tooltip:
+  fr_fr: |
+    Charger ou recharger les familles dans le document choisi.
+  en_us: |
+    Load or Reload selected families into chosen document.
+help_url: "{{youtube}}"
+author: "{{author}}"

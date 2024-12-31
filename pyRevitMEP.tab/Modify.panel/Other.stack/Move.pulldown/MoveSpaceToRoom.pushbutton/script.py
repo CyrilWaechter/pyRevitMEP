@@ -2,10 +2,6 @@
 from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory
 from pyrevit import script, forms, revit
 
-__title__ = "SpaceToRoom"
-__author__ = "Cyril Waechter"
-__doc__ = "Move space to room location by corresponding number"
-
 
 class CancelledByUserError(BaseException):
     pass

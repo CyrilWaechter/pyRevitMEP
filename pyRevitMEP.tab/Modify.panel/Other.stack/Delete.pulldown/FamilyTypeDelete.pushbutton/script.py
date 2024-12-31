@@ -23,11 +23,6 @@ doc = revit.doc
 uidoc = revit.uidoc
 
 
-__doc__ = "Delete selected families from project"
-__title__ = "Familytype delete"
-__author__ = "Cyril Waechter"
-__context__ = "Selection"
-
 with revit.Transaction("Delete families from project"):
     # Find families of selected object and delete it
     for id in uidoc.Selection.GetElementIds():

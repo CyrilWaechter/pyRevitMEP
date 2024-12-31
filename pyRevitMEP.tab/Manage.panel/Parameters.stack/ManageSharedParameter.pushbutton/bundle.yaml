@@ -1,0 +1,16 @@
+title:
+  fr_fr: Paramètres partagés
+  en_us: Shared parameters
+tooltip:
+  fr_fr: |
+    Interface pour gérer les paramètres partagés
+    Fonctions : créer, modifier, dupliquer, exporter vers fichier de paramètres partagés,
+    supprimer plusieurs paramètres, ouvrir plusieurs groupes dans le même affichage, 
+    créer un fichier de paramètres partagés, créer les paramètres depuis un fichier csv
+  en_us: |
+    Interface to manage shared parameters
+    Features : create, modify, duplicate, save to definition file, delete multiple parameters, 
+    open multiple parameter groups in the same datagrid, create a new definition file, create from csv, 
+    return selected parameter for another use (e.g. create project parameters, family parameters)
+help_url: "{{youtube}}"
+author: "{{author}}"

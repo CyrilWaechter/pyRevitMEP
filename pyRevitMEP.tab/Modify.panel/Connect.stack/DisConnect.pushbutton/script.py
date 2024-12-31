@@ -2,10 +2,6 @@
 from pyrevit import script, revit
 from pyrevitmep.meputils import NoConnectorManagerError, get_connector_manager
 
-__doc__ = """Disconnect all connector of an element"""
-__title__ = "Disconnect"
-__author__ = "Cyril Waechter"
-
 logger = script.get_logger()
 doc = revit.doc
 output = script.get_output()

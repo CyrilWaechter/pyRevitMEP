@@ -1,0 +1,10 @@
+title:
+  fr_fr: Remplacer fluide
+  en_us: Fluid replace
+tooltip:
+  fr_fr: |
+    Remplacer le fluide et les températures associées dans l’ensemble des systèmes.
+  en_us: |
+    Replace a selected fluid and temperature find in all systems by an other selected fluid and temperature.
+help_url: "{{youtube}}"
+author: "{{author}}"

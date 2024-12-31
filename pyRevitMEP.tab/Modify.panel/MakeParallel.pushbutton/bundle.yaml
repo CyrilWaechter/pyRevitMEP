@@ -1,0 +1,12 @@
+title:
+  fr_fr: Rendre parallèle (XY)
+  en_us: Make parallel (XY)
+tooltip:
+  fr_fr: |
+    Rendre 2 éléments parallèles.
+    1. Sélectionner l’élément de référence.
+    2. Sélectionner l’élement qui doit subir une rotation.
+  en_us: |
+    Make 2 elements parallel. First element selected is reference. Second element selected rotate.
+help_url: "{{youtube}}"
+author: "{{author}}"

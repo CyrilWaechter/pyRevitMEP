@@ -1,3 +1,6 @@
+title:
+  fr_fr: Supprimer
+  en_us: Delete
 layout:
   - FamilyDelete
   - FamilyTypeDelete

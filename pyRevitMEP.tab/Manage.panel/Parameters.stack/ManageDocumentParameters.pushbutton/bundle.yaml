@@ -1,0 +1,10 @@
+title:
+  fr_fr: Paramètres de document
+  en_us: Document paramaters
+tooltip:
+  fr_fr: |
+    Gérer les paramètres du document ouvert (famille ou projet)
+  en_us: |
+    Manage document parameter (project or family)
+help_url: "{{youtube}}"
+author: "{{author}}"

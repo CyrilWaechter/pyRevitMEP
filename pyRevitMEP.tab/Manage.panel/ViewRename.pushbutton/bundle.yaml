@@ -1,0 +1,10 @@
+title:
+  fr_fr: Renommer vues
+  en_us: View rename
+tooltip:
+  fr_fr: |
+    Renommer les vues en respectant une convention basée sur les paramètres.
+  en_us: |
+    Rename selected views according to a pattern.
+help_url: "{{youtube}}"
+author: "{{author}}"

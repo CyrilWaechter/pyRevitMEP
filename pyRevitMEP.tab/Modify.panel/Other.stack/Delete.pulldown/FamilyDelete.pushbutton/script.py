@@ -16,15 +16,11 @@ GNU General Public License for more details.
 See this link for a copy of the GNU General Public License protecting this package.
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
+
 from pyrevit import revit
 
 doc = revit.doc
 uidoc = revit.uidoc
-
-__doc__ = "Delete selected families from project"
-__title__ = "Family delete"
-__author__ = "Cyril Waechter"
-__context__ = "Selection"
 
 
 with revit.Transaction("Delete families from project"):

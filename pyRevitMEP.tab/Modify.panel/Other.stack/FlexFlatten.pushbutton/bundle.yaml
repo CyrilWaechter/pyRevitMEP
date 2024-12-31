@@ -1,0 +1,13 @@
+title:
+  fr_fr: Aplatir flexible
+  en_us: Flex flatten
+tooltip:
+  fr_fr: |
+    Aplatir les flexibles (gaines ou tuyaux).
+    Par aplatir on entend mettre la même altitude pour tous les points de contrôle.
+  en_us: |
+    Flatten selected flexible pipe/duct.
+help_url: "{{youtube}}"
+author: "{{author}}"
+
+context: selection

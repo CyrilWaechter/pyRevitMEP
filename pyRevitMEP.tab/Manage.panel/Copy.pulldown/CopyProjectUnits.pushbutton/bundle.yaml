@@ -1,0 +1,11 @@
+title:
+  fr_fr: Unités du projet
+  en_us: Project units
+tooltip:
+  fr_fr: |
+    Copier les unités du projet depuis un autre document choisi.
+  en_us: |
+    Copy project units from another document. 
+    Display a form to select source and target document.
+help_url: "{{youtube}}"
+author: "{{author}}"

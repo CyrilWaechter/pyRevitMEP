@@ -31,11 +31,6 @@ from Autodesk.Revit.UI.Selection import ObjectType, ISelectionFilter
 from Autodesk.Revit.Exceptions import OperationCanceledException
 
 
-__doc__ = "Rotate object in any direction"
-__title__ = "3D Rotate"
-__author__ = "Cyril Waechter"
-__persistentengine__ = True
-
 doc = revit.doc
 uidoc = revit.uidoc
 

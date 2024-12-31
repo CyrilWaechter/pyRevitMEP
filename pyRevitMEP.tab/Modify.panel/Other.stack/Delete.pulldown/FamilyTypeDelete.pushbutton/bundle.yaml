@@ -1,0 +1,12 @@
+title:
+  fr_fr: Type
+  en_us: Type
+tooltip:
+  fr_fr: |
+    Supprimer le type de la famille sélectionnée du projet.
+  en_us: |
+    Delete selected family types from project.
+help_url: "{{youtube}}"
+author: "{{author}}"
+
+context: selection
