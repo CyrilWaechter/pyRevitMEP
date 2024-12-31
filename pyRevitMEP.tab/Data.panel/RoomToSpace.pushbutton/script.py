@@ -100,8 +100,10 @@ class Gui(WPFWindow):
                     value.append(attr_name)
                     continue
                 param = room.LookupParameter(attr_name)
-                value.append(param.AsString())
-            space_param.Set("".join(value))
+                if param.HasValue:
+                    value.append(param.AsString())
+            if value:
+                space_param.Set("".join(value))
 
     # noinspection PyUnusedLocal
     def ok_click(self, sender, e):
