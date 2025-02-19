@@ -1,6 +1,7 @@
 # coding: utf8
 
 # noinspection PyUnresolvedReferences
+import System
 from Autodesk.Revit.Exceptions import (
     InvalidOperationException,
 )
@@ -27,6 +28,9 @@ class CustomizableEvent:
         self.function_or_method = None
         self.args = ()
         self.kwargs = {}
+
+        # Optional logger
+        self.logger = None
 
     def _raised_method(self):
         """!!! DO NOT USE THIS METHOD IN YOUR SCRIPT !!!
@@ -59,9 +63,11 @@ class _CustomHandler(UI.IExternalEventHandler):
     def Execute(self, application):
         try:
             self.customizable_event._raised_method()
-        except InvalidOperationException:
-            # If you don't catch this exeption Revit may crash.
-            print("InvalidOperationException catched")
+        except (InvalidOperationException, Exception, System.Exception):
+            # If you don't catch exeptions Revit may crash. All exceptions inherit from python Exception or System.Exception
+            logger = self.customizable_event.logger
+            if logger:
+                logger.exception("Failed to executer customizable event")
 
     # noinspection PyMethodMayBeStatic, PyPep8Naming
     def GetName(self):
