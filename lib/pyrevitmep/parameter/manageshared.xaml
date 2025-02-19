@@ -115,12 +115,12 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Type" MinWidth="20" SortMemberPath="type" >
+                    <DataGridTemplateColumn Header="DataType" MinWidth="20" SortMemberPath="data_type" >
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
                                     <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" IsEditable="True"
-                                              ItemsSource="{Binding parameter_types, ElementName=window}" SelectedValue="{Binding type, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" SourceUpdated="target_updated"
+                                              ItemsSource="{Binding parameter_types, ElementName=window}" SelectedValue="{Binding data_type, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" SourceUpdated="target_updated"
                                     />
                                 </Grid>
                             </DataTemplate>

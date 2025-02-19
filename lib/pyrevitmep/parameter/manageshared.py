@@ -6,12 +6,11 @@ import re
 import inspect
 
 from Autodesk.Revit import Exceptions
-from Autodesk.Revit.DB import SpecTypeId
 
 from pyrevit.script import get_logger
 from pyrevit.forms import WPFWindow, SelectFromList, alert, utils
 
-from pyrevitmep.parameter import SharedParameter
+from pyrevitmep.parameter import SharedParameter, PType
 
 from System.Collections.ObjectModel import ObservableCollection
 from System.Windows.Controls import DataGrid
@@ -23,7 +22,8 @@ logger = get_logger()
 
 
 class ManageSharedParameter(WPFWindow):
-    parameter_types = [k for k in SpecTypeId.__dict__.keys() if not k.startswith("__")]
+    parameter_types = PType.enum_generator()
+    logger.debug(parameter_types)
 
     def __init__(self):
         file_dir = os.path.dirname(__file__)
@@ -96,11 +96,7 @@ class ManageSharedParameter(WPFWindow):
                 try:
                     parameter.write_to_definition_file(definition_file)
                 except Exceptions.InvalidOperationException:
-                    logger.info(
-                        "[{}] Failed to write {}".format(
-                            inspect.stack()[1][3], parameter.name
-                        )
-                    )
+                    logger.info("[{}] Failed to write {}".format(inspect.stack()[1][3], parameter.name))
             elif parameter.new is False and parameter.changed is True:
                 logger.debug(parameter.initial_values)
                 todelete.append(SharedParameter(**parameter.initial_values))
@@ -164,7 +160,8 @@ class ManageSharedParameter(WPFWindow):
             return
 
         try:
-            self.data_grid_content.Add(SharedParameter.read_from_definition_file(definition_groups=selected_groups))
+            for parameter in SharedParameter.read_from_definition_file(definition_groups=selected_groups):
+                self.data_grid_content.Add(parameter)
         except LookupError:
             logger.exception("Failed to add to datagrid")
 
@@ -215,9 +212,7 @@ class ManageSharedParameter(WPFWindow):
         self.datagrid.Items.Refresh()
 
     @staticmethod
-    def sort_datagrid(
-        datagrid, column_index=0, list_sort_direction=ListSortDirection.Ascending
-    ):
+    def sort_datagrid(datagrid, column_index=0, list_sort_direction=ListSortDirection.Ascending):
         # type: (DataGrid, int, ListSortDirection) -> None
         """Method use to set actual initial sort.
         cf. https://stackoverflow.com/questions/16956251/sort-a-wpf-datagrid-programmatically"""
@@ -227,9 +222,7 @@ class ManageSharedParameter(WPFWindow):
         datagrid.Items.SortDescriptions.Clear()
 
         # Add the new sort description
-        datagrid.Items.SortDescriptions.Add(
-            SortDescription(column.SortMemberPath, list_sort_direction)
-        )
+        datagrid.Items.SortDescriptions.Add(SortDescription(column.SortMemberPath, list_sort_direction))
 
         # Apply sort
         for col in datagrid.Columns:
@@ -259,10 +252,7 @@ class ManageSharedParameter(WPFWindow):
         gui = cls()
         gui.ShowDialog()
         if gui.bool_return_parameters:
-            return [
-                shared_parameter.get_definition(gui.definition_file)
-                for shared_parameter in gui.data_grid_content
-            ]
+            return [shared_parameter.get_definition(gui.definition_file) for shared_parameter in gui.data_grid_content]
 
 
 if __name__ == "__main__":

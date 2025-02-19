@@ -44,8 +44,7 @@ class ManageProjectParameter(forms.WPFWindow):
 
         self.headerdict = {
             "name": "Name",
-            "pt_name": "ParameterType",
-            "ut_name": "SpecTypeId",
+            "pt_name": "SpecTypeId",
             "bip_group": "GroupTypeId",
             "is_instance": "Instance?",
         }
@@ -58,26 +57,19 @@ class ManageProjectParameter(forms.WPFWindow):
 
         # Read existing project parameters and add it to datagrid
         self.project_parameters_datagrid_content = ObservableCollection[object]()
-        for project_parameter in sorted(
-            [pp for pp in ProjectParameter.read_from_revit_doc()], key=lambda o: o.name
-        ):
+        for project_parameter in sorted([pp for pp in ProjectParameter.read_from_revit_doc()], key=lambda o: o.name):
             self.project_parameters_datagrid_content.Add(project_parameter)
         self.datagrid.ItemsSource = self.project_parameters_datagrid_content
 
         # Insert all available category to the grid
         self.category_datagrid_content = ObservableCollection[object]()
         bound_allowed_category_list = sorted(
-            [
-                BoundAllowedCategory(cat)
-                for cat in ProjectParameter.bound_allowed_category_generator()
-            ],
+            [BoundAllowedCategory(cat) for cat in ProjectParameter.bound_allowed_category_generator()],
             key=lambda o: o.name,
         )
         for category in bound_allowed_category_list:
             self.category_datagrid_content.Add(category)
-        self.category_datagrid.ItemsSource = [
-            category for category in self.category_datagrid_content
-        ]
+        self.category_datagrid.ItemsSource = [category for category in self.category_datagrid_content]
 
         self.memory_categories = CategorySet()
         for category in self.category_datagrid_content:  # type: BoundAllowedCategory
@@ -95,9 +87,7 @@ class ManageProjectParameter(forms.WPFWindow):
         if headername in self.headerdict.keys():
             if headername == "bip_group":
                 cb = DataGridComboBoxColumn()
-                cb.ItemsSource = sorted(
-                    [BipGroup(pp) for pp in BipGroup.enum_generator()]
-                )
+                cb.ItemsSource = sorted([BipGroup(pp) for pp in BipGroup.enum_generator()])
                 cb.SelectedItemBinding = Binding(headername)
                 cb.SelectedValuePath = "bip_group"
                 e.Column = cb
@@ -133,15 +123,11 @@ class ManageProjectParameter(forms.WPFWindow):
             column.DisplayIndex = headerindex[str(column.Header)]
 
     @staticmethod
-    def sortdatagrid(
-        datagrid, columnindex=0, sortdirection=ListSortDirection.Ascending
-    ):
+    def sortdatagrid(datagrid, columnindex=0, sortdirection=ListSortDirection.Ascending):
         """Sort a datagrid. Cf. https://stackoverflow.com/questions/16956251/sort-a-wpf-datagrid-programmatically"""
         column = datagrid.Columns(columnindex)
         datagrid.Items.SortDescription.Clear()
-        datagrid.Items.SortDescription.Add(
-            SortDescription(column.SortMemberPath, sortdirection)
-        )
+        datagrid.Items.SortDescription.Add(SortDescription(column.SortMemberPath, sortdirection))
         for col in datagrid.Columns:
             col.SortDirection = None
         column.SortDirection = sortdirection
@@ -155,25 +141,17 @@ class ManageProjectParameter(forms.WPFWindow):
     # noinspection PyUnusedLocal
     def save_click(self, sender, e):
         with revit.Transaction("Save project parameters"):
-            for (
-                projectparam
-            ) in self.project_parameters_datagrid_content:  # type: ProjectParameter
+            for projectparam in self.project_parameters_datagrid_content:  # type: ProjectParameter
                 bindingmap = doc.ParameterBindings  # type: BindingMap
                 try:
                     projectparam.save_to_revit_doc()
                 except Exceptions.ArgumentException:
-                    logger.info(
-                        "Saving {} failed. At least 1 category must be selected.".format(
-                            projectparam
-                        )
-                    )
+                    logger.info("Saving {} failed. At least 1 category must be selected.".format(projectparam))
 
     # noinspection PyUnusedLocal
     def delete_click(self, sender, e):
         with revit.Transaction("Delete project parameters"):
-            for projectparam in list(
-                self.datagrid.SelectedItems
-            ):  # type: ProjectParameter
+            for projectparam in list(self.datagrid.SelectedItems):  # type: ProjectParameter
                 doc.ParameterBindings.Remove(projectparam.definition)
                 self.project_parameters_datagrid_content.Remove(projectparam)
 
@@ -189,9 +167,7 @@ class ManageProjectParameter(forms.WPFWindow):
         for category in self.category_datagrid_content:  # type: BoundAllowedCategory
             category.is_bound = False
         for bound_category in self.memory_categories:
-            for (
-                category
-            ) in self.category_datagrid_content:  # type: BoundAllowedCategory
+            for category in self.category_datagrid_content:  # type: BoundAllowedCategory
                 if bound_category.Name == category.name:
                     category.is_bound = True
         self.category_datagrid.Items.Refresh()
@@ -203,9 +179,7 @@ class ManageProjectParameter(forms.WPFWindow):
         for category in self.category_datagrid_content:  # type: BoundAllowedCategory
             category.is_bound = False
         for bound_category in sender.SelectedItem.binding.Categories:
-            for (
-                category
-            ) in self.category_datagrid_content:  # type: BoundAllowedCategory
+            for category in self.category_datagrid_content:  # type: BoundAllowedCategory
                 if bound_category.Name == category.name:
                     category.is_bound = True
         self.category_datagrid.Items.Refresh()
@@ -218,9 +192,7 @@ class ManageProjectParameter(forms.WPFWindow):
         for category in ProjectParameter.bound_allowed_category_generator():
             binding.Categories.Insert(category)
         for definition in ManageSharedParameter.show_dialog():
-            self.project_parameters_datagrid_content.Add(
-                ProjectParameter(definition, binding)
-            )
+            self.project_parameters_datagrid_content.Add(ProjectParameter(definition, binding))
 
     # noinspection PyUnusedLocal
     def bind_as_instance_click(self, sender, e):
@@ -249,9 +221,7 @@ class ManageProjectParameter(forms.WPFWindow):
     @classmethod
     def show_dialog(cls):
         if doc.IsFamilyDocument:
-            forms.alert(
-                "This tool works with project documents only. Not family documents."
-            )
+            forms.alert("This tool works with project documents only. Not family documents.")
             import sys
 
             sys.exit()

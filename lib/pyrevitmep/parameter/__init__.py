@@ -24,8 +24,12 @@ from Autodesk.Revit.DB import (
     DefinitionBindingMapIterator,
     Document,
     GroupTypeId,
+    ForgeTypeId,
+    SpecUtils,
+    UnitUtils,
 )
-from pyrevit import forms, revit, HOST_APP
+from pyrevit import forms, revit, HOST_APP, script
+
 if HOST_APP.is_older_than(2023):
     from Autodesk.Revit.DB import ParameterType
 else:
@@ -33,13 +37,15 @@ else:
 
 import rsparam
 
+logger = script.get_logger()
+
 
 class SharedParameter:
     """
     Class used to manage Revit shared parameters
     :param name: Displayed shared parameter name
-    :param ptype : Parameter type like Text, PipingFlow etc…
-    :param group: Group used in parameter definition file (shared parameter file)
+    :param data_type : SpecTypeId like String, Flow etc…
+    :param group: GroupTypeId used in parameter definition file (shared parameter file)
     :param guid: Parameter globally unique identifier
     :param description: Parameter description hint
     :param modifiable: This property indicates whether this parameter can be modified by UI user or not.
@@ -49,7 +55,7 @@ class SharedParameter:
     def __init__(
         self,
         name,
-        ptype,
+        data_type,
         group=None,
         guid=None,
         description="",
@@ -89,8 +95,7 @@ class SharedParameter:
         else:
             self.guid = guid
 
-        if HOST_APP.is_older_than(2023):
-            self.check_parameter_type(ptype, name)
+        self.check_parameter_type(data_type)
 
         self.initial_values = {}
         if new is True:
@@ -123,8 +128,7 @@ class SharedParameter:
             return self.get_definitiongroup(definition_file).Definitions[self.name]
         except AttributeError as e:
             forms.alert(
-                "default error message : {} \n"
-                "Unable to retrieve definition for parameter named {}".format(
+                "default error message : {} \nUnable to retrieve definition for parameter named {}".format(
                     e.message, self.name
                 )
             )
@@ -151,7 +155,7 @@ class SharedParameter:
     def initial_values_update(self):
         self.initial_values = {
             "name": self.name,
-            "ptype": self.type,
+            "data_type": self.data_type,
             "group": self.group,
             "guid": self.guid,
             "description": self.description,
@@ -184,9 +188,7 @@ class SharedParameter:
         return shared_parameter_list
 
     @classmethod
-    def read_from_definition_file(
-        cls, definition_groups=None, definition_names=None, definition_file=None
-    ):
+    def read_from_definition_file(cls, definition_groups=None, definition_names=None, definition_file=None):
         # type: (list, list, DefinitionFile) -> list
         """
         Retrieve definitions from a definition file
@@ -203,9 +205,7 @@ class SharedParameter:
         shared_parameter_list = []
 
         for dg in definition_file.Groups:
-            if definition_groups and dg.Name not in (
-                dg.Name for dg in definition_groups
-            ):
+            if definition_groups and dg.Name not in (dg.Name for dg in definition_groups):
                 continue
             for definition in dg.Definitions:
                 if definition_names and definition.Name not in definition_names:
@@ -213,7 +213,7 @@ class SharedParameter:
                 shared_parameter_list.append(
                     cls(
                         definition.Name,
-                        definition.GetDataType(),
+                        PType(definition.GetDataType()),
                         dg.Name,
                         definition.GUID,
                         definition.Description,
@@ -224,19 +224,6 @@ class SharedParameter:
                 )
 
         return shared_parameter_list
-
-    @staticmethod
-    def from_rsparam(param):
-        return SharedParameter(
-            param.name,
-            getattr(SpecTypeId, param.datatype.title()),
-            param.group.name,
-            param.guid,
-            param.desc,
-            param.usermod,
-            param.visible,
-            new=False,
-        )
 
     def write_to_definition_file(self, definition_file=None, warning=True):
         # type: (DefinitionFile, bool) -> ExternalDefinition
@@ -257,9 +244,7 @@ class SharedParameter:
             definition_group = definition_file.Groups.Create(self.group)
 
         if definition_group.Definitions[self.name] and warning:
-            forms.alert(
-                "A parameter definition named {} already exist".format(self.name)
-            )
+            forms.alert("A parameter definition named {} already exist".format(self.name))
             return
         else:
             external_definition_create_options = ExternalDefinitionCreationOptions(
@@ -271,39 +256,26 @@ class SharedParameter:
                 Visible=self.visible,
             )
             try:
-                definition = definition_group.Definitions.Create(
-                    external_definition_create_options
-                )
+                definition = definition_group.Definitions.Create(external_definition_create_options)
             except Exceptions.ArgumentException:
-                forms.alert(
-                    "A parameter with same Guid already exist. Parameter: {} will be ignored".format(
-                        self.name
-                    )
-                )
+                forms.alert("A parameter with same Guid already exist. Parameter: {} will be ignored".format(self.name))
                 return
         self.initial_values_update()
         self.new = self.changed = False
         return definition
 
     @staticmethod
-    def delete_from_definition_file(
-        to_del_params, definition_file_path=None, warning=True
-    ):
+    def delete_from_definition_file(to_del_params, definition_file_path=None, warning=True):
         # type: (iter, DefinitionFile, bool) -> None
         try:
             params = rsparam.get_params(definition_file_path, encoding="utf-16")
         except IOError:
-            forms.alert(
-                "Unable to delete parameters from file :\n{}".format(to_del_params)
-            )
+            forms.alert("Unable to delete parameters from file :\n{}".format(to_del_params))
             return
 
         def to_delete(param):
             for to_del_param in to_del_params[:]:
-                if (
-                    to_del_param.name == param.name
-                    and to_del_param.group == param.group.name
-                ):
+                if to_del_param.name == param.name and to_del_param.group == param.group.name:
                     return True
             else:
                 return False
@@ -325,9 +297,7 @@ class SharedParameter:
         :rtype: DefinitionFile
         """
         if path_and_name is None:
-            path_and_name = forms.save_file(
-                file_ext="txt", default_name="pyrevit_sharedparameters"
-            )
+            path_and_name = forms.save_file(file_ext="txt", default_name="pyrevit_sharedparameters")
         with open(path_and_name, "w"):
             pass
         HOST_APP.app.SharedParametersFilename = path_and_name
@@ -340,23 +310,22 @@ class SharedParameter:
             HOST_APP.app.SharedParametersFilename = path
             return cls.get_definition_file()
 
-    def check_parameter_type(self, ptype):
+    def check_parameter_type(self, data_type):
         # Check if given parameter type is valid. If not user is prompted to choose one.
-        if isinstance(ptype, ParameterType):
-            self.type = ptype
+        if isinstance(data_type, PType):
+            self.data_type = data_type
+        elif isinstance(data_type, str):
+            self.data_type = PType(getattr(SpecTypeId, data_type))
         else:
-            try:
-                self.type = getattr(ParameterType, ptype)
-            except AttributeError:
-                self.type = ptype
-                while not isinstance(self.type, ParameterType):
-                    self.type = forms.SelectFromList.show(
-                        PType.enum_generator(),
-                        "Parameter {} ParameterType: {} not valid. Please select a parameter type".format(
-                            self.name, ptype
-                        ),
-                    )
-
+            logger.debug(data_type)
+            self.data_type = data_type
+            while not isinstance(self.type, PType):
+                self.data_type = forms.SelectFromList.show(
+                    PType.enum_generator(),
+                    "Parameter {} ParameterType: {} not valid. Please select a parameter type".format(
+                        self.name, data_type
+                    ),
+                )
 
 
 class ProjectParameter:
@@ -387,21 +356,17 @@ class ProjectParameter:
     def read_from_revit_doc(cls, doc=revit.doc):
         # type: (Document) -> iter
         """Generator which return all ProjectParameter in document"""
-        iterator = (
-            doc.ParameterBindings.ForwardIterator()
-        )  # type: DefinitionBindingMapIterator
+        iterator = doc.ParameterBindings.ForwardIterator()  # type: DefinitionBindingMapIterator
         for binding in iterator:  # type: ElementBinding
             definition = iterator.Key
             yield cls(definition, binding)
 
     def save_to_revit_doc(self, doc=revit.doc):
         """Save current project parameter to Revit doc.
-        Need to be used in an open Transaction. """
+        Need to be used in an open Transaction."""
         bindingmap = doc.ParameterBindings  # type: BindingMap
         if bindingmap[self.definition]:
-            bindingmap.ReInsert(
-                self.definition, self.binding, self.group
-            )
+            bindingmap.ReInsert(self.definition, self.binding, self.group)
         else:
             bindingmap.Insert(self.definition, self.binding, self.group)
 
@@ -441,16 +406,8 @@ class FamilyParameter:
             setattr(self, key, value)
 
         if not self.definition:
-            self.type = (
-                self.type
-                if isinstance(self.type, PType)
-                else PType(ParameterType.Length)
-            )
-            self.group = (
-                self.group
-                if isinstance(self.group, BipGroup)
-                else BipGroup(BuiltInParameterGroup.PG_TEXT)
-            )
+            self.type = self.type if isinstance(self.type, PType) else PType(ParameterType.Length)
+            self.group = self.group if isinstance(self.group, BipGroup) else BipGroup(BuiltInParameterGroup.PG_TEXT)
             self.initial_values = dict()
         else:
             self.type = PType(self.definition.ParameterType)
@@ -470,9 +427,7 @@ class FamilyParameter:
     def read_from_revit_doc(cls, doc=revit.doc):
         """Generator which return all FamilyParameter in document"""
         # type: (Document) -> iter
-        iterator = (
-            doc.FamilyManager.Parameters.ForwardIterator()
-        )  # type: DefinitionBindingMapIterator
+        iterator = doc.FamilyManager.Parameters.ForwardIterator()  # type: DefinitionBindingMapIterator
         for parameter in iterator:  # type: Autodesk.Revit.DB.FamilyParameter
             # Exclude built in parameters as they cannot be copied
             if parameter.Definition.BuiltInParameter == BuiltInParameter.INVALID:
@@ -503,14 +458,12 @@ class FamilyParameter:
     def save_to_revit(self, doc=revit.doc):
         # type: (Document) -> Autodesk.Revit.DB.FamilyParameter
         """Save current family parameter to Revit doc.
-        Need to be used in an open Transaction. """
+        Need to be used in an open Transaction."""
 
         # Create any new shared family parameter
         if self.is_new and self.is_shared:
             try:
-                return doc.FamilyManager.AddParameter(
-                    self.definition, self.group.enum_member, self.is_instance
-                )
+                return doc.FamilyManager.AddParameter(self.definition, self.group.enum_member, self.is_instance)
             except Exceptions.InvalidObjectException:
                 new_shared_param = SharedParameter(
                     self.name,
@@ -519,9 +472,7 @@ class FamilyParameter:
                     guid=self.GUID,
                 )
                 new_shared_param.write_to_definition_file()
-                return doc.FamilyManager.AddParameter(
-                    self.definition, self.group.enum_member, self.is_instance
-                )
+                return doc.FamilyManager.AddParameter(self.definition, self.group.enum_member, self.is_instance)
 
         # Create any new non shared family parameter
         elif self.is_new:
@@ -560,25 +511,18 @@ class FamilyParameter:
                     return fp
 
             # Case 2 : shared/non shared switched but no type change
-            if (
-                self.is_shared != fp.IsShared
-                and self.type == fp.Definition.ParameterType
-            ):
+            if self.is_shared != fp.IsShared and self.type == fp.Definition.ParameterType:
                 if self.is_shared:
                     var_attr = SharedParameter.get_definition_by_name(self.name)
                 else:
                     var_attr = self.name
-                return doc.FamilyManager.ReplaceParameter(
-                    fp, var_attr, self.group.enum_member, self.is_instance
-                )
+                return doc.FamilyManager.ReplaceParameter(fp, var_attr, self.group.enum_member, self.is_instance)
 
             # Case 3 : any ParameterType changed and/or shared parameter has been renamed
             doc.FamilyManager.RemoveParameter(fp)
             if self.is_shared:
                 external_definition = SharedParameter.get_definition_by_name(self.name)
-                return doc.FamilyManager.AddParameter(
-                    external_definition, self.group.enum_member, self.is_instance
-                )
+                return doc.FamilyManager.AddParameter(external_definition, self.group.enum_member, self.is_instance)
             else:
                 return doc.FamilyManager.AddParameter(
                     self.name,
@@ -590,7 +534,7 @@ class FamilyParameter:
     def delete_from_revit(self, doc):
         # type: (Document) -> None
         """Delete current family parameter from current Revit doc.
-        Need to be used in an open Transaction. """
+        Need to be used in an open Transaction."""
         doc.FamilyManager.RemoveParameter(doc.FamilyManager.get_Parameter(self.name))
 
 
@@ -631,11 +575,11 @@ class RevitEnum:
         return locale.strxfrm(self.name) < locale.strxfrm(other.name)
 
     @property
-    def name(self):
+    def name(self, label=None):
+        if not label:
+            label = LabelUtils.GetLabelFor(self.enum_member)
         try:
-            return "{}{}({})".format(
-                LabelUtils.GetLabelFor(self.enum_member), 4 * " ", self.enum_member
-            )
+            return "{}{}({})".format(label, 4 * " ", self.enum_member)
         except Exceptions.InvalidOperationException:
             return "Invalid"
 
@@ -660,14 +604,22 @@ class RevitEnum:
 class BipGroup(RevitEnum):
     @staticmethod
     def enum_generator():
-        for bip_group in (getattr(GroupTypeId, name) for name in GroupTypeId.__dict__.keys() if not name.startswith("__")):
+        for bip_group in (
+            getattr(GroupTypeId, name) for name in GroupTypeId.__dict__.keys() if not name.startswith("__")
+        ):
             yield bip_group
+
+    @property
+    def name(self):
+        return super().name(LabelUtils.GetLabelForGroup())
 
 
 class PType(RevitEnum):
     @staticmethod
     def enum_generator():
-        for data_type in (getattr(SpecTypeId, name) for name in SpecTypeId.__dict__.keys() if not name.startswith("__")):
+        for data_type in (
+            getattr(SpecTypeId, name) for name in SpecTypeId.__dict__.keys() if not name.startswith("__")
+        ):
             yield data_type
 
     @classmethod
@@ -677,3 +629,7 @@ class PType(RevitEnum):
                 return item
         else:
             print("Error with {}".format(text))
+
+    @property
+    def name(self):
+        return super().name(LabelUtils.GetLabelForSpec())
