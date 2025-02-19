@@ -23,10 +23,13 @@ from Autodesk.Revit.DB import (
     BuiltInParameterGroup,
     DefinitionBindingMapIterator,
     Document,
+    GroupTypeId,
 )
 from pyrevit import forms, revit, HOST_APP
 if HOST_APP.is_older_than(2023):
     from Autodesk.Revit.DB import ParameterType
+else:
+    from Autodesk.Revit.DB import SpecTypeId
 
 import rsparam
 
@@ -210,7 +213,7 @@ class SharedParameter:
                 shared_parameter_list.append(
                     cls(
                         definition.Name,
-                        definition.ParameterType,
+                        definition.GetDataType(),
                         dg.Name,
                         definition.GUID,
                         definition.Description,
@@ -226,7 +229,7 @@ class SharedParameter:
     def from_rsparam(param):
         return SharedParameter(
             param.name,
-            PType.from_text(param.datatype),
+            getattr(SpecTypeId, param.datatype.title()),
             param.group.name,
             param.guid,
             param.desc,
@@ -362,9 +365,8 @@ class ProjectParameter:
         self.definition = definition
         self.binding = binding
         self.category_set = binding.Categories
-        self.bip_group = BipGroup(definition.ParameterGroup)
-        self.pt_name = LabelUtils.GetLabelFor(definition.ParameterType)
-        self.ut_name = LabelUtils.GetLabelFor(definition.UnitType)
+        self.group = definition.GetGroupTypeId()
+        self.data_type_name = LabelUtils.GetLabelForSpec(definition.GetDataType())
         if isinstance(binding, InstanceBinding):
             self.is_instance = True
         else:
@@ -380,10 +382,6 @@ class ProjectParameter:
     @property
     def parameter_type(self):
         return self.definition.ParameterType
-
-    @property
-    def unit_type(self):
-        return self.definition.UnitType
 
     @classmethod
     def read_from_revit_doc(cls, doc=revit.doc):
@@ -402,10 +400,10 @@ class ProjectParameter:
         bindingmap = doc.ParameterBindings  # type: BindingMap
         if bindingmap[self.definition]:
             bindingmap.ReInsert(
-                self.definition, self.binding, self.bip_group.enum_member
+                self.definition, self.binding, self.group
             )
         else:
-            bindingmap.Insert(self.definition, self.binding, self.bip_group.enum_member)
+            bindingmap.Insert(self.definition, self.binding, self.group)
 
     @staticmethod
     def all_categories():
@@ -662,15 +660,15 @@ class RevitEnum:
 class BipGroup(RevitEnum):
     @staticmethod
     def enum_generator():
-        for bip_group in BuiltInParameterGroup.GetValues(BuiltInParameterGroup):
-            yield bip_group  # type: ParameterType
+        for bip_group in (getattr(GroupTypeId, name) for name in GroupTypeId.__dict__.keys() if not name.startswith("__")):
+            yield bip_group
 
 
 class PType(RevitEnum):
     @staticmethod
     def enum_generator():
-        for parameter_type in ParameterType.GetValues(ParameterType):
-            yield parameter_type  # type: ParameterType
+        for data_type in (getattr(SpecTypeId, name) for name in SpecTypeId.__dict__.keys() if not name.startswith("__")):
+            yield data_type
 
     @classmethod
     def from_text(cls, text):

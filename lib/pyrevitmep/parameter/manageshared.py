@@ -6,12 +6,10 @@ import re
 import inspect
 
 from Autodesk.Revit import Exceptions
-from Autodesk.Revit.DB import ParameterType
+from Autodesk.Revit.DB import SpecTypeId
 
 from pyrevit.script import get_logger
 from pyrevit.forms import WPFWindow, SelectFromList, alert, utils
-
-import rsparam
 
 from pyrevitmep.parameter import SharedParameter
 
@@ -20,14 +18,12 @@ from System.Windows.Controls import DataGrid
 from System.ComponentModel import ListSortDirection, SortDescription
 
 from pyrevit import HOST_APP
-if HOST_APP.is_older_than(2023):
-    from Autodesk.Revit.DB import ParameterType
 
 logger = get_logger()
 
 
 class ManageSharedParameter(WPFWindow):
-    parameter_types = ParameterType.GetValues(ParameterType)
+    parameter_types = [k for k in SpecTypeId.__dict__.keys() if not k.startswith("__")]
 
     def __init__(self):
         file_dir = os.path.dirname(__file__)
@@ -148,10 +144,8 @@ class ManageSharedParameter(WPFWindow):
     # noinspection PyUnusedLocal
     def load_from_definition_file_click(self, sender, e):
         try:
-            groups = rsparam.get_paramgroups(
-                self.definition_file_path, encoding="utf-16"
-            )
-            available_groups = sorted(groups, key=lambda x: locale.strxfrm(x.name))
+            groups = set(g for g in self.definition_file.Groups)
+            available_groups = sorted(groups, key=lambda x: locale.strxfrm(x.Name))
         except IOError:
             self.invalid_definition_file()
             return
@@ -161,7 +155,7 @@ class ManageSharedParameter(WPFWindow):
             "Select groups",
             400,
             300,
-            name_attr="name",
+            name_attr="Name",
             multiselect=True,
         )
         logger.debug("{} result = {}".format(SelectFromList.__name__, selected_groups))
@@ -170,13 +164,9 @@ class ManageSharedParameter(WPFWindow):
             return
 
         try:
-            for parameter in rsparam.get_params(
-                self.definition_file_path, encoding="utf-16"
-            ):
-                if parameter.group in selected_groups:
-                    self.data_grid_content.Add(SharedParameter.from_rsparam(parameter))
-        except LookupError as e:
-            logger.info(e)
+            self.data_grid_content.Add(SharedParameter.read_from_definition_file(definition_groups=selected_groups))
+        except LookupError:
+            logger.exception("Failed to add to datagrid")
 
     # noinspection PyUnusedLocal
     def add(self, sender, e):

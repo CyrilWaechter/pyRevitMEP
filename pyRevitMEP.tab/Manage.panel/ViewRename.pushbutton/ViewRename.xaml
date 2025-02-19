@@ -20,9 +20,9 @@
                     <CheckBox Name="cb_all" IsThreeState="False" Checked="cb_all_checked_changed"
                               Unchecked="cb_all_checked_changed">All</CheckBox>
                     <StackPanel Margin="20,5">
-                        <CheckBox Name="cb_viewplan" IsChecked="True" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewPlan</CheckBox>
-                        <CheckBox Name="cb_view3D" IsChecked="True" Checked="cb_checked_changed" Unchecked="cb_checked_changed">View3D</CheckBox>
-                        <CheckBox Name="cb_viewsection" IsChecked="True" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewSection</CheckBox>
+                        <CheckBox Name="cb_ViewPlan" IsChecked="True" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewPlan</CheckBox>
+                        <CheckBox Name="cb_View3D" IsChecked="True" Checked="cb_checked_changed" Unchecked="cb_checked_changed">View3D</CheckBox>
+                        <CheckBox Name="cb_ViewSection" IsChecked="True" Checked="cb_checked_changed" Unchecked="cb_checked_changed">ViewSection</CheckBox>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel  Grid.Column="2">
@@ -39,28 +39,28 @@
             <!--ViewPlan-->
             <GroupBox Header="ViewPlan pattern" Margin="0,0,10,0">
                 <StackPanel Margin="10">
-                    <TextBlock x:Name="viewplan_preview"
+                    <TextBlock x:Name="ViewPlan_preview"
                                Grid.Column="2"
                                Margin="10"
                                HorizontalAlignment="Center"
                                FontWeight="Bold"
                                Foreground="#00f"/>
-                    <TextBlock x:Name="viewplan_toname_preview"
+                    <TextBlock x:Name="ViewPlan_toname_preview"
                                Grid.Column="2"
                                Margin="10"
                                HorizontalAlignment="Center"
                                FontWeight="Bold" Foreground="#d3d3d3"/>
-                    <TextBox x:Name="viewplan_pattern" SelectionChanged="pattern_changed"
+                    <TextBox x:Name="ViewPlan_pattern" SelectionChanged="pattern_changed"
                              Width="Auto" Height="30"
                              Grid.Column="0"
                              Margin="0,10,0,0"
                              HorizontalContentAlignment="Center"
                              VerticalContentAlignment="Center" />
                     <Button Content="Add this parameter at cursor position"
-                            Name="btn_viewplan_add_parameter" Click="btn_add_parameter_click"
+                            Name="btn_ViewPlan_add_parameter" Click="btn_add_parameter_click"
                             HorizontalAlignment="Center"
                             Padding="5"/>
-                    <ComboBox x:Name="cb_viewplan_parameters"
+                    <ComboBox x:Name="cb_ViewPlan_parameters"
                               SelectedIndex="0"
                               IsEditable="True"
                               Padding="5">
@@ -84,28 +84,28 @@
                 </StackPanel>
             </GroupBox>
 
-            <!--view3D-->
+            <!--View3D-->
             <GroupBox Header="View3D pattern" Margin="0,0,10,0">
                 <StackPanel Margin="10">
-                    <TextBlock x:Name="view3D_preview"
+                    <TextBlock x:Name="View3D_preview"
                                Grid.Column="2"
                                Margin="10"
                                HorizontalAlignment="Center"
                                FontWeight="Bold"
                                Foreground="#00f"/>
-                    <TextBlock x:Name="view3D_toname_preview"
+                    <TextBlock x:Name="View3D_toname_preview"
                                Grid.Column="2"
                                HorizontalAlignment="Center"
                                FontWeight="Bold" Foreground="#d3d3d3"/>
-                    <TextBox x:Name="view3D_pattern" SelectionChanged="pattern_changed"
+                    <TextBox x:Name="View3D_pattern" SelectionChanged="pattern_changed"
                              Width="Auto" Height="30"
                              Grid.Column="0" Margin="0,20,0,0"
                              HorizontalContentAlignment="Center"
                              VerticalContentAlignment="Center" />
                     <Button Content="Add this parameter at cursor position"
-                            Name="btn_view3D_add_parameter" Click="btn_add_parameter_click"
+                            Name="btn_View3D_add_parameter" Click="btn_add_parameter_click"
                             HorizontalAlignment="Center" Padding="5"/>
-                    <ComboBox x:Name="cb_view3D_parameters" SelectedIndex="0" IsEditable="True" Padding="5">
+                    <ComboBox x:Name="cb_View3D_parameters" SelectedIndex="0" IsEditable="True" Padding="5">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -129,27 +129,27 @@
             <!--ViewSection-->
             <GroupBox Header="ViewSection pattern" Margin="0,0,10,0">
                 <StackPanel Margin="10">
-                    <TextBlock x:Name="viewsection_preview"
+                    <TextBlock x:Name="ViewSection_preview"
                                Grid.Column="2"
                                Margin="10"
                                HorizontalAlignment="Center"
                                FontWeight="Bold"
                                Foreground="#00f"/>
-                    <TextBlock x:Name="viewsection_toname_preview"
+                    <TextBlock x:Name="ViewSection_toname_preview"
                                Grid.Column="2"
                                HorizontalAlignment="Center"
                                FontWeight="Bold"
                                Foreground="#d3d3d3"/>
-                    <TextBox x:Name="viewsection_pattern" SelectionChanged="pattern_changed"
+                    <TextBox x:Name="ViewSection_pattern" SelectionChanged="pattern_changed"
                              Width="Auto"
                              Height="30"
                              Grid.Column="0"
                              Margin="0,20,0,0"
                              HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                     <Button Content="Add this parameter at cursor position"
-                            Name="btn_viewsection_add_parameter" Click="btn_add_parameter_click"
+                            Name="btn_ViewSection_add_parameter" Click="btn_add_parameter_click"
                             HorizontalAlignment="Center" Padding="5"/>
-                    <ComboBox x:Name="cb_viewsection_parameters" SelectedIndex="0" IsEditable="True" Padding="5">
+                    <ComboBox x:Name="cb_ViewSection_parameters" SelectedIndex="0" IsEditable="True" Padding="5">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>

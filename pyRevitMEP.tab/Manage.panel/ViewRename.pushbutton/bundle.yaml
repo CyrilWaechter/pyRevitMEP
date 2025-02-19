@@ -6,5 +6,8 @@ tooltip:
     Renommer les vues en respectant une convention basée sur les paramètres.
   en_us: |
     Rename selected views according to a pattern.
-help_url: "{{youtube}}"
+help_url: "https://youtu.be/OdEty6okZ84"
 author: "{{author}}"
+
+engine:
+  persistent: true

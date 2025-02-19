@@ -36,7 +36,7 @@
                                     Load from a csv file
                                 </TextBlock>
                                 <TextBlock>
-                                    Format : Name, ParameterType, Group, GUID, Description, Modifiable, Visible <LineBreak />
+                                    Format : Name, DataType, Group, GUID, Description, Modifiable, Visible <LineBreak />
                                     <LineBreak />
                                     Example: <LineBreak />
                                     Thickness,Lenght,MyGroup<LineBreak />

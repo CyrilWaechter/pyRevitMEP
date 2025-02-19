@@ -45,8 +45,8 @@ class ManageProjectParameter(forms.WPFWindow):
         self.headerdict = {
             "name": "Name",
             "pt_name": "ParameterType",
-            "ut_name": "UnitType",
-            "bip_group": "ParameterGroup",
+            "ut_name": "SpecTypeId",
+            "bip_group": "GroupTypeId",
             "is_instance": "Instance?",
         }
 
