@@ -57,6 +57,7 @@ class Offset:
             BuiltInCategory.OST_DuctTerminal,
             BuiltInCategory.OST_PlumbingFixtures,
             BuiltInCategory.OST_GenericModel,
+            BuiltInCategory.OST_MechanicalEquipment,
         }
         no_offset_from_2020 = {
             BuiltInCategory.OST_DuctAccessory,
