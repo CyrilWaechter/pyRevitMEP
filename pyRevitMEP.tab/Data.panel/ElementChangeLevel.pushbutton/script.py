@@ -68,9 +68,7 @@ class Offset:
             BuiltInCategory.OST_ConduitFitting,
         }
         if is_revit_2020_or_above:
-            self.category_ids_to_offset = self.get_category_ids(
-                to_offset.difference(no_offset_from_2020)
-            )
+            self.category_ids_to_offset = self.get_category_ids(to_offset.difference(no_offset_from_2020))
         else:
             self.category_ids_to_offset = self.get_category_ids(to_offset)
         logger.debug(self.category_ids_to_offset)
@@ -124,14 +122,8 @@ def change_level(ref_level):
                 el_level = doc.GetElement(el.LevelId)
                 el_level_param = el.get_Parameter(BuiltInParameter.FAMILY_LEVEL_PARAM)
                 if offset.is_required(el):
-                    el_param_offset = el.get_Parameter(
-                        BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM
-                    )
-                    el_newoffset = (
-                        el_param_offset.AsDouble()
-                        + el_level.Elevation
-                        - ref_level.Elevation
-                    )
+                    el_param_offset = el.get_Parameter(BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM)
+                    el_newoffset = el_param_offset.AsDouble() + el_level.Elevation - ref_level.Elevation
                     el_param_offset.Set(el_newoffset)
                 el_level_param.Set(ref_level.Id)
             elif isinstance(el, Space):
@@ -144,21 +136,15 @@ def change_level(ref_level):
                     if not value:
                         continue
                     newspace.LookupParameter(param.Definition.Name).Set(value)
-                newspace.get_Parameter(BuiltInParameter.ROOM_UPPER_LEVEL).Set(
-                    ref_level.Id
-                )
-                upper_offset = newspace.get_Parameter(
-                    BuiltInParameter.ROOM_UPPER_OFFSET
-                )
+                newspace.get_Parameter(BuiltInParameter.ROOM_UPPER_LEVEL).Set(ref_level.Id)
+                upper_offset = newspace.get_Parameter(BuiltInParameter.ROOM_UPPER_OFFSET)
                 if upper_offset.AsDouble() <= 0:
                     upper_offset.Set(1 / 0.3048)
                 doc.Delete(el.Id)
 
             # Ignore other objects
             else:
-                logger.info(
-                    "Warning. Following element was ignored. It is probably an hosted element."
-                )
+                logger.info("Warning. Following element was ignored. It is probably an hosted element.")
                 logger.info(el)
 
 
