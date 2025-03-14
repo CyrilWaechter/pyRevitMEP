@@ -1,6 +1,10 @@
 layout:
   - Manage
   - Modify
+  - Split Pipes
+  - Code
+  - Renumber Mark
+  - Clear Mark
   - Create
   - Data
   - Check
