@@ -20,7 +20,6 @@ from Autodesk.Revit.DB import (
     ElementBinding,
     Category,
     LabelUtils,
-    BuiltInParameterGroup,
     DefinitionBindingMapIterator,
     Document,
     GroupTypeId,
@@ -29,6 +28,11 @@ from Autodesk.Revit.DB import (
     UnitUtils,
 )
 from pyrevit import forms, revit, HOST_APP, script
+
+if HOST_APP.is_older_than(2024):
+    from Autodesk.Revit.DB import BuiltInParameterGroup
+else:
+    from Autodesk.Revit.DB import GroupTypeId
 
 if HOST_APP.is_older_than(2023):
     from Autodesk.Revit.DB import ParameterType
@@ -385,6 +389,12 @@ class ProjectParameter:
                 yield category
 
 
+def get_default_built_in_parameter_group():
+    try:
+        return GroupTypeId.Text
+    except NameError:
+        return BipGroup(BuiltInParameterGroup.PG_TEXT)
+
 class FamilyParameter:
     """class handle family parameters creation, copy and imports"""
 
@@ -407,7 +417,7 @@ class FamilyParameter:
 
         if not self.definition:
             self.type = self.type if isinstance(self.type, PType) else PType(ParameterType.Length)
-            self.group = self.group if isinstance(self.group, BipGroup) else BipGroup(BuiltInParameterGroup.PG_TEXT)
+            self.group = self.group if isinstance(self.group, BipGroup) else get_default_built_in_parameter_group()
             self.initial_values = dict()
         else:
             self.type = PType(self.definition.ParameterType)
