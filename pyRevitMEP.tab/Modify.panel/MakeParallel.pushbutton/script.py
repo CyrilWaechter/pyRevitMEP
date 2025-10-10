@@ -32,18 +32,14 @@ logger = script.get_logger()
 def element_selection():
     try:
         with forms.WarningBar(title="Pick reference element"):
-            reference = uidoc.Selection.PickObject(
-                ObjectType.Element, "Pick reference element"
-            )
+            reference = uidoc.Selection.PickObject(ObjectType.Element, "Pick reference element")
     except Exceptions.OperationCanceledException:
         return False
 
     try:
         element1 = doc.GetElement(reference)
         with forms.WarningBar(title="Pick target element"):
-            reference = uidoc.Selection.PickObject(
-                ObjectType.Element, "Pick target element"
-            )
+            reference = uidoc.Selection.PickObject(ObjectType.Element, "Pick target element")
         element2 = doc.GetElement(reference)
 
         logger.debug("ELEMENTS \n 1: {} \n 2: {}".format(element1, element2))
@@ -61,11 +57,7 @@ def element_selection():
 
         logger.debug("ANGLE : {}".format(angle))
         logger.debug("NORMAL : {}".format(normal))
-        logger.debug(
-            "DIRECTION \n 1: {} \n 2: {}".format(
-                direction(element1), direction(element2)
-            )
-        )
+        logger.debug("DIRECTION \n 1: {} \n 2: {}".format(direction(element1), direction(element2)))
 
         axis = Line.CreateBound(origin(element2), origin(element2) + normal)
 
@@ -86,18 +78,14 @@ def element_selection():
 
 def get_view_from(element):
     # type: (Element) -> ViewSection
-    sketch_parameter = element.get_Parameter(
-        BuiltInParameter.VIEW_FIXED_SKETCH_PLANE
-    )  # type: SketchPlane
+    sketch_parameter = element.get_Parameter(BuiltInParameter.VIEW_FIXED_SKETCH_PLANE)  # type: SketchPlane
     return doc.GetElement(doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId)
 
 
 def get_elevation_marker(element):
     # type: (Element) -> ElevationMarker
     view = get_view_from(element)
-    for elevation_marker in FilteredElementCollector(doc).OfClass(
-        ElevationMarker
-    ):  # type: ElevationMarker
+    for elevation_marker in FilteredElementCollector(doc).OfClass(ElevationMarker):  # type: ElevationMarker
         for i in range(4):
             id = elevation_marker.GetViewId(i)
             if view.Id == id:
@@ -106,12 +94,8 @@ def get_elevation_marker(element):
 
 def section_direction(element):
     # type: (Element) -> XYZ
-    sketch_parameter = element.get_Parameter(
-        BuiltInParameter.VIEW_FIXED_SKETCH_PLANE
-    )  # type: SketchPlane
-    view = doc.GetElement(
-        doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId
-    )  # type: ViewSection
+    sketch_parameter = element.get_Parameter(BuiltInParameter.VIEW_FIXED_SKETCH_PLANE)  # type: SketchPlane
+    view = doc.GetElement(doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId)  # type: ViewSection
     return view.RightDirection
 
 
@@ -163,12 +147,8 @@ def direction(element):
 
 def section_origin(element):
     # type: (Element) -> XYZ
-    sketch_parameter = element.get_Parameter(
-        BuiltInParameter.VIEW_FIXED_SKETCH_PLANE
-    )  # type: SketchPlane
-    view = doc.GetElement(
-        doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId
-    )  # type: ViewSection
+    sketch_parameter = element.get_Parameter(BuiltInParameter.VIEW_FIXED_SKETCH_PLANE)  # type: SketchPlane
+    view = doc.GetElement(doc.GetElement(sketch_parameter.AsElementId()).OwnerViewId)  # type: ViewSection
     return view.Origin
 
 
