@@ -12,6 +12,8 @@ from Autodesk.Revit.DB import (
     BuiltInParameter,
     ElevationMarker,
     ViewType,
+    Options,
+    Element,
 )
 from Autodesk.Revit.UI.Selection import ObjectType
 from Autodesk.Revit import Exceptions
@@ -132,6 +134,14 @@ def family_direction(element):
     return element.FacingOrientation
 
 
+def scope_box(element):
+    # type: (Element) -> XYZ
+    options = Options()
+    options.View = doc.ActiveView
+    for geom in element.Geometry[options]:
+        return geom.Direction
+
+
 def direction(element):
     direction_funcs = (
         grid_direction,
@@ -139,6 +149,7 @@ def direction(element):
         family_direction,
         line_direction,
         section_direction,
+        scope_box,
     )
 
     for func in direction_funcs:
@@ -180,6 +191,14 @@ def family_origin(element):
     return element.GetTransform().Origin
 
 
+def scope_box_origin(element):
+    # type: (Element) -> XYZ
+    options = Options()
+    options.View = doc.ActiveView
+    for geom in element.Geometry[options]:
+        return geom.Origin
+
+
 def origin(element):
     origin_funcs = (
         grid_origin,
@@ -187,6 +206,7 @@ def origin(element):
         family_origin,
         line_origin,
         section_origin,
+        scope_box_origin,
     )
 
     for func in origin_funcs:
