@@ -18,6 +18,7 @@ See this link for a copy of the GNU General Public License protecting this packa
 https://github.com/CyrilWaechter/pypevitmep/blob/master/LICENSE
 """
 
+import ast
 from System import Guid
 
 from Autodesk.Revit.DB import (
@@ -276,8 +277,8 @@ class ViewRename(WPFWindow):
             parameter_combobox.ItemsSource = param_list
             pattern = None
             param = revit.doc.ProjectInformation.LookupParameter(self.storage_pattern_parameter)
-            if param:
-                pattern = param.AsString()[view_class]
+            if param and param.AsString():
+                pattern = ast.literal_eval(param.AsString())[name]
             if not pattern:
                 # Try to load patterns from config file
                 pattern = getattr(my_config, name, None)
@@ -321,7 +322,7 @@ class ViewRename(WPFWindow):
             view_class_checkbox = getattr(self, "cb_{}".format(name))
             if view_class_checkbox.IsChecked:
                 pattern_textbox = getattr(self, "{}_pattern".format(name))
-                pattern_dict[view_class] = pattern_textbox.Text
+                pattern_dict[name] = pattern_textbox.Text
 
         with revit.Transaction("Saving configuration to parameter"):
             param.Set(str(pattern_dict).encode("utf8"))
