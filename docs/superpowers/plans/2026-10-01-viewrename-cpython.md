@@ -19,6 +19,7 @@
 - Pattern semantics to preserve: `name(Param Name)`, `bip(BUILTIN_NAME)`, `Guid('…')`; display value via `AsString()` for String storage else `AsValueString()`; unresolvable reference → empty string.
 - Commits: `ViewRename: <description>` (repo convention).
 - Remote workflow: use the `remote-revit` skill and `AGENTS.local.md`. Extension path `C:\Users\Marie\AppData\Roaming\pyRevit\Extensions\PyRevitMEP.extension`; pyRevit CLI `C:\Users\Marie\AppData\Roaming\pyRevit-Master\bin\pyrevit.exe`. Remote output must be ASCII.
+- Probe-verified engine reality (2026-10-01): `pyrevit run` journal playback crashes on `pyrevit.revit`/`pyrevit.script` imports, cannot show dialogs, and exposes no document and no lib paths; UI-mode button execution has all of them. Use `pyrevit run` only for throwaway logic probes (with explicit `sys.path` insertion), and UI-mode test buttons in the throwaway `ProbeOC` extension (user clicks once; results written to a file read over SSH) for storage/UI/integration.
 - Scratch models are copies; never test on originals. `%TEMP%` = `C:\Users\Marie\AppData\Local\Temp`.
 - Local test command: `python3 -m pytest tests/viewrename -q` (dev-only tests; not loaded by pyRevit). Formatting: `ruff format` then `ruff check` on touched files.
 - Do not commit `AGENTS.md`, `AGENTS.local.md`, or `pyproject.toml` (pre-existing untracked user files).
@@ -736,7 +737,7 @@ git commit -m "ViewRename: Add rename flow module"
 **Interfaces:**
 - Consumes: `codec` (Task 3); `viewrename.CLASS_NAMES` (Task 2).
 - Produces:
-  - `storage.SCHEMA_GUID = "62444aa5-69f7-4aa6-9b0e-238dd1309f83"`, `SCHEMA_NAME = "pyRevitMEP.ViewRename"`, `FIELD_NAME = "Patterns"`, `LEGACY_PARAM_NAME = "pyRevitMEP_viewrename_patterns"`
+  - `storage.SCHEMA_GUID = "62444aa5-69f7-4aa6-9b0e-238dd1309f83"`, `SCHEMA_NAME = "pyRevitMEP_ViewRename"`, `FIELD_NAME = "Patterns"`, `LEGACY_PARAM_NAME = "pyRevitMEP_viewrename_patterns"`
   - `storage.read_patterns(doc) -> dict` (ExtensibleStorage → legacy parameter → config)
   - `storage.read_legacy_parameter(doc) -> dict`
   - `storage.write_to_model(doc, patterns)` (own `revit.Transaction("ViewRename: save patterns")`)
@@ -746,58 +747,52 @@ git commit -m "ViewRename: Add rename flow module"
 
 Pinned details:
 
-- `_get_schema(doc, create)`: `Schema.Lookup(Guid(SCHEMA_GUID))`; when `create` and missing, `SchemaBuilder(Guid(SCHEMA_GUID), SCHEMA_NAME)` with `set([Read,Write])AccessLevel(AccessLevel.Public)`, `AddSimpleField(FIELD_NAME, str)`, `Finish()`.
+- `_get_schema(doc, create)`: `Schema.Lookup(Guid(SCHEMA_GUID))`; when `create` and missing, `SchemaBuilder(Guid(SCHEMA_GUID))`, `SetSchemaName(SCHEMA_NAME)` (dots are rejected by Revit, use the underscore name), `SetReadAccessLevel(AccessLevel.Public)`, `SetWriteAccessLevel(AccessLevel.Public)`, `AddSimpleField(FIELD_NAME, str)`, `Finish()`; `AccessLevel` is imported from `Autodesk.Revit.DB.ExtensibleStorage`.
 - `_read_entity(doc)`: missing schema / invalid entity → `""`; else `doc.ProjectInformation.GetEntity(schema).Get[str](FIELD_NAME)`.
-- If `Entity.Set[str]` / `Get[str]` syntax from Task 1 differs, use the syntax validated by the probe.
+- `Entity.Set[str]` / `Get[str]` are probe-verified under CPython; keep that form.
 - `read_from_config`: `script.get_config()`, values via `getattr(config, name, "")` for `CLASS_NAMES`, `codec.normalize_config_value`, drop empties.
 - `write_to_config`: set every `CLASS_NAMES` attribute (empty string clears), then `script.save_config()`.
 - All Revit/pyRevit imports inside functions (module must import without Revit so tests keep running).
 
-- [ ] **Step 2: Sync and smoke-test on the remote**
+- [ ] **Step 2: Verify on the remote in UI mode (user clicks)**
 
-Copy the bundle, then run the smoke against the R24 and R25 scratch copies:
-
-```bash
-cd /home/cyril/git/pyRevitMEP
-tar czf - --exclude=.git --exclude=__pycache__ --exclude=.idea . \
-  | ssh -p 2222 Marie@127.0.0.1 "tar xzf - -C C:/Users/Marie/AppData/Roaming/pyRevit/Extensions/PyRevitMEP.extension"
-```
-
-`/tmp/opencode/viewrename-probe/probe_storage.py` (throwaway; imports the bundle lib explicitly so it works even without bundle context):
+The runner cannot import `pyrevit.revit` (probe-verified), so this smoke runs as a UI button. Add this throwaway button to the synced `ProbeOC` extension at
+`/tmp/opencode/viewrename-probe/probe-extension/ProbeOC.extension/ProbeOC.tab/Probe.panel/ProbeVRStorage.pushbutton/script.py`:
 
 ```python
 #! python3
+import os
 import sys
-from os.path import dirname
+import traceback
 
-sys.path.insert(0, dirname(__file__))
-sys.path.insert(0, dirname(__file__) + r"\lib")
+sys.path.insert(
+    0,
+    r"C:\Users\Marie\AppData\Roaming\pyRevit\Extensions\PyRevitMEP.extension"
+    r"\pyRevitMEP.tab\Manage.panel\ViewRename.pushbutton\lib",
+)
 
-from pyrevit import revit, script
+from pyrevit import revit
 from viewrename import storage
 
 doc = revit.doc
 patterns = {"ViewPlan": "VR_name(Level)", "View3D": "name(Sous-catégorie)_3D"}
-storage.write_to_model(doc, patterns)
-assert storage.read_patterns(doc) == patterns, storage.read_patterns(doc)
-storage.write_to_config(patterns)
-assert storage.read_from_config() == patterns, storage.read_from_config()
-output = script.get_output()
-output.print("STORAGE-SMOKE-OK")
+results = []
+try:
+    storage.write_to_model(doc, patterns)
+    results.append("model-roundtrip " + ("OK" if storage.read_patterns(doc) == patterns else "FAIL"))
+    storage.write_to_config(patterns)
+    results.append("config-roundtrip " + ("OK" if storage.read_from_config() == patterns else "FAIL"))
+except Exception:
+    results.append("storage FAIL " + traceback.format_exc().replace("\n", " | ").encode("ascii", "replace").decode())
+
+path = os.path.join(os.environ.get("TEMP", r"C:\Windows\Temp"), "viewrename-storage-smoke.txt")
+open(path, "w").write("\n".join(results))
+from Autodesk.Revit.UI import TaskDialog
+
+TaskDialog.Show("ViewRename storage smoke", "\n".join(results))
 ```
 
-Sync it into the bundle, run, then delete it remotely:
-
-```bash
-scp -P 2222 /tmp/opencode/viewrename-probe/probe_storage.py 'Marie@127.0.0.1:C:/Users/Marie/AppData/Roaming/pyRevit/Extensions/PyRevitMEP.extension/pyRevitMEP.tab/Manage.panel/ViewRename.pushbutton/_probe_storage.py'
-ssh -p 2222 Marie@127.0.0.1 'C:\Users\Marie\AppData\Roaming\pyRevit-Master\bin\pyrevit.exe run "C:\Users\Marie\AppData\Roaming\pyRevit\Extensions\PyRevitMEP.extension\pyRevitMEP.tab\Manage.panel\ViewRename.pushbutton\_probe_storage.py" --revit=2024 --models="C:\Users\Marie\AppData\Local\Temp\viewrename-test\scratch_r24.rvt"'
-```
-
-Repeat for `--revit=2025` / `scratch_r25.rvt`; expected `STORAGE-SMOKE-OK` both times. Then:
-
-```bash
-ssh -p 2222 Marie@127.0.0.1 'del /q "C:\Users\Marie\AppData\Roaming\pyRevit\Extensions\PyRevitMEP.extension\pyRevitMEP.tab\Manage.panel\ViewRename.pushbutton\_probe_storage.py"'
-```
+Sync the ViewRename bundle (tar command above) and the ProbeOC extension. Ask the user to open `C:\Users\Marie\AppData\Local\Temp\viewrename-test\scratch_r25.rvt` in Revit 2025, reload pyRevit, click **ProbeOC > Probe > ViewRename storage smoke**, then read the results file over SSH (it lands in a per-command folder under `%TEMP%`; locate it with a recursive `dir`). Expected `model-roundtrip OK` and `config-roundtrip OK`. Revit 2024 coverage happens in Task 7. Do not save the scratch model.
 
 - [ ] **Step 3: Commit**
 
@@ -864,26 +859,9 @@ DEFAULT_PATTERNS = {
 }
 ```
 
-- [ ] **Step 2: Remote smoke — window builds, controls populate, closes cleanly**
+- [ ] **Step 2: Editor smoke is deferred to Task 7**
 
-`/tmp/opencode/viewrename-probe/probe_ui.py` (throwaway; explicit lib path like Task 5):
-
-```python
-#! python3
-import sys
-from os.path import dirname
-
-sys.path.insert(0, dirname(__file__))
-sys.path.insert(0, dirname(__file__) + r"\lib")
-
-from pyrevit import revit, script
-from viewrename import ui
-
-doc = revit.doc
-ui.run_smoke(doc)  # helper in ui.py: builds the editor, asserts tabs/controls, closes via Timer, prints "UI-SMOKE-OK"
-```
-
-Add to `ui.py` a small `run_smoke(doc)` helper (dev aid, harmless in production): builds the editor, `Timer` closes it after 1200 ms, prints `UI-SMOKE-OK`. Sync `probe_ui.py` into the bundle, run on 2024 and 2025 with `--allowdialogs` (same commands as Task 5, plus the flag), delete afterwards. Expected `UI-SMOKE-OK`.
+The runner cannot show WinForms windows (probe-verified). `ui.run_smoke(doc)` (builds the editor, asserts tabs/controls, closes via a `Timer`, returns a result string) is exercised by the combined UI test button in Task 7 Step 3, alongside the interactive check in Step 3 below. Local verification for this task: `python3 -m py_compile` on the two new files plus `ruff check`.
 
 - [ ] **Step 3: Interactive manual check (user)**
 
@@ -921,23 +899,25 @@ Pinned flow: guard `revit.doc is None`; `patterns = storage.read_patterns(doc)`;
 - Tooltips (fr/en) mention `SHIFT-CLIC`/`SHIFT-CLICK` for patterns; keep title/help_url/author.
 - `git rm pyRevitMEP.tab/Manage.panel/ViewRename.pushbutton/ViewRename.xaml`.
 
-- [ ] **Step 3: Write the integration probe**
+- [ ] **Step 3: Combined UI-mode test button (user clicks, Revit 2024 + 2025)**
 
-`/tmp/opencode/viewrename-probe/probe_int.py` (throwaway) runs inside the bundle context. It must:
+The runner cannot import `pyrevit.revit`, get a document, or show dialogs (probe-verified). Create the throwaway button `ProbeOC.../ProbeVRTest.pushbutton/script.py` that:
 
-1. Import `from System.Collections.Generic import List`, `from Autodesk.Revit.DB import ElementId`, and `from viewrename import apply, storage`.
-2. Seed patterns: `storage.write_to_model(doc, {"ViewPlan": "ZZVR_name(Level)"})`.
-3. **All scope**: clear selection (`uidoc.Selection.SetElementIds(List[ElementId]())`), run `apply.main(doc, uidoc, patterns, confirm=lambda renames, scope: True)`; assert every non-template `ViewPlan` name starts with `ZZVR_`, `View3D` names unchanged, and `skipped["no_pattern"]` is non-empty.
-4. **Selected scope**: select one `ViewPlan` (`uidoc.Selection.SetElementIds(List[ElementId]([view_id]))`), run again; assert only that view's name changed.
-5. **Conflicts**: pick two plans, set patterns so both resolve to the same name, run; assert the second got a ` 1` suffix and `failed` is empty.
-6. **Templates**: assert no template view appears in `renamed`.
-7. Print `INT-SCOPE-OK`, `INT-SELECTED-OK`, `INT-CONFLICT-OK`, `INT-TEMPLATE-OK`, `INTEGRATION-OK`.
+1. Adds the ViewRename bundle `lib` to `sys.path` explicitly, imports `from pyrevit import revit` and `from viewrename import apply, storage, ui`.
+2. Gets `doc = revit.doc`, `uidoc = revit.uidoc` (real UI session).
+3. **Storage**: `storage.write_to_model(doc, {"ViewPlan": "ZZVR_name(Level)"})` round-trip; `write_to_config`/`read_from_config` round-trip.
+4. **All scope**: clear selection (`uidoc.Selection.SetElementIds(List[ElementId]())`), run `apply.main(doc, uidoc, patterns, confirm=lambda renames, scope: True)`; assert all non-template `ViewPlan` names start with `ZZVR_`, `View3D` names unchanged, `skipped["no_pattern"]` non-empty.
+5. **Selected scope**: select one `ViewPlan`, run again; assert only that view changed.
+6. **Conflicts**: two plans whose pattern resolves to one name; assert the ` 1` suffix and `failed` empty.
+7. **Templates**: no template view in `renamed`.
+8. **Editor smoke**: `ui.run_smoke(doc)` (auto-closing window, asserts controls).
+9. Write `INT-*` / `UI-SMOKE-*` results plus tracebacks to `%TEMP%\viewrename-int-test.txt` and show a TaskDialog summary.
 
-Sync the bundle, sync the probe into the bundle, run on 2024 and 2025, delete the probe afterwards. Do not save the scratch models.
+Ask the user to run it in Revit 2025 (`scratch_r25.rvt`) and Revit 2024 (`scratch_r24.rvt`), reloading pyRevit if needed, then read the results file over SSH. Expected every line `OK`. Do not save the scratch models.
 
-- [ ] **Step 4: Run the apply entry point end-to-end (user + agent)**
+- [ ] **Step 4: Run the real button end-to-end (user)**
 
-Run `script.py` itself via `pyrevit run --allowdialogs` on the scratch models (TaskDialog appears; requires the user to click Rename). Confirm the output report and the names afterwards with a read-only probe. Then ask the user to run the button normally in Revit 2024 and 2025 and confirm the dialog/report UX.
+Ask the user to run the actual ViewRename button (normal click and Shift+Click editor) in Revit 2024 and 2025 on the scratch models, confirming the confirmation TaskDialog, the output-window report and the editor UX. No runner involvement: it cannot execute this code (probe-verified).
 
 - [ ] **Step 5: Format and commit**
 

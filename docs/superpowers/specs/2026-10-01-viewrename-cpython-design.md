@@ -110,9 +110,10 @@ classes with no views in the model are ignored.
 
 Read order:
 
-1. **ExtensibleStorage** on `ProjectInformation` — schema `pyRevitMEP.ViewRename`
-   (fixed GUID), single string field holding JSON. Primary storage; travels with the
-   model and needs no shared parameter file or parameter.
+1. **ExtensibleStorage** on `ProjectInformation` — schema `pyRevitMEP_ViewRename`
+   (fixed GUID, underscores; Revit rejects dots in schema names), single string field
+   holding JSON. Primary storage; travels with the model and needs no shared parameter
+   file or parameter.
 2. Legacy project parameter `pyRevitMEP_viewrename_patterns` (only if ExtensibleStorage
    is empty), parsed safely with `ast.literal_eval` (the old tool stored `str(dict)`,
    with single quotes) instead of `eval`.
@@ -188,6 +189,28 @@ Decision points and fallbacks:
 - Bundle `lib/` import fails → flatten the modules into `script.py` / `config.py` or
   use the extension `lib/` directory.
 
+### Probe results (2026-10-01, pyRevit 6.5.5, CPython 3.12.3)
+
+`pyrevit run` (journal playback) and normal UI execution differ sharply:
+
+| Capability | `pyrevit run` | UI mode (button) |
+| --- | --- | --- |
+| `#! python3` → CPython 3.12.3 | works | works |
+| `pyrevit.revit` / `pyrevit.script` / output import | **crashes** (NullReferenceException in IronPython dictionary via `envvars`) | works |
+| `HOST_APP`, `EXEC_PARAMS`, `DB`, logger, `userconfig` | works | works |
+| Direct Revit API + `Transaction` | works (no document available) | works |
+| WinForms `ShowDialog` | fails (non-interactive process) | works |
+| TaskDialog | constructible | works |
+| Bundle/extension `lib/` on `sys.path` | **not added** | added |
+| `__file__` | defined | defined |
+
+Consequences: the approved product design stands (it targets UI execution). The
+runner is only usable for throwaway probes and logic that avoids `pyrevit.revit`,
+`pyrevit.script`, dialogs and documents; storage/UI/integration verification moves to
+a UI-mode test button. ExtensibleStorage specifics: `SchemaBuilder(Guid)` plus
+`SetSchemaName("pyRevitMEP_ViewRename")` (dots are rejected), `AccessLevel` from
+`Autodesk.Revit.DB.ExtensibleStorage`, `Entity.Set[str]`/`Get[str]` generics work.
+
 ### Version support
 
 Only APIs present in Revit 2024–2027 are used (ForgeTypeId era; no
@@ -203,7 +226,24 @@ file), `eval()` on pattern text, `SpecTypeId` import fragility.
 
 ## Verification
 
-Manual, on the remote Revit 2024 and 2025:
+Local, no Revit needed:
+
+- `python3 -m pytest tests/viewrename -q` covers the pure modules (`pattern`, `codec`,
+  `apply` conflict/formatting logic).
+
+Remote, on Revit 2024 and 2025:
+
+- `pyrevit run` probes only for logic that avoids `pyrevit.revit`/`pyrevit.script`,
+  dialogs and documents (the runner crashes on those, see probe results). Throwaway
+  probes add the bundle `lib/` to `sys.path` explicitly.
+- A UI-mode verification button (in the throwaway `ProbeOC` extension) exercises the
+  storage round-trip, apply flows and an auto-closing editor window in a normal Revit
+  session; the user clicks it once per verification round and the results file is read
+  back over SSH.
+- Final acceptance: the user runs the real ViewRename button and its Shift+Click
+  editor in Revit 2024 and 2025.
+
+Manual checks on Revit 2024 and 2025:
 
 - No patterns configured → explanatory dialog, no changes.
 - Patterns from: ExtensibleStorage; legacy project parameter; pyRevit config.
