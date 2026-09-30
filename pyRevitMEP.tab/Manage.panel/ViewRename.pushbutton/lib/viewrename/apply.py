@@ -152,7 +152,7 @@ def main(doc, uidoc, patterns, confirm):
     scope = "selected views" if used_selection else "views in the project"
     if not confirm(renames, scope):
         return None
-    with revit.Transaction("ViewRename"):
+    with revit.Transaction("ViewRename", doc):
         renamed, failed = rename_views(renames, duplicate_exception=ArgumentException)
     return {
         "scope": scope,

@@ -85,9 +85,9 @@ def read_patterns(doc):
 
 
 def write_to_model(doc, patterns):
-    """Write patterns into the model (own transaction)."""
+    """Write patterns into the model (own transaction, on the given document)."""
     from pyrevit import revit
 
     text = codec.encode_patterns(patterns)
-    with revit.Transaction("ViewRename: save patterns"):
+    with revit.Transaction("ViewRename: save patterns", doc):
         _write_entity(doc, text)
