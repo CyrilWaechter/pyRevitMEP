@@ -7,9 +7,12 @@ import re
 
 NAME_RE = re.compile(r"name\(([^)]+)\)")
 BIP_RE = re.compile(r"bip\((\w+)\)")
-GUID_RE = re.compile(r"""Guid\(\s*['"]([0-9a-fA-F-]{36})['"]\s*\)""")
+GUID_RE = re.compile(
+    r"""Guid\(\s*['"]([0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12})['"]\s*\)"""
+)
 KNOWN_REFERENCES = ("name(", "bip(", "Guid(")
 REFERENCE_REGEXES = ((NAME_RE, "name"), (BIP_RE, "bip"), (GUID_RE, "guid"))
+EMPTY_REFERENCE_RE = re.compile(r"(?:name|bip)\(\s*\)")
 
 
 class Resolver:
@@ -39,28 +42,12 @@ def validate_pattern(pattern):
         word = match.group(0)
         if not any(word.endswith(known) for known in KNOWN_REFERENCES):
             errors.append(f"Unknown reference: {word}")
+    for match in EMPTY_REFERENCE_RE.finditer(pattern):
+        errors.append(f"Empty reference: {match.group(0)}")
     for match in re.finditer(r"Guid\(", pattern):
         if not GUID_RE.match(pattern, match.start()):
             errors.append("Invalid Guid reference")
     return errors
-
-
-def tokenize(text):
-    """Split a pattern into ordered (kind, value) segments.
-
-    kind is "text", "name", "bip" or "guid"; value is the literal text or the
-    exact reference substring, so join_tokens() is lossless.
-    """
-    segments = []
-    position = 0
-    for start, end, kind, value in reference_matches(text):
-        if start > position:
-            segments.append(("text", text[position:start]))
-        segments.append((kind, value))
-        position = end
-    if position < len(text):
-        segments.append(("text", text[position:]))
-    return segments
 
 
 def reference_matches(text):
@@ -77,7 +64,3 @@ def reference_matches(text):
             result.append((start, end, kind, value))
             last_end = end
     return result
-
-
-def join_tokens(segments):
-    return "".join(value for _, value in segments)

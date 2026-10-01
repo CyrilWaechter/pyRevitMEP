@@ -39,3 +39,26 @@ def test_normalize_config_value():
     assert codec.normalize_config_value(b"name(Level)") == "name(Level)"
     assert codec.normalize_config_value(None) == ""
     assert codec.normalize_config_value(42) == "42"
+
+
+def test_resolve_sources_prefers_present_model_entity_even_when_empty():
+    patterns, source = codec.resolve_pattern_sources(
+        "{}", {"ViewPlan": "legacy"}, {"View3D": "config"}, {"ViewPlan": "default"}
+    )
+    assert (patterns, source) == ({}, "model")
+
+
+def test_resolve_sources_falls_back_in_order():
+    defaults = {"ViewPlan": "default"}
+    assert codec.resolve_pattern_sources("", {"ViewPlan": "legacy"}, {"View3D": "config"}, defaults) == (
+        {"ViewPlan": "legacy"},
+        "legacy",
+    )
+    assert codec.resolve_pattern_sources(None, {}, {"View3D": "config"}, defaults) == (
+        {"View3D": "config"},
+        "config",
+    )
+    patterns, source = codec.resolve_pattern_sources("", {}, {}, defaults)
+    assert (patterns, source) == (defaults, "defaults")
+    patterns["ViewPlan"] = "mutated"
+    assert defaults["ViewPlan"] == "default"

@@ -42,3 +42,20 @@ def normalize_config_value(value):
     if value is None:
         return ""
     return str(value)
+
+
+def resolve_pattern_sources(entity_text, legacy_patterns, config_patterns, defaults):
+    """Return (patterns, source) following the storage precedence.
+
+    A non-empty entity text means the model storage is authoritative even when it
+    decodes to an empty dict (the user explicitly saved nothing); only a missing or
+    invalid entity falls back to the legacy parameter, then the user config, then the
+    built-in defaults.
+    """
+    if entity_text:
+        return decode_patterns(entity_text), "model"
+    if legacy_patterns:
+        return legacy_patterns, "legacy"
+    if config_patterns:
+        return config_patterns, "config"
+    return dict(defaults), "defaults"

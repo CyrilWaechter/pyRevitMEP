@@ -38,7 +38,6 @@ from System.Windows.Forms import (
     TabControl,
     TabPage,
     TextBox,
-    Timer,
     View,
 )
 
@@ -69,6 +68,9 @@ class PatternEditor:
         self._error_labels = {}
         self._label_refs = {class_name: {} for class_name in CLASS_NAMES}
         self._dragged_token = None
+        self._base_font = Font("Segoe UI", 9)
+        self._regular_font = Font(self._base_font, FontStyle.Regular)
+        self._bold_font = Font(self._base_font, FontStyle.Bold)
 
         stored = storage.read_patterns(doc)
 
@@ -116,6 +118,7 @@ class PatternEditor:
         box.SetBounds(10, 15, 850, 110)
         box.Multiline = True
         box.AllowDrop = True
+        box.Font = self._base_font
         raw = stored.get(class_name) or DEFAULT_PATTERNS.get(class_name, "")
         box.Text = self._display(class_name, raw)
         box.TextChanged += lambda sender, args: self._text_changed(class_name)
@@ -251,11 +254,11 @@ class PatternEditor:
         length = box.SelectionLength
         box.SelectAll()
         box.SelectionBackColor = Color.White
-        box.SelectionFont = Font(box.Font, FontStyle.Regular)
+        box.SelectionFont = self._regular_font
         for start, end, kind in self._token_ranges(class_name):
             box.Select(start, end - start)
             box.SelectionBackColor = KIND_COLORS.get(kind, Color.LightGray)
-            box.SelectionFont = Font(box.Font, FontStyle.Bold)
+            box.SelectionFont = self._bold_font
         box.Select(caret, length)
 
     def _text_changed(self, class_name):
@@ -266,6 +269,8 @@ class PatternEditor:
         box = self._pattern_boxes[class_name]
         if args.KeyCode == Keys.Enter:
             args.SuppressKeyPress = True
+            return
+        if box.SelectionLength:
             return
         if args.KeyCode == Keys.Delete:
             token = self._token_at(class_name, box.SelectionStart, include_start=True, include_end=False)
@@ -283,6 +288,8 @@ class PatternEditor:
         if ord(args.KeyChar) < 32:
             return
         box = self._pattern_boxes[class_name]
+        if box.SelectionLength:
+            return
         index = box.SelectionStart
         snapped = self._snap_to_token_boundary(class_name, index)
         if snapped != index:
@@ -431,6 +438,8 @@ class PatternEditor:
 
     def _save(self, action):
         for class_name in CLASS_NAMES:
+            if self._samples.get(class_name) is None:
+                continue
             errors = self._validation_errors(class_name)
             if errors:
                 MessageBox.Show(
@@ -444,7 +453,18 @@ class PatternEditor:
         self.form.Close()
 
     def show(self):
-        self.form.ShowDialog(_revit_owner())
+        owner = _revit_owner()
+        try:
+            self.form.ShowDialog(owner)
+        finally:
+            if owner is not None:
+                owner.ReleaseHandle()
+
+    def dispose(self):
+        self.form.Dispose()
+        self._regular_font.Dispose()
+        self._bold_font.Dispose()
+        self._base_font.Dispose()
 
 
 def _revit_owner():
@@ -548,17 +568,8 @@ def _reference_argument(reference):
 def show_editor(doc):
     """Show the modal editor; return (action, patterns) with action in model/config/None."""
     editor = PatternEditor(doc)
-    editor.show()
+    try:
+        editor.show()
+    finally:
+        editor.dispose()
     return editor.action, editor.patterns
-
-
-def run_smoke(doc):
-    """Dev aid: build the editor, auto-close it, and report tabs and token counts."""
-    editor = PatternEditor(doc)
-    timer = Timer()
-    timer.Interval = 1200
-    timer.Tick += lambda sender, args: editor.form.Close()
-    timer.Start()
-    editor.show()
-    tokens = sum(len(editor._token_ranges(class_name)) for class_name in CLASS_NAMES)
-    return f"UI-SMOKE-OK tabs={len(editor._pattern_boxes)} tokens={tokens}"

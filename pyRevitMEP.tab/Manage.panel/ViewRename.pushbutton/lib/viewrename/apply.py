@@ -109,6 +109,18 @@ def preview_lines(renames, limit=10):
     return lines
 
 
+FORBIDDEN_NAME_CHARS = frozenset('\\:{}[]|;<>?`"*')
+
+
+def _invalid_name_reason(new_name):
+    if not new_name.strip():
+        return "pattern resolved to an empty name"
+    bad = sorted(FORBIDDEN_NAME_CHARS.intersection(new_name))
+    if bad:
+        return "name contains invalid characters: {}".format(" ".join(bad))
+    return None
+
+
 def rename_views(views_and_names, duplicate_exception):
     """Rename views; must be called inside an open transaction."""
     renamed, failed = [], []
@@ -116,6 +128,10 @@ def rename_views(views_and_names, duplicate_exception):
         old_name = view.Name
         if old_name == new_name:
             renamed.append((old_name, new_name))
+            continue
+        reason = _invalid_name_reason(new_name)
+        if reason:
+            failed.append((old_name, reason))
             continue
         final, error = None, None
         try:

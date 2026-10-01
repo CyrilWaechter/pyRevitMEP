@@ -95,6 +95,35 @@ def test_rename_views_reports_failures_and_continues():
     assert failed and failed[0][0] == "a"
 
 
+def test_rename_views_rejects_empty_name_without_attempting():
+    class CountingView:
+        def __init__(self):
+            self.attempts = 0
+
+        @property
+        def Name(self):
+            return "old"
+
+        @Name.setter
+        def Name(self, value):
+            self.attempts += 1
+            raise FakeDuplicate(value)
+
+    view = CountingView()
+    renamed, failed = apply.rename_views([(view, "")], duplicate_exception=FakeDuplicate)
+    assert renamed == []
+    assert failed == [("old", "pattern resolved to an empty name")]
+    assert view.attempts == 0
+
+
+def test_rename_views_rejects_forbidden_characters():
+    view = make_view("a", "ViewPlan")
+    renamed, failed = apply.rename_views([(view, "bad[1]")], duplicate_exception=FakeDuplicate)
+    assert renamed == []
+    assert failed and "invalid characters" in failed[0][1]
+    assert view.Name == "a"
+
+
 def test_preview_lines_truncates():
     views = [make_view(str(i), "ViewPlan") for i in range(15)]
     lines = apply.preview_lines([(v, "n" + v.Name) for v in views], limit=3)

@@ -49,6 +49,10 @@ def read_legacy_parameter(doc):
     parameter = doc.ProjectInformation.LookupParameter(LEGACY_PARAM_NAME)
     if not parameter:
         return {}
+    from Autodesk.Revit.DB import StorageType
+
+    if parameter.StorageType != StorageType.String:
+        return {}
     return codec.decode_patterns(parameter.AsString())
 
 
@@ -82,19 +86,16 @@ def read_patterns(doc):
 def read_patterns_with_source(doc):
     """Return (patterns, source); source is model/legacy/config/defaults.
 
-    Built-in defaults are only used when the model, the legacy parameter and the user
-    config are all empty.
+    A model entity that exists is authoritative even when it decodes to an empty
+    dict (the user explicitly saved nothing); defaults are only used when the model,
+    the legacy parameter and the user config are all empty or absent.
     """
-    patterns = codec.decode_patterns(_read_entity(doc))
-    if patterns:
-        return patterns, "model"
-    patterns = read_legacy_parameter(doc)
-    if patterns:
-        return patterns, "legacy"
-    patterns = read_from_config()
-    if patterns:
-        return patterns, "config"
-    return dict(DEFAULT_PATTERNS), "defaults"
+    return codec.resolve_pattern_sources(
+        _read_entity(doc),
+        read_legacy_parameter(doc),
+        read_from_config(),
+        DEFAULT_PATTERNS,
+    )
 
 
 def write_to_model(doc, patterns):

@@ -108,17 +108,22 @@ classes with no views in the model are ignored.
 
 ### Pattern storage
 
-Read order:
+Read order (implemented as `codec.resolve_pattern_sources`, unit-tested locally):
 
 1. **ExtensibleStorage** on `ProjectInformation` — schema `pyRevitMEP_ViewRename`
    (fixed GUID, underscores; Revit rejects dots in schema names), single string field
    holding JSON. Primary storage; travels with the model and needs no shared parameter
-   file or parameter.
-2. Legacy project parameter `pyRevitMEP_viewrename_patterns` (only if ExtensibleStorage
-   is empty), parsed safely with `ast.literal_eval` (the old tool stored `str(dict)`,
-   with single quotes) instead of `eval`.
+   file or parameter. A present entity is authoritative **even when it decodes to an
+   empty map** (the user explicitly saved nothing), so an intentionally emptied model
+   does not resurrect patterns from the fallbacks.
+2. Legacy project parameter `pyRevitMEP_viewrename_patterns` (only when no model entity
+   exists), parsed safely with `ast.literal_eval` (the old tool stored `str(dict)`,
+   with single quotes) instead of `eval`; non-string storage types are ignored.
 3. pyRevit user config attributes (`ViewPlan`, `View3D`, …), decoding `bytes` values
    written by the old tool.
+4. Built-in default patterns (`viewrename.DEFAULT_PATTERNS`) — last resort only when the
+   model, the legacy parameter and the user config are all absent or empty. The
+   confirmation dialog warns "Using built-in default patterns" so the user can cancel.
 
 Editor save buttons write to ExtensibleStorage ("Save to model") and/or user config
 ("Save to config"). The first model save migrates whatever was read from the legacy
@@ -128,20 +133,31 @@ cleanup the user can do with the existing ParameterDelete tool.
 ### Editor (`config.py`, WinForms)
 
 - One tab per offered view class, each with:
-  - pattern text box;
+  - a single `RichTextBox` holding the pattern; parameter references are rendered as
+    colored, bold inline tokens showing `[Definition Name]` (the label→reference mapping
+    is kept so saving restores the exact `name(...)` / `bip(...)` / `Guid('...')` kind,
+    preserving language independence);
+  - tokens are draggable (the caret snaps to token boundaries and shows the landing
+    point), double-click selects one, Delete/Backspace removes a whole token, and typing
+    or inserting with the caret inside a token snaps to the nearest edge;
   - live primary preview (resolved name) and secondary preview (definition names);
   - parameter list for a sample view of that class, columns Name / BuiltInParameter /
-    GUID, with **Insert at cursor**;
-  - disabled tab with a note when the model has no view of that class.
-- Old hardcoded defaults are pre-filled as starting suggestions only, and only when a
-  class has no stored pattern; they are never applied implicitly.
+    GUID, with a live search box and **Insert selected parameter** / double-click insert;
+  - disabled tab with a note when the model has no view of that class; such tabs are
+    skipped when validating on save so an unfixable stored pattern cannot block saving.
+- Built-in defaults pre-fill classes without a stored pattern (same list as the apply
+  fallback), and are only applied implicitly through the warned fallback above.
 - Buttons: **Save to model**, **Save to config**, **Close**. Empty pattern boxes are
-  saved as absent entries (removing the class from storage). The window is modal;
-  transactions run after it closes. No external event, no persistent engine.
-- Invalid pattern syntax is reported in the window, not silently saved.
+  saved as absent entries (removing the class from storage). The window is modal and
+  owned by Revit's main window (the ribbon is blocked while it is open, so no nested
+  pyRevit command can start a second CPython engine); transactions run after it closes.
+  Fonts are cached and the form/owner handle disposed on close.
+- Invalid pattern syntax is reported in the window, not silently saved. Cancelling the
+  apply confirmation stays silent (no output message) per user request.
 
-Note: the old hardcoded defaults produce names like `_PE_…` for models without the
-company parameters, which is why the new apply path never uses implicit defaults.
+Note: the built-in defaults produce names like `_PE_…` for models without the company
+parameters; the confirmation dialog shows the resulting names and warns that defaults
+are in use, and an explicit "Save to model" of an empty map disables the fallback.
 
 ## Technical design
 
