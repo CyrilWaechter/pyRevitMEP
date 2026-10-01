@@ -211,6 +211,22 @@ a UI-mode test button. ExtensibleStorage specifics: `SchemaBuilder(Guid)` plus
 `SetSchemaName("pyRevitMEP_ViewRename")` (dots are rejected), `AccessLevel` from
 `Autodesk.Revit.DB.ExtensibleStorage`, `Entity.Set[str]`/`Get[str]` generics work.
 
+### pyRevit CPython engine scope (2026-10-01)
+
+pyRevit 6.5.5 caches CPython engines per **extension**
+(`ScriptEngine.TypeId = session:engineType:extension`) and `CPythonEngine.Start`
+re-sets `Runtime.PythonDLL` whenever a new engine is created. Because pythonnet is
+already initialized by the first engine, a CPython command from a **second extension**
+in the same Revit session fails with “This property must be set before runtime is
+initialized” (Revit external-command failure dialog). `SharedSessionEngine` would share
+one engine across extensions, but pyRevit only uses it for its own loader scripts;
+commands cannot opt in.
+
+All CPython tools in pyRevitMEP share one engine, so they coexist; the limitation only
+bites when mixing pyRevitMEP with another extension that also runs CPython commands
+(this is why the throwaway `ProbeOC` test extension had to be removed). Nothing in the
+extension can work around it; it is a pyRevit runtime bug.
+
 ### Version support
 
 Only APIs present in Revit 2024–2027 are used (ForgeTypeId era; no
