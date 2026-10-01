@@ -4,10 +4,9 @@ title:
 tooltip:
   fr_fr: |
     Renommer les vues en respectant une convention basée sur les paramètres.
+    SHIFT-CLIC pour modifier les motifs.
   en_us: |
     Rename selected views according to a pattern.
+    SHIFT-CLICK to edit patterns.
 help_url: "https://youtu.be/OdEty6okZ84"
 author: "{{author}}"
-
-engine:
-  persistent: true
