@@ -4,10 +4,14 @@ pyRevit's forms module is unavailable under CPython, so the editor is built dire
 System.Windows.Forms via pythonnet. The window only reads the model; saves happen in
 `config.py` after the modal dialog closes.
 
-Each view class has a single RichTextBox holding the pattern; parameter references are
-rendered as colored, bold inline tokens that can be dragged to another position (the
-caret shows the landing point), double-clicked to select, and deleted like text.
+Each view class has a single RichTextBox holding the pattern. Parameter references are
+shown as `[Parameter Name]` and rendered as colored, bold inline tokens that can be
+dragged to another position (the caret snaps to token boundaries and shows the landing
+point), double-clicked to select, and deleted like text. On save the tokens are
+converted back to the canonical `name(...)` / `bip(...)` / `Guid('...')` syntax.
 """
+
+import re
 
 import clr
 
@@ -43,7 +47,10 @@ KIND_COLORS = {
     "name": Color.FromArgb(210, 230, 255),
     "bip": Color.FromArgb(210, 245, 210),
     "guid": Color.FromArgb(255, 245, 200),
+    "unknown": Color.FromArgb(255, 220, 220),
 }
+
+BRACKET_RE = re.compile(r"\[([^\[\]]+)\]")
 
 
 class PatternEditor:
@@ -59,6 +66,7 @@ class PatternEditor:
         self._primary_labels = {}
         self._secondary_labels = {}
         self._error_labels = {}
+        self._label_refs = {class_name: {} for class_name in CLASS_NAMES}
         self._dragged_token = None
 
         stored = storage.read_patterns(doc)
@@ -108,7 +116,8 @@ class PatternEditor:
         box.SetBounds(10, 15, 850, 110)
         box.Multiline = True
         box.AllowDrop = True
-        box.Text = stored.get(class_name) or DEFAULT_PATTERNS.get(class_name, "")
+        raw = stored.get(class_name) or DEFAULT_PATTERNS.get(class_name, "")
+        box.Text = self._display(class_name, raw)
         box.TextChanged += lambda sender, args: self._text_changed(class_name)
         box.MouseDown += lambda sender, args: self._pattern_mouse_down(class_name, sender, args)
         box.DoubleClick += lambda sender, args: self._pattern_double_click(class_name, sender, args)
@@ -184,17 +193,56 @@ class PatternEditor:
         self._update_preview(class_name)
         return tab
 
-    # ------------------------------------------------------------------ tokens
+    # ------------------------------------------------------------------ display/canonical
+
+    def _display(self, class_name, text):
+        sample = self._samples.get(class_name)
+        parts = []
+        position = 0
+        for start, end, _kind, value in pattern.reference_matches(text):
+            parts.append(text[position:start])
+            parameter = _resolve_reference(sample, value)
+            if parameter is None:
+                parts.append(value)
+            else:
+                label = parameter.Definition.Name
+                self._label_refs[class_name].setdefault(label, value)
+                parts.append("[" + label + "]")
+            position = end
+        parts.append(text[position:])
+        return "".join(parts)
+
+    def _canonical(self, class_name, text):
+        sample = self._samples.get(class_name)
+
+        def replace(match):
+            label = match.group(1)
+            reference = self._label_refs[class_name].get(label)
+            if reference is None:
+                parameter = _find_parameter(sample, label)
+                if parameter is None:
+                    return match.group(0)
+                reference = _parameter_reference(parameter)
+                self._label_refs[class_name][label] = reference
+            return reference
+
+        return BRACKET_RE.sub(replace, text)
 
     def _token_ranges(self, class_name):
         text = self._pattern_boxes[class_name].Text
         ranges = []
-        position = 0
-        for kind, value in pattern.tokenize(text):
-            if kind != "text":
-                ranges.append((position, position + len(value), kind))
-            position += len(value)
+        for start, end, kind, _value in pattern.reference_matches(text):
+            ranges.append((start, end, kind))
+        for match in BRACKET_RE.finditer(text):
+            ranges.append((match.start(), match.end(), self._bracket_kind(class_name, match.group(1))))
+        ranges.sort()
         return ranges
+
+    def _bracket_kind(self, class_name, name):
+        parameter = _find_parameter(self._samples.get(class_name), name)
+        if parameter is None:
+            return "unknown"
+        return _parameter_kind(parameter)
 
     def _apply_styles(self, class_name):
         box = self._pattern_boxes[class_name]
@@ -216,6 +264,12 @@ class PatternEditor:
     def _pattern_key_down(self, sender, args):
         if args.KeyCode == Keys.Enter:
             args.SuppressKeyPress = True
+
+    def _snap_to_token_boundary(self, class_name, index):
+        for start, end, _kind in self._token_ranges(class_name):
+            if start < index < end:
+                return start if index - start <= end - index else end
+        return index
 
     def _pattern_mouse_down(self, class_name, sender, args):
         if args.Button != MouseButtons.Left:
@@ -240,7 +294,8 @@ class PatternEditor:
         if self._dragged_token is None:
             return
         box = self._pattern_boxes[class_name]
-        box.SelectionStart = box.GetCharIndexFromPosition(box.PointToClient(Cursor.Position))
+        index = box.GetCharIndexFromPosition(box.PointToClient(Cursor.Position))
+        box.SelectionStart = self._snap_to_token_boundary(class_name, index)
         box.SelectionLength = 0
         args.Effect = DragDropEffects.Move
 
@@ -251,7 +306,8 @@ class PatternEditor:
             return
         _cls, start, end = dragged
         box = self._pattern_boxes[class_name]
-        target = box.GetCharIndexFromPosition(box.PointToClient(Cursor.Position))
+        index = box.GetCharIndexFromPosition(box.PointToClient(Cursor.Position))
+        target = self._snap_to_token_boundary(class_name, index)
         if start < target < end:
             return
         text = box.Text
@@ -267,12 +323,15 @@ class PatternEditor:
         list_view = self._parameter_lists[class_name]
         if list_view.SelectedItems.Count == 0:
             return
-        self._insert_reference(class_name, _parameter_reference(list_view.SelectedItems[0].Tag))
+        parameter = list_view.SelectedItems[0].Tag
+        label = parameter.Definition.Name
+        self._label_refs[class_name].setdefault(label, _parameter_reference(parameter))
+        self._insert_token(class_name, "[" + label + "]")
 
-    def _insert_reference(self, class_name, reference):
+    def _insert_token(self, class_name, text):
         box = self._pattern_boxes[class_name]
-        box.SelectedText = reference
-        box.SelectionStart += len(reference)
+        box.SelectedText = text
+        box.SelectionStart += len(text)
         box.SelectionLength = 0
         self._apply_styles(class_name)
         self._update_preview(class_name)
@@ -300,10 +359,20 @@ class PatternEditor:
             item.Tag = parameter
             list_view.Items.Add(item)
 
-    def _update_preview(self, class_name):
+    def _validation_errors(self, class_name):
         text = self._pattern_boxes[class_name].Text
-        errors = pattern.validate_pattern(text)
-        self._error_labels[class_name].Text = " | ".join(errors)
+        errors = pattern.validate_pattern(self._canonical(class_name, text))
+        sample = self._samples.get(class_name)
+        if sample is not None:
+            for match in BRACKET_RE.finditer(text):
+                label = match.group(1)
+                if label not in self._label_refs[class_name] and _find_parameter(sample, label) is None:
+                    errors.append(f"Unknown parameter: {label}")
+        return errors
+
+    def _update_preview(self, class_name):
+        text = self._canonical(class_name, self._pattern_boxes[class_name].Text)
+        self._error_labels[class_name].Text = " | ".join(self._validation_errors(class_name))
         sample = self._samples.get(class_name)
         if sample is None:
             return
@@ -315,14 +384,14 @@ class PatternEditor:
     def _collect_patterns(self):
         patterns = {}
         for class_name in CLASS_NAMES:
-            text = self._pattern_boxes[class_name].Text.strip()
+            text = self._canonical(class_name, self._pattern_boxes[class_name].Text).strip()
             if text:
                 patterns[class_name] = text
         return patterns
 
     def _save(self, action):
         for class_name in CLASS_NAMES:
-            errors = pattern.validate_pattern(self._pattern_boxes[class_name].Text)
+            errors = self._validation_errors(class_name)
             if errors:
                 MessageBox.Show(
                     f"{class_name}: {'; '.join(errors)}",
@@ -350,14 +419,73 @@ def _find_sample_view(doc, class_name):
     return None
 
 
-def _parameter_reference(parameter):
+def _find_parameter(sample, name):
+    if sample is None:
+        return None
+    parameters = sample.GetParameters(name)
+    if not parameters:
+        return None
+    return parameters[0]
+
+
+def _resolve_reference(sample, reference):
+    if sample is None:
+        return None
+    kind = _kind_for_reference(reference)
+    argument = _reference_argument(reference)
+    try:
+        if kind == "name":
+            return _find_parameter(sample, argument)
+        if kind == "bip":
+            from Autodesk.Revit.DB import BuiltInParameter
+
+            bip = getattr(BuiltInParameter, argument, None)
+            if bip is None:
+                return None
+            return sample.get_Parameter(bip)
+        from System import Guid
+
+        return sample.get_Parameter(Guid.Parse(argument))
+    except Exception:  # noqa: BLE001 - unresolved references keep their raw syntax
+        return None
+
+
+def _parameter_kind(parameter):
     from Autodesk.Revit.DB import BuiltInParameter
 
     if parameter.IsShared:
-        return f"Guid('{parameter.GUID}')"
+        return "guid"
     if parameter.Definition.BuiltInParameter != BuiltInParameter.INVALID:
+        return "bip"
+    return "name"
+
+
+def _parameter_reference(parameter):
+    kind = _parameter_kind(parameter)
+    if kind == "guid":
+        return f"Guid('{parameter.GUID}')"
+    if kind == "bip":
         return f"bip({parameter.Definition.BuiltInParameter.ToString()})"
     return f"name({parameter.Definition.Name})"
+
+
+def _kind_for_reference(reference):
+    if reference.startswith("name("):
+        return "name"
+    if reference.startswith("bip("):
+        return "bip"
+    return "guid"
+
+
+def _reference_argument(reference):
+    start = reference.find("(")
+    end = reference.rfind(")")
+    if start == -1 or end <= start:
+        return reference
+    argument = reference[start + 1 : end].strip()
+    if len(argument) >= 2 and argument[0] in ("'", '"') and argument[-1] == argument[0]:
+        argument = argument[1:-1]
+    return argument
 
 
 def show_editor(doc):

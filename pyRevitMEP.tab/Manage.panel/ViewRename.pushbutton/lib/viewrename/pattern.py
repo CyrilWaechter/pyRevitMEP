@@ -8,7 +8,6 @@ import re
 NAME_RE = re.compile(r"name\(([^)]+)\)")
 BIP_RE = re.compile(r"bip\((\w+)\)")
 GUID_RE = re.compile(r"""Guid\(\s*['"]([0-9a-fA-F-]{36})['"]\s*\)""")
-REFERENCE_WORD_RE = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z]\w*\(")
 KNOWN_REFERENCES = ("name(", "bip(", "Guid(")
 REFERENCE_REGEXES = ((NAME_RE, "name"), (BIP_RE, "bip"), (GUID_RE, "guid"))
 
@@ -36,10 +35,13 @@ def validate_pattern(pattern):
     errors = []
     if pattern.count("(") != pattern.count(")"):
         errors.append("Unbalanced parentheses")
-    for match in REFERENCE_WORD_RE.finditer(pattern):
+    for match in re.finditer(r"[A-Za-z_]\w*\(", pattern):
         word = match.group(0)
-        if word not in KNOWN_REFERENCES:
+        if not any(word.endswith(known) for known in KNOWN_REFERENCES):
             errors.append(f"Unknown reference: {word}")
+    for match in re.finditer(r"Guid\(", pattern):
+        if not GUID_RE.match(pattern, match.start()):
+            errors.append("Invalid Guid reference")
     return errors
 
 
@@ -49,16 +51,9 @@ def tokenize(text):
     kind is "text", "name", "bip" or "guid"; value is the literal text or the
     exact reference substring, so join_tokens() is lossless.
     """
-    matches = []
-    for regex, kind in REFERENCE_REGEXES:
-        for match in regex.finditer(text):
-            matches.append((match.start(), match.end(), kind, match.group(0)))
-    matches.sort()
     segments = []
     position = 0
-    for start, end, kind, value in matches:
-        if start < position:
-            continue
+    for start, end, kind, value in reference_matches(text):
         if start > position:
             segments.append(("text", text[position:start]))
         segments.append((kind, value))
@@ -66,6 +61,22 @@ def tokenize(text):
     if position < len(text):
         segments.append(("text", text[position:]))
     return segments
+
+
+def reference_matches(text):
+    """Return non-overlapping (start, end, kind, value) reference matches."""
+    matches = []
+    for regex, kind in REFERENCE_REGEXES:
+        for match in regex.finditer(text):
+            matches.append((match.start(), match.end(), kind, match.group(0)))
+    matches.sort()
+    result = []
+    last_end = 0
+    for start, end, kind, value in matches:
+        if start >= last_end:
+            result.append((start, end, kind, value))
+            last_end = end
+    return result
 
 
 def join_tokens(segments):

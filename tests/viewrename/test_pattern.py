@@ -56,6 +56,14 @@ def test_validate_ignores_parentheses_without_leading_word():
     assert pattern.validate_pattern("Plan (sans reference)") == []
 
 
+def test_validate_accepts_text_glued_to_reference():
+    assert pattern.validate_pattern("PEnname(Level)") == []
+
+
+def test_validate_rejects_short_guid():
+    assert pattern.validate_pattern("Guid('AAAA')") != []
+
+
 def test_tokenize_splits_references_and_text():
     assert pattern.tokenize("PE_name(Level)_3D") == [
         ("text", "PE_"),
