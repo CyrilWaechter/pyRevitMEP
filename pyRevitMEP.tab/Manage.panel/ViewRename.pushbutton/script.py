@@ -39,7 +39,5 @@ else:
     else:
         using_defaults = source == "defaults"
         report = apply.main(doc, uidoc, patterns, lambda renames, scope: confirm(renames, scope, using_defaults))
-        if report is None:
-            output.print_md("ViewRename: cancelled.")
-        else:
+        if report is not None:
             output.print_code(apply.format_report(report))

@@ -17,6 +17,9 @@ from System.Drawing import Color, Font, FontStyle, Point
 from System.Windows.Forms import (
     BorderStyle,
     Button,
+    Cursor,
+    Cursors,
+    DragDropEffects,
     FlatStyle,
     FlowLayoutPanel,
     Form,
@@ -27,12 +30,14 @@ from System.Windows.Forms import (
     ListViewItem,
     MessageBox,
     MessageBoxButtons,
+    MouseButtons,
     Padding,
     Panel,
     TabControl,
     TabPage,
     TextBox,
     Timer,
+    ToolTip,
     View,
 )
 
@@ -59,6 +64,8 @@ class PatternEditor:
         self._primary_labels = {}
         self._secondary_labels = {}
         self._error_labels = {}
+        self._tooltip = ToolTip()
+        self._dragged_chip = None
 
         stored = storage.read_patterns(doc)
 
@@ -109,6 +116,9 @@ class PatternEditor:
         area.WrapContents = True
         area.BorderStyle = BorderStyle.FixedSingle
         area.Padding = Padding(4)
+        area.AllowDrop = True
+        area.DragEnter += self._area_drag_enter
+        area.DragDrop += lambda sender, args: self._area_drag_drop(class_name, sender, args)
         tab.Controls.Add(area)
         self._chip_areas[class_name] = area
 
@@ -198,11 +208,13 @@ class PatternEditor:
         chip.BackColor = KIND_COLORS.get(kind, Color.LightGray)
         chip.Height = 24
         chip.Margin = Padding(2)
+        chip.Cursor = Cursors.SizeAll
 
+        display = self._chip_label(class_name, kind, value)
         label = Label()
-        label.Text = value
+        label.Text = display
         label.AutoSize = False
-        label.Width = _text_width(value)
+        label.Width = _text_width(display)
         label.Height = 18
         label.Location = Point(4, 3)
         chip.Controls.Add(label)
@@ -217,7 +229,50 @@ class PatternEditor:
         chip.Controls.Add(remove)
 
         chip.Width = label.Width + remove.Width + 16
+        self._tooltip.SetToolTip(chip, value)
+        self._tooltip.SetToolTip(label, value)
+        chip.MouseDown += lambda sender, args: self._chip_mouse_down(chip, sender, args)
         return chip
+
+    def _chip_label(self, class_name, kind, value):
+        argument = _reference_argument(value)
+        sample = self._samples.get(class_name)
+        if sample is not None:
+            resolver = apply.ViewResolver(sample, use_definition_name=True)
+            if kind == "name":
+                resolved = resolver.by_name(argument)
+            elif kind == "bip":
+                resolved = resolver.by_bip(argument)
+            else:
+                resolved = resolver.by_guid(argument)
+            if resolved:
+                return resolved
+        if kind == "guid" and len(argument) > 12:
+            return argument[:8] + "..."
+        return argument
+
+    def _chip_mouse_down(self, chip, sender, args):
+        if args.Button == MouseButtons.Left:
+            self._dragged_chip = chip
+            chip.DoDragDrop(chip, DragDropEffects.Move)
+
+    def _area_drag_enter(self, sender, args):
+        if self._dragged_chip is not None:
+            args.Effect = DragDropEffects.Move
+
+    def _area_drag_drop(self, class_name, sender, args):
+        chip = self._dragged_chip
+        self._dragged_chip = None
+        area = self._chip_areas[class_name]
+        if chip is None or chip.Parent != area:
+            return
+        client = area.PointToClient(Cursor.Position)
+        index = len(area.Controls)
+        for position, control in enumerate(area.Controls):
+            if client.X < control.Left + control.Width // 2:
+                index = position
+                break
+        area.Controls.SetChildIndex(chip, index)
 
     # ------------------------------------------------------------------ editing
 
@@ -324,6 +379,17 @@ class PatternEditor:
 
 def _text_width(text):
     return max(30, 8 * len(text) + 16)
+
+
+def _reference_argument(reference):
+    start = reference.find("(")
+    end = reference.rfind(")")
+    if start == -1 or end <= start:
+        return reference
+    argument = reference[start + 1 : end].strip()
+    if len(argument) >= 2 and argument[0] in ("'", '"') and argument[-1] == argument[0]:
+        argument = argument[1:-1]
+    return argument
 
 
 def _kind_for_reference(reference):
