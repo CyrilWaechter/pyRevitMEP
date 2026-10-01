@@ -118,6 +118,7 @@ class PatternEditor:
         area.Padding = Padding(4)
         area.AllowDrop = True
         area.DragEnter += self._area_drag_enter
+        area.DragOver += self._area_drag_enter
         area.DragDrop += lambda sender, args: self._area_drag_drop(class_name, sender, args)
         tab.Controls.Add(area)
         self._chip_areas[class_name] = area
@@ -199,8 +200,15 @@ class PatternEditor:
         box.Width = _text_width(text)
         box.TextChanged += lambda sender, args: self._text_changed(class_name, box)
         box.Enter += lambda sender, args: self._focused_boxes.__setitem__(class_name, box)
+        self._enable_drop(class_name, box)
         self._chip_areas[class_name].Controls.Add(box)
         return box
+
+    def _enable_drop(self, class_name, control):
+        control.AllowDrop = True
+        control.DragEnter += self._area_drag_enter
+        control.DragOver += self._area_drag_enter
+        control.DragDrop += lambda sender, args: self._area_drag_drop(class_name, sender, args)
 
     def _make_chip(self, class_name, kind, value):
         chip = Panel()
@@ -232,6 +240,10 @@ class PatternEditor:
         self._tooltip.SetToolTip(chip, value)
         self._tooltip.SetToolTip(label, value)
         chip.MouseDown += lambda sender, args: self._chip_mouse_down(chip, sender, args)
+        label.MouseDown += lambda sender, args: self._chip_mouse_down(chip, sender, args)
+        self._enable_drop(class_name, chip)
+        self._enable_drop(class_name, label)
+        self._enable_drop(class_name, remove)
         return chip
 
     def _chip_label(self, class_name, kind, value):
@@ -269,9 +281,15 @@ class PatternEditor:
         client = area.PointToClient(Cursor.Position)
         index = len(area.Controls)
         for position, control in enumerate(area.Controls):
-            if client.X < control.Left + control.Width // 2:
+            if client.Y < control.Top + control.Height // 2:
                 index = position
                 break
+            if client.Y <= control.Bottom and client.X < control.Left + control.Width // 2:
+                index = position
+                break
+        current = area.Controls.GetChildIndex(chip)
+        if current < index:
+            index -= 1
         area.Controls.SetChildIndex(chip, index)
 
     # ------------------------------------------------------------------ editing
