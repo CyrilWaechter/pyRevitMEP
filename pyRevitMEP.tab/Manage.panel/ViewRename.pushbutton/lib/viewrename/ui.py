@@ -124,7 +124,8 @@ class PatternEditor:
         box.DragEnter += lambda sender, args: self._pattern_drag_over(class_name, sender, args)
         box.DragOver += lambda sender, args: self._pattern_drag_over(class_name, sender, args)
         box.DragDrop += lambda sender, args: self._pattern_drag_drop(class_name, sender, args)
-        box.KeyDown += lambda sender, args: self._pattern_key_down(sender, args)
+        box.KeyDown += lambda sender, args: self._pattern_key_down(class_name, sender, args)
+        box.KeyPress += lambda sender, args: self._pattern_key_press(class_name, sender, args)
         tab.Controls.Add(box)
         self._pattern_boxes[class_name] = box
 
@@ -261,9 +262,46 @@ class PatternEditor:
         self._apply_styles(class_name)
         self._update_preview(class_name)
 
-    def _pattern_key_down(self, sender, args):
+    def _pattern_key_down(self, class_name, sender, args):
+        box = self._pattern_boxes[class_name]
         if args.KeyCode == Keys.Enter:
             args.SuppressKeyPress = True
+            return
+        if args.KeyCode == Keys.Delete:
+            token = self._token_at(class_name, box.SelectionStart, include_start=True, include_end=False)
+            if token is not None:
+                self._delete_token(class_name, token)
+                args.SuppressKeyPress = True
+            return
+        if args.KeyCode == Keys.Back:
+            token = self._token_at(class_name, box.SelectionStart, include_start=False, include_end=True)
+            if token is not None:
+                self._delete_token(class_name, token)
+                args.SuppressKeyPress = True
+
+    def _pattern_key_press(self, class_name, sender, args):
+        if ord(args.KeyChar) < 32:
+            return
+        box = self._pattern_boxes[class_name]
+        index = box.SelectionStart
+        snapped = self._snap_to_token_boundary(class_name, index)
+        if snapped != index:
+            box.SelectionStart = snapped
+            box.SelectionLength = 0
+
+    def _token_at(self, class_name, index, include_start, include_end):
+        for start, end, _kind in self._token_ranges(class_name):
+            if (include_start and start <= index < end) or (include_end and start < index <= end):
+                return (start, end)
+        return None
+
+    def _delete_token(self, class_name, token):
+        start, end = token
+        box = self._pattern_boxes[class_name]
+        text = box.Text
+        box.Text = text[:start] + text[end:]
+        box.SelectionStart = start
+        box.SelectionLength = 0
 
     def _snap_to_token_boundary(self, class_name, index):
         for start, end, _kind in self._token_ranges(class_name):
@@ -330,6 +368,8 @@ class PatternEditor:
 
     def _insert_token(self, class_name, text):
         box = self._pattern_boxes[class_name]
+        box.SelectionStart = self._snap_to_token_boundary(class_name, box.SelectionStart)
+        box.SelectionLength = 0
         box.SelectedText = text
         box.SelectionStart += len(text)
         box.SelectionLength = 0
