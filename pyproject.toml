@@ -1,0 +1,10 @@
+[tool.ruff]
+line-length = 120
+extend-exclude = [
+  # Vendored third-party code
+  "lib/lxml",
+  "lib/materialsdb",
+  # Python 2 scripts that ruff cannot parse
+  "pyRevitMEP.tab/Lab.panel/Lab.pulldown/AutoInsulate.pushbutton/script.py",
+  "pyRevitMEP.tab/Lab.panel/Lab.pulldown/odfpy.pushbutton/script.py",
+]
