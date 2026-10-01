@@ -171,3 +171,6 @@ Avalonia*/
 .vs/
 *.sln
 *.pyproj
+
+# OpenCode project config (machine-specific)
+.opencode/
