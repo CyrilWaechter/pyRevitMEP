@@ -4,8 +4,9 @@ pyRevit's forms module is unavailable under CPython, so the editor is built dire
 System.Windows.Forms via pythonnet. The window only reads the model; saves happen in
 `config.py` after the modal dialog closes.
 
-Patterns are edited as a sequence of chips: literal text is kept in small text boxes and
-parameter references are colored chips that can be inserted at the caret or removed.
+Each view class has a single RichTextBox holding the pattern; parameter references are
+rendered as colored, bold inline tokens that can be dragged to another position (the
+caret shows the landing point), double-clicked to select, and deleted like text.
 """
 
 import clr
@@ -13,31 +14,26 @@ import clr
 clr.AddReference("System.Windows.Forms")
 clr.AddReference("System.Drawing")
 
-from System.Drawing import Color, Font, FontStyle, Point
+from System.Drawing import Color, Font, FontStyle
 from System.Windows.Forms import (
-    BorderStyle,
     Button,
     Cursor,
-    Cursors,
     DragDropEffects,
-    FlatStyle,
-    FlowLayoutPanel,
     Form,
     FormBorderStyle,
     FormStartPosition,
+    Keys,
     Label,
     ListView,
     ListViewItem,
     MessageBox,
     MessageBoxButtons,
     MouseButtons,
-    Padding,
-    Panel,
+    RichTextBox,
     TabControl,
     TabPage,
     TextBox,
     Timer,
-    ToolTip,
     View,
 )
 
@@ -55,8 +51,7 @@ class PatternEditor:
         self.doc = doc
         self.action = None
         self.patterns = {}
-        self._chip_areas = {}
-        self._focused_boxes = {}
+        self._pattern_boxes = {}
         self._parameter_lists = {}
         self._search_boxes = {}
         self._parameters = {}
@@ -64,8 +59,7 @@ class PatternEditor:
         self._primary_labels = {}
         self._secondary_labels = {}
         self._error_labels = {}
-        self._tooltip = ToolTip()
-        self._dragged_chip = None
+        self._dragged_token = None
 
         stored = storage.read_patterns(doc)
 
@@ -110,25 +104,20 @@ class PatternEditor:
         self._samples[class_name] = sample
         tab = TabPage(class_name)
 
-        area = FlowLayoutPanel()
-        area.SetBounds(10, 15, 850, 110)
-        area.AutoScroll = True
-        area.WrapContents = True
-        area.BorderStyle = BorderStyle.FixedSingle
-        area.Padding = Padding(4)
-        area.AllowDrop = True
-        area.DragEnter += self._area_drag_enter
-        area.DragOver += self._area_drag_enter
-        area.DragDrop += lambda sender, args: self._area_drag_drop(class_name, sender, args)
-        tab.Controls.Add(area)
-        self._chip_areas[class_name] = area
-
-        text = stored.get(class_name) or DEFAULT_PATTERNS.get(class_name, "")
-        for kind, value in pattern.tokenize(text):
-            if kind == "text":
-                self._add_text_box(class_name, value)
-            else:
-                area.Controls.Add(self._make_chip(class_name, kind, value))
+        box = RichTextBox()
+        box.SetBounds(10, 15, 850, 110)
+        box.Multiline = True
+        box.AllowDrop = True
+        box.Text = stored.get(class_name) or DEFAULT_PATTERNS.get(class_name, "")
+        box.TextChanged += lambda sender, args: self._text_changed(class_name)
+        box.MouseDown += lambda sender, args: self._pattern_mouse_down(class_name, sender, args)
+        box.DoubleClick += lambda sender, args: self._pattern_double_click(class_name, sender, args)
+        box.DragEnter += lambda sender, args: self._pattern_drag_over(class_name, sender, args)
+        box.DragOver += lambda sender, args: self._pattern_drag_over(class_name, sender, args)
+        box.DragDrop += lambda sender, args: self._pattern_drag_drop(class_name, sender, args)
+        box.KeyDown += lambda sender, args: self._pattern_key_down(sender, args)
+        tab.Controls.Add(box)
+        self._pattern_boxes[class_name] = box
 
         primary = Label()
         primary.SetBounds(10, 135, 850, 20)
@@ -186,155 +175,109 @@ class PatternEditor:
         tab.Controls.Add(insert)
 
         if sample is None:
-            area.Enabled = False
+            box.Enabled = False
             search.Enabled = False
             list_view.Enabled = False
             insert.Enabled = False
 
+        self._apply_styles(class_name)
         self._update_preview(class_name)
         return tab
 
-    def _add_text_box(self, class_name, text):
-        box = TextBox()
-        box.Text = text
-        box.Width = _text_width(text)
-        box.TextChanged += lambda sender, args: self._text_changed(class_name, box)
-        box.Enter += lambda sender, args: self._focused_boxes.__setitem__(class_name, box)
-        self._enable_drop(class_name, box)
-        self._chip_areas[class_name].Controls.Add(box)
-        return box
+    # ------------------------------------------------------------------ tokens
 
-    def _enable_drop(self, class_name, control):
-        control.AllowDrop = True
-        control.DragEnter += self._area_drag_enter
-        control.DragOver += self._area_drag_enter
-        control.DragDrop += lambda sender, args: self._area_drag_drop(class_name, sender, args)
+    def _token_ranges(self, class_name):
+        text = self._pattern_boxes[class_name].Text
+        ranges = []
+        position = 0
+        for kind, value in pattern.tokenize(text):
+            if kind != "text":
+                ranges.append((position, position + len(value), kind))
+            position += len(value)
+        return ranges
 
-    def _make_chip(self, class_name, kind, value):
-        chip = Panel()
-        chip.Tag = value
-        chip.BackColor = KIND_COLORS.get(kind, Color.LightGray)
-        chip.Height = 24
-        chip.Margin = Padding(2)
-        chip.Cursor = Cursors.SizeAll
+    def _apply_styles(self, class_name):
+        box = self._pattern_boxes[class_name]
+        caret = box.SelectionStart
+        length = box.SelectionLength
+        box.SelectAll()
+        box.SelectionBackColor = Color.White
+        box.SelectionFont = Font(box.Font, FontStyle.Regular)
+        for start, end, kind in self._token_ranges(class_name):
+            box.Select(start, end - start)
+            box.SelectionBackColor = KIND_COLORS.get(kind, Color.LightGray)
+            box.SelectionFont = Font(box.Font, FontStyle.Bold)
+        box.Select(caret, length)
 
-        display = self._chip_label(class_name, kind, value)
-        label = Label()
-        label.Text = display
-        label.AutoSize = False
-        label.Width = _text_width(display)
-        label.Height = 18
-        label.Location = Point(4, 3)
-        chip.Controls.Add(label)
+    def _text_changed(self, class_name):
+        self._apply_styles(class_name)
+        self._update_preview(class_name)
 
-        remove = Button()
-        remove.Text = "x"
-        remove.FlatStyle = FlatStyle.Flat
-        remove.Width = 20
-        remove.Height = 20
-        remove.Location = Point(label.Width + 8, 2)
-        remove.Click += lambda sender, args: self._remove_chip(class_name, chip)
-        chip.Controls.Add(remove)
+    def _pattern_key_down(self, sender, args):
+        if args.KeyCode == Keys.Enter:
+            args.SuppressKeyPress = True
 
-        chip.Width = label.Width + remove.Width + 16
-        self._tooltip.SetToolTip(chip, value)
-        self._tooltip.SetToolTip(label, value)
-        chip.MouseDown += lambda sender, args: self._chip_mouse_down(chip, sender, args)
-        label.MouseDown += lambda sender, args: self._chip_mouse_down(chip, sender, args)
-        self._enable_drop(class_name, chip)
-        self._enable_drop(class_name, label)
-        self._enable_drop(class_name, remove)
-        return chip
-
-    def _chip_label(self, class_name, kind, value):
-        argument = _reference_argument(value)
-        sample = self._samples.get(class_name)
-        if sample is not None:
-            resolver = apply.ViewResolver(sample, use_definition_name=True)
-            if kind == "name":
-                resolved = resolver.by_name(argument)
-            elif kind == "bip":
-                resolved = resolver.by_bip(argument)
-            else:
-                resolved = resolver.by_guid(argument)
-            if resolved:
-                return resolved
-        if kind == "guid" and len(argument) > 12:
-            return argument[:8] + "..."
-        return argument
-
-    def _chip_mouse_down(self, chip, sender, args):
-        if args.Button == MouseButtons.Left:
-            self._dragged_chip = chip
-            chip.DoDragDrop(chip, DragDropEffects.Move)
-
-    def _area_drag_enter(self, sender, args):
-        if self._dragged_chip is not None:
-            args.Effect = DragDropEffects.Move
-
-    def _area_drag_drop(self, class_name, sender, args):
-        chip = self._dragged_chip
-        self._dragged_chip = None
-        area = self._chip_areas[class_name]
-        if chip is None or chip.Parent != area:
+    def _pattern_mouse_down(self, class_name, sender, args):
+        if args.Button != MouseButtons.Left:
             return
-        client = area.PointToClient(Cursor.Position)
-        index = len(area.Controls)
-        for position, control in enumerate(area.Controls):
-            if client.Y < control.Top + control.Height // 2:
-                index = position
-                break
-            if client.Y <= control.Bottom and client.X < control.Left + control.Width // 2:
-                index = position
-                break
-        current = area.Controls.GetChildIndex(chip)
-        if current < index:
-            index -= 1
-        area.Controls.SetChildIndex(chip, index)
+        box = self._pattern_boxes[class_name]
+        index = box.GetCharIndexFromPosition(args.Location)
+        for start, end, _kind in self._token_ranges(class_name):
+            if start <= index < end:
+                self._dragged_token = (class_name, start, end)
+                box.DoDragDrop(box, DragDropEffects.Move)
+                return
 
-    # ------------------------------------------------------------------ editing
+    def _pattern_double_click(self, class_name, sender, args):
+        box = self._pattern_boxes[class_name]
+        index = box.GetCharIndexFromPosition(args.Location)
+        for start, end, _kind in self._token_ranges(class_name):
+            if start <= index < end:
+                box.Select(start, end - start)
+                return
 
-    def _text_changed(self, class_name, box):
-        box.Width = _text_width(box.Text)
-        self._update_preview(class_name)
+    def _pattern_drag_over(self, class_name, sender, args):
+        if self._dragged_token is None:
+            return
+        box = self._pattern_boxes[class_name]
+        box.SelectionStart = box.GetCharIndexFromPosition(box.PointToClient(Cursor.Position))
+        box.SelectionLength = 0
+        args.Effect = DragDropEffects.Move
 
-    def _remove_chip(self, class_name, chip):
-        self._chip_areas[class_name].Controls.Remove(chip)
-        self._update_preview(class_name)
+    def _pattern_drag_drop(self, class_name, sender, args):
+        dragged = self._dragged_token
+        self._dragged_token = None
+        if dragged is None or dragged[0] != class_name:
+            return
+        _cls, start, end = dragged
+        box = self._pattern_boxes[class_name]
+        target = box.GetCharIndexFromPosition(box.PointToClient(Cursor.Position))
+        if start < target < end:
+            return
+        text = box.Text
+        token = text[start:end]
+        moved = text[:start] + text[end:]
+        if target > end:
+            target -= end - start
+        box.Text = moved[:target] + token + moved[target:]
+        box.SelectionStart = target + len(token)
+        box.SelectionLength = 0
 
     def _insert_selected(self, class_name):
         list_view = self._parameter_lists[class_name]
         if list_view.SelectedItems.Count == 0:
             return
-        reference = _parameter_reference(list_view.SelectedItems[0].Tag)
-        self._insert_reference(class_name, reference)
+        self._insert_reference(class_name, _parameter_reference(list_view.SelectedItems[0].Tag))
 
     def _insert_reference(self, class_name, reference):
-        area = self._chip_areas[class_name]
-        chip = self._make_chip(class_name, _kind_for_reference(reference), reference)
-        box = self._focused_boxes.get(class_name)
-        if box is not None and box.Parent == area:
-            caret = box.SelectionStart
-            before, after = box.Text[:caret], box.Text[caret:]
-            box.Text = before
-            index = area.Controls.GetChildIndex(box)
-            area.Controls.Add(chip)
-            area.Controls.SetChildIndex(chip, index + 1)
-            new_box = self._add_text_box(class_name, after)
-            area.Controls.SetChildIndex(new_box, index + 2)
-            self._focused_boxes[class_name] = new_box
-        else:
-            area.Controls.Add(chip)
+        box = self._pattern_boxes[class_name]
+        box.SelectedText = reference
+        box.SelectionStart += len(reference)
+        box.SelectionLength = 0
+        self._apply_styles(class_name)
         self._update_preview(class_name)
 
-    def _serialize(self, class_name):
-        parts = []
-        for control in self._chip_areas[class_name].Controls:
-            if isinstance(control, TextBox):
-                parts.append(control.Text)
-            elif control.Tag:
-                parts.append(control.Tag)
-        return "".join(parts)
+    # ------------------------------------------------------------------ list and preview
 
     def _fill_parameter_list(self, class_name):
         filter_text = self._search_boxes[class_name].Text.lower()
@@ -358,7 +301,7 @@ class PatternEditor:
             list_view.Items.Add(item)
 
     def _update_preview(self, class_name):
-        text = self._serialize(class_name)
+        text = self._pattern_boxes[class_name].Text
         errors = pattern.validate_pattern(text)
         self._error_labels[class_name].Text = " | ".join(errors)
         sample = self._samples.get(class_name)
@@ -372,14 +315,14 @@ class PatternEditor:
     def _collect_patterns(self):
         patterns = {}
         for class_name in CLASS_NAMES:
-            text = self._serialize(class_name).strip()
+            text = self._pattern_boxes[class_name].Text.strip()
             if text:
                 patterns[class_name] = text
         return patterns
 
     def _save(self, action):
         for class_name in CLASS_NAMES:
-            errors = pattern.validate_pattern(self._serialize(class_name))
+            errors = pattern.validate_pattern(self._pattern_boxes[class_name].Text)
             if errors:
                 MessageBox.Show(
                     f"{class_name}: {'; '.join(errors)}",
@@ -393,29 +336,6 @@ class PatternEditor:
 
     def show(self):
         self.form.ShowDialog()
-
-
-def _text_width(text):
-    return max(30, 8 * len(text) + 16)
-
-
-def _reference_argument(reference):
-    start = reference.find("(")
-    end = reference.rfind(")")
-    if start == -1 or end <= start:
-        return reference
-    argument = reference[start + 1 : end].strip()
-    if len(argument) >= 2 and argument[0] in ("'", '"') and argument[-1] == argument[0]:
-        argument = argument[1:-1]
-    return argument
-
-
-def _kind_for_reference(reference):
-    if reference.startswith("name("):
-        return "name"
-    if reference.startswith("bip("):
-        return "bip"
-    return "guid"
 
 
 def _find_sample_view(doc, class_name):
@@ -448,12 +368,12 @@ def show_editor(doc):
 
 
 def run_smoke(doc):
-    """Dev aid: build the editor, auto-close it, and report the tab count."""
+    """Dev aid: build the editor, auto-close it, and report tabs and token counts."""
     editor = PatternEditor(doc)
     timer = Timer()
     timer.Interval = 1200
     timer.Tick += lambda sender, args: editor.form.Close()
     timer.Start()
     editor.show()
-    chip_count = sum(len(area.Controls) for area in editor._chip_areas.values())
-    return f"UI-SMOKE-OK tabs={len(editor._chip_areas)} controls={chip_count}"
+    tokens = sum(len(editor._token_ranges(class_name)) for class_name in CLASS_NAMES)
+    return f"UI-SMOKE-OK tabs={len(editor._pattern_boxes)} tokens={tokens}"
