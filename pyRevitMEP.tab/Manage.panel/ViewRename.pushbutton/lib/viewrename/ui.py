@@ -33,6 +33,7 @@ from System.Windows.Forms import (
     MessageBox,
     MessageBoxButtons,
     MouseButtons,
+    NativeWindow,
     RichTextBox,
     TabControl,
     TabPage,
@@ -74,7 +75,6 @@ class PatternEditor:
         self.form = Form()
         self.form.Text = "ViewRename patterns"
         self.form.StartPosition = FormStartPosition.CenterScreen
-        self.form.TopMost = True
         self.form.FormBorderStyle = FormBorderStyle.FixedDialog
         self.form.MaximizeBox = False
         self.form.MinimizeBox = False
@@ -444,7 +444,24 @@ class PatternEditor:
         self.form.Close()
 
     def show(self):
-        self.form.ShowDialog()
+        self.form.ShowDialog(_revit_owner())
+
+
+def _revit_owner():
+    """Return an IWin32Window for Revit's main window so the editor blocks the ribbon.
+
+    Without an owner the ribbon stays clickable and a nested pyRevit command can start
+    while this modal dialog is open, which makes pythonnet fail to initialize a second
+    CPython engine.
+    """
+    try:
+        from pyrevit import HOST_APP
+
+        owner = NativeWindow()
+        owner.AssignHandle(HOST_APP.uiapp.MainWindowHandle)
+        return owner
+    except Exception:  # noqa: BLE001 - fall back to an unowned dialog
+        return None
 
 
 def _find_sample_view(doc, class_name):
