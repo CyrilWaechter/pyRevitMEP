@@ -3,7 +3,7 @@
 Revit/pyRevit imports stay inside functions so the module imports locally without Revit.
 """
 
-from . import CLASS_NAMES, codec
+from . import CLASS_NAMES, DEFAULT_PATTERNS, codec
 
 SCHEMA_GUID = "62444aa5-69f7-4aa6-9b0e-238dd1309f83"
 SCHEMA_NAME = "pyRevitMEP_ViewRename"  # dots are rejected by Revit for schema names
@@ -75,13 +75,26 @@ def write_to_config(patterns):
 
 def read_patterns(doc):
     """Read patterns with precedence: ExtensibleStorage, legacy parameter, config."""
+    patterns, _source = read_patterns_with_source(doc)
+    return patterns
+
+
+def read_patterns_with_source(doc):
+    """Return (patterns, source); source is model/legacy/config/defaults.
+
+    Built-in defaults are only used when the model, the legacy parameter and the user
+    config are all empty.
+    """
     patterns = codec.decode_patterns(_read_entity(doc))
     if patterns:
-        return patterns
+        return patterns, "model"
     patterns = read_legacy_parameter(doc)
     if patterns:
-        return patterns
-    return read_from_config()
+        return patterns, "legacy"
+    patterns = read_from_config()
+    if patterns:
+        return patterns, "config"
+    return dict(DEFAULT_PATTERNS), "defaults"
 
 
 def write_to_model(doc, patterns):

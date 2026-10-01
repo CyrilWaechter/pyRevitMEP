@@ -951,3 +951,44 @@ If a probe fallback was chosen or behavior differed, update `docs/superpowers/sp
 git add -A pyRevitMEP.tab/Manage.panel/ViewRename.pushbutton docs/superpowers/specs/2026-10-01-viewrename-cpython-design.md tests/viewrename
 git commit -m "ViewRename: Finalize CPython migration"
 ```
+
+---
+
+### Task 9: Post-acceptance fixes (user feedback, executed before Task 8 finishes)
+
+**Files:**
+- Modify: `pyRevitMEP.tab/Manage.panel/ViewRename.pushbutton/lib/viewrename/pattern.py`
+- Modify: `pyRevitMEP.tab/Manage.panel/ViewRename.pushbutton/lib/viewrename/__init__.py`
+- Modify: `pyRevitMEP.tab/Manage.panel/ViewRename.pushbutton/lib/viewrename/storage.py`
+- Modify: `pyRevitMEP.tab/Manage.panel/ViewRename.pushbutton/lib/viewrename/ui.py`
+- Modify: `pyRevitMEP.tab/Manage.panel/ViewRename.pushbutton/script.py`
+- Test: `tests/viewrename/test_pattern.py`
+
+**Interfaces:**
+- `pattern.tokenize(text) -> list[(kind, value)]`, kind in `("text", "name", "bip", "guid")`; `pattern.join_tokens(segments) -> str`; `join_tokens(tokenize(p)) == p`.
+- `viewrename.DEFAULT_PATTERNS` (moved from `ui.py`).
+- `storage.read_patterns_with_source(doc) -> (patterns, source)`, source in `("model", "legacy", "config", "defaults")`; defaults only when all three sources are empty. `storage.read_patterns(doc)` remains the dict-returning wrapper.
+
+- [ ] **Step 1: Tokenizer tests (RED) then implementation (GREEN)**
+
+Tests: splits references and text; multiple references; plain text; round-trip equality; accented text. Implementation scans the three reference regexes, sorts matches by start offset, emits text gaps and references in order.
+
+- [ ] **Step 2: Defaults and storage source**
+
+Move `DEFAULT_PATTERNS` to `__init__.py`; `read_patterns_with_source` returns the first non-empty source, else defaults; `script.py` warns in the confirmation dialog when the source is `defaults`.
+
+- [ ] **Step 3: Chip editor in `ui.py`**
+
+Per tab: `FlowLayoutPanel` of segments (literal `TextBox`es, reference chips as colored `Panel` + label + `×` button); insert-at-caret splits the focused literal box; parameter list with live search box and double-click insert; serialization back to the pattern string; `run_smoke` asserts chip areas exist.
+
+- [ ] **Step 4: `script.py` output fix**
+
+`output.print_code(...)` for the report and `output.print_md(...)` for the cancelled case (`PyRevitOutputWindow` has no `print`).
+
+- [ ] **Step 5: Local checks and commit**
+
+`python3 -m pytest tests/viewrename -q`, `ruff format`, `ruff check`; commit `ViewRename: Fix output API, default patterns fallback and add chip editor`.
+
+- [ ] **Step 6: Remote verification (user clicks)**
+
+Sync; user runs the integration test button (Revit 2025) and checks the editor (chips, search, insert at caret, remove, previews, save/reload).

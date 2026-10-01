@@ -15,10 +15,13 @@ uidoc = revit.uidoc
 output = script.get_output()
 
 
-def confirm(renames, scope):
+def confirm(renames, scope, using_defaults=False):
     dialog = TaskDialog("ViewRename")
     dialog.MainInstruction = f"Rename {len(renames)} view(s)?"
-    dialog.MainContent = f"Scope: {scope}\n\n" + "\n".join(apply.preview_lines(renames))
+    content = f"Scope: {scope}\n\n" + "\n".join(apply.preview_lines(renames))
+    if using_defaults:
+        content = "Using built-in default patterns.\n\n" + content
+    dialog.MainContent = content
     dialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Rename")
     dialog.CommonButtons = TaskDialogCommonButtons.Cancel
     return dialog.Show() == TaskDialogResult.CommandLink1
@@ -27,15 +30,16 @@ def confirm(renames, scope):
 if doc is None:
     TaskDialog.Show("ViewRename", "Open a document first.")
 else:
-    patterns = storage.read_patterns(doc)
+    patterns, source = storage.read_patterns_with_source(doc)
     if not patterns:
         TaskDialog.Show(
             "ViewRename",
             "No rename pattern configured.\nShift+Click this button to edit patterns.",
         )
     else:
-        report = apply.main(doc, uidoc, patterns, confirm)
+        using_defaults = source == "defaults"
+        report = apply.main(doc, uidoc, patterns, lambda renames, scope: confirm(renames, scope, using_defaults))
         if report is None:
-            output.print("ViewRename: cancelled.")
+            output.print_md("ViewRename: cancelled.")
         else:
-            output.print(apply.format_report(report))
+            output.print_code(apply.format_report(report))

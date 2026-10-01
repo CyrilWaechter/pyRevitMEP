@@ -54,3 +54,36 @@ def test_validate_rejects_unknown_reference():
 
 def test_validate_ignores_parentheses_without_leading_word():
     assert pattern.validate_pattern("Plan (sans reference)") == []
+
+
+def test_tokenize_splits_references_and_text():
+    assert pattern.tokenize("PE_name(Level)_3D") == [
+        ("text", "PE_"),
+        ("name", "name(Level)"),
+        ("text", "_3D"),
+    ]
+
+
+def test_tokenize_multiple_reference_kinds():
+    text = "name(ORG_Métier)_bip(PLAN_VIEW_LEVEL)_Guid('62444aa5-69f7-4aa6-9b0e-238dd1309f83')"
+    assert [kind for kind, _ in pattern.tokenize(text)] == [
+        "name",
+        "text",
+        "bip",
+        "text",
+        "guid",
+    ]
+
+
+def test_tokenize_plain_text():
+    assert pattern.tokenize("Plan (niveau)") == [("text", "Plan (niveau)")]
+
+
+def test_tokenize_join_round_trip():
+    for text in (
+        "PE_name(Level)_3D",
+        "name(ORG_Métier)_bip(PLAN_VIEW_LEVEL)_Guid('62444aa5-69f7-4aa6-9b0e-238dd1309f83')",
+        "Plan (niveau)",
+        "",
+    ):
+        assert pattern.join_tokens(pattern.tokenize(text)) == text
